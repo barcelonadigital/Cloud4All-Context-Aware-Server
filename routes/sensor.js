@@ -31,8 +31,8 @@ exports.getSensor = function(req, res, next) {
       } else {
         res.send(404);
       }
-    });
-  };
+    })
+  }
 
   if (utils.UUIDCheck(id)) {
     db.get('sensor:' + id, function(err, newid) {
@@ -49,7 +49,7 @@ exports.getSensor = function(req, res, next) {
 
 exports.get = function(req, res, next) {
   res.send(req.reply);
- };
+}
 
 exports.post = function(req, res, next) {
   /**
@@ -61,7 +61,7 @@ exports.post = function(req, res, next) {
     if (err) {
       next(err);
     }
-  });
+  })
 
   db.hmset(
       "sensor:" + id, "uuid", req.body.uuid, 
@@ -71,8 +71,8 @@ exports.post = function(req, res, next) {
     } else {
       res.send(200, {sensor: 'sensor:' + id});
     }
-  });
-};
+  })
+}
 
 exports.postData = function(req, res) {
   /**
@@ -87,8 +87,8 @@ exports.postData = function(req, res) {
     } else {
       res.send(200);
     }
-  });
-};
+  })
+}
 
 exports.getData = function(req, res) {
   /**
@@ -103,5 +103,5 @@ exports.getData = function(req, res) {
     } else {
       res.send(200, {data: reply.join(',')});
     }
-  });
-};
+  })
+}

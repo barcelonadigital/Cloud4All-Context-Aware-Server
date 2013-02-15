@@ -1,5 +1,5 @@
 Context Aware Server
-Copyright (c) 2013, Barcelona Digital Centre
+Copyright (c) 2013, Barcelona Digital Centre Tecnològic
 All rights reserved.
 
 The research leading to these results has received funding from the European 
