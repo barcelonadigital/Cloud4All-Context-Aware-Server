@@ -1,4 +1,4 @@
 Cloud4All---Context-Aware-Server
 ================================
 
-The Context Awareness Server developed in NodeJs provides a platform that collects data from sensors, store and process the data, and when some triggers are fired it is sent to gpii-flowmanager
+The Context Aware Server developed in NodeJs provides a platform that collects and process the data from sensors and when some triggers are fired it sends the processed data to gpii-flowmanager
