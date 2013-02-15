@@ -1,5 +1,5 @@
 /**
- * Site routes.
+ * Site routes
  */
 
 

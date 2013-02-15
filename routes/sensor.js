@@ -16,6 +16,9 @@ var redis = require('redis')
 
 
 exports.getSensor = function(req, res, next) {
+	/**
+	 * Get sensor from Redis database
+	**/
 	var id = req.params.id;
 
 	var getId = function(id) {
@@ -49,6 +52,9 @@ exports.get = function(req, res, next) {
  };
 
 exports.post = function(req, res, next) {
+	/**
+	 * Post or update sensor 
+	**/
 	var id = req.body.id;
 
 	db.set("sensor:" + req.body.uuid, id, function(err) {

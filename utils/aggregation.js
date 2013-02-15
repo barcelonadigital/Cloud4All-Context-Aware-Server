@@ -1,3 +1,6 @@
+/**
+* Aggregation Utils methods 
+**/
 
 
 exports.sum = function(value, next) {
