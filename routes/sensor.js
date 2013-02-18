@@ -10,78 +10,58 @@
  }
 **/
 
-var redis = require('redis')
-  , utils = require('../utils/utils')
-  , db = redis.createClient();
 
+var app = require('../app') 
+  , CacheRedis = require('../managers/cache-redis').CacheRedis
+  , cache = new CacheRedis(
+      app.redisClient, 
+      app.logmessage)
+  , sensorClass= {'entityName': 'sensor'};
 
-exports.getSensor = function(req, res, next) {
+exports.get = function(req, res, next) {
   /**
    * Get sensor from Redis database
   **/
   var id = req.params.id;
 
-  var getId = function(id) {
-    db.hgetall('sensor:' + id, function(err, reply) {
+  cache.getItem(sensorClass, id, function (err, item){
+    if (err) {
+      next(err);
+    } else if (item) {
+      res.send(item);
+    } else {
+      res.send(404);
+    }
+  })
+}
+
+exports.search = function(req, res, next) {
+  /**
+   * Get sensor from query search 
+  **/
+  var query = req.query;
+  var uuid = query['uuid'] || null;
+  if (uuid) {
+    cache.getItemFromUuid(sensorClass, uuid, function (err, item) {
       if (err) {
         next(err);
-      } else if (reply) {
-        req.reply = reply;
-        next();
+      } else if (item) {
+        res.send(item);
       } else {
         res.send(404);
       }
-    })
-  }
-
-  if (utils.UUIDCheck(id)) {
-    db.get('sensor:' + id, function(err, newid) {
-      if (err) {
-        next(err);
-      } else {
-        getId(newid);
-      }
-    });
+    }) 
   } else {
-    getId(id);
+    res.send(404);
   }
-}
-
-exports.get = function(req, res, next) {
-  res.send(req.reply);
 }
 
 exports.post = function(req, res, next) {
   /**
    * Post or update sensor 
   **/
-  var id = req.body.id;
-
-  db.set("sensor:" + req.body.uuid, id, function(err) {
-    if (err) {
-      next(err);
-    }
-  })
-
-  db.hmset(
-      "sensor:" + id, "uuid", req.body.uuid, 
-      "type", req.body.type, "gps" , req.body.gps, function(err) {
-    if (err) {
-      next(err);
-    } else {
-      res.send(200, {sensor: 'sensor:' + id});
-    }
-  })
-}
-
-exports.postData = function(req, res) {
-  /**
-   * Post new data from sensor id
-  **/
-  var id = req.params.id
-    , now = Date.now();
-
-  db.rpush('sensor:'+ id + ':data', req.body, function(err) {
+  var item = req.body;
+  cache.postItem(sensorClass, item, function (err, item) {
     if (err) {
       next(err);
     } else {
@@ -90,14 +70,28 @@ exports.postData = function(req, res) {
   })
 }
 
+exports.postData = function(req, res) {
+  /**
+   * Post new data from sensor id
+  **/
+  var id = req.params.id;
+  var data = req.body;
+
+  cache.postData(sensorClass, id, data, function(err){
+    if (err) {
+      next(err);
+    } else {
+      res.send(200); 
+    }
+  })
+}
+
 exports.getData = function(req, res) {
   /**
    * Get all data from sensor id
   **/
-  var id = req.params.id
-    , now = Date.now();
-
-  db.lrange('sensor:'+ id + ':data', 0, -1, function(err, reply) {
+  var id = req.params.id;
+  cache.getData(sensorClass, id, function(err, reply) {
     if (err) {
       next(err);
     } else {
