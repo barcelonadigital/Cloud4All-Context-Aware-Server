@@ -37,7 +37,7 @@ exports.get = function(req, res, next) {
 
 exports.search = function(req, res, next) {
   /**
-   * Get sensor from query search 
+   * Gets sensor from query search 
   **/
   var query = req.query;
   var uuid = query['uuid'] || null;
@@ -58,24 +58,40 @@ exports.search = function(req, res, next) {
 
 exports.post = function(req, res, next) {
   /**
-   * Post or update sensor 
+   * Posts new sensor returning sensor with id
   **/
   var item = req.body;
   cache.postItem(sensorClass, item, function (err, item) {
     if (err) {
       next(err);
     } else {
-      res.send(200);
+      res.send(200, item);
+    }
+  })
+}
+
+exports.update = function(req, res, next) {
+  /**
+   * Updates an existing sensor id, returning sensor;
+  **/
+  var item = req.body
+    , id = req.params.id;
+
+  cache.updateItem(sensorClass, item, id, function (err, item) {
+    if (err) {
+      next(err);
+    } else {
+      res.send(200, item);
     }
   })
 }
 
 exports.postData = function(req, res) {
   /**
-   * Post new data from sensor id
+   * Posts new data from sensor id
   **/
-  var id = req.params.id;
-  var data = req.body;
+  var id = req.params.id
+    , data = req.body;
 
   cache.postData(sensorClass, id, data, function(err){
     if (err) {
@@ -88,7 +104,7 @@ exports.postData = function(req, res) {
 
 exports.getData = function(req, res) {
   /**
-   * Get all data from sensor id
+   * Gets all data from sensor id
   **/
   var id = req.params.id;
   cache.getData(sensorClass, id, function(err, reply) {

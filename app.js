@@ -9,28 +9,13 @@ var express = require('express')
   , redis = require('redis');
 
 var common = require('./config/common')
-  , config = common.config()
-  , CFG_SERVER = config.server
-  , CFG_STORE_REDIS = config.storeRedis
+  , envConfig = common.config()
+  , CFG_SERVER = envConfig.server
+  , CFG_STORE_REDIS = envConfig.storeRedis
   , port = process.env.PORT || CFG_SERVER.port 
   , forks = process.env.FORKS || CFG_SERVER.forks;
 
 var app = express();
-// our catcher for log messages
-process.addListener('uncaughtException', function (err, stack) {
-  var message = 'Caught exception: ' + err + '\n' + err.stack;
-  if (app && app.logmessage) {
-    app.logmessage(message);
-  } else {
-    console.log(message);
-  }
-});
-
-// basically a wrapper around logger
-var logmessage = function(message) {
-  message = '#' + (process.env.NODE_WORKER_ID ? process.env.NODE_WORKER_ID : 'M') + ': ' + message;
-  console.log(message);
-}
 
 // all environments
 app.set('port', port);
@@ -48,6 +33,12 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+// testing only 
+if ('test' == app.get('env')) {
+  app.use(express.errorHandler());
+}
+
+
 // Start redis connection
 app.redisClient = redis.createClient(
   CFG_STORE_REDIS.port, 
@@ -56,24 +47,32 @@ app.redisClient = redis.createClient(
 app.redisClient.select(CFG_STORE_REDIS.dbname);
 
 // Add other stuff to app
-app.envConfig = config;
-app.logmessage = logmessage;
+app.envConfig = envConfig;
+app.logmessage = console.log;
 module.exports = app;
 
 
 // here we load de routes 
 var sensor = require('./routes/sensor')
+  , config = require('./routes/config')
   , site = require('./routes/site');
 
 // General
 app.get('/', site.index);
 
-// Api
+// Api:sensors
 app.get('/sensors/:id', sensor.get);
 app.get('/sensors', sensor.search);
 app.post('/sensors', sensor.post);
+app.post('/sensors/:id', sensor.update);
 app.get('/sensors/:id/data', sensor.getData);
 app.post('/sensors/:id/data', sensor.postData);
+
+// Api:config
+//app.get('/configs/:id', config.get);
+//app.post('/configs', config.post);
+//app.post('/configs/:id/items', config.postConfigItem);
+//app.get('/configs/:id/items/:key', config.getConfigItem);
 
 http.createServer(app).listen(port, function(){
   console.log("Express server listening on port " + port + ' in "' + app.settings.env + '" mode');

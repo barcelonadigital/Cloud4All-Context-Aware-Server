@@ -13,6 +13,8 @@
     "should":"*",
     "expect":"*",
     "supertest":"*",
-    "underscore":"*"
+    "underscore":"*",
+    "async":"*",
+    "node-uuid":"*"
   }
 }

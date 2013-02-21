@@ -40,7 +40,7 @@ Afterwards you can send a POST request to the CAS to add data to the new sensor.
 
 	curl -H "Content-Type: application/json" -X POST --data @test/data/sensor-sample-data.json http://localhost:8888/sensors/1/data
 
-And get all the data stored from that sensor
+And get all the data stored in CAS from that sensor
 
 	curl http://localhost:8888/sensors/1/data
 
