@@ -11,7 +11,7 @@ var app = require('../app')
 // removes all data from devel database
 app.redisClient.flushall();
 
-describe('POST /sensors', function() {
+describe('Sensor API', function() {
   before(function(){
     console.log("\n\nTESTING SENSOR API\n") 
   });
@@ -25,8 +25,9 @@ describe('POST /sensors', function() {
         res.body.id.should.equal("1");
         res.body.uuid.should.equal(sensor_sample.uuid);
         done();
-      });
-  });
+      })
+  })
+
   it('Trhows exception when saving new sensor with same uuid', function(done) {
     request(app)
       .post('/sensors')
@@ -34,7 +35,8 @@ describe('POST /sensors', function() {
       .send(sensor_sample)  
       .expect('Content-type', /json/)
       .expect(500, done);
-  });
+  })
+
   it('It admits new sensor without uuid', function(done) {
     request(app)
       .post('/sensors')
@@ -42,7 +44,8 @@ describe('POST /sensors', function() {
       .send(sensor_sample_no_uuid)  
       .expect('Content-type', /json/)
       .expect(200, done);
-  });
+  })
+
   it('updates a sensor', function(done) {
     request(app)
       .post('/sensors/1')
@@ -54,7 +57,8 @@ describe('POST /sensors', function() {
         res.body.uuid.should.equal(sensor_sample.uuid);
         done();
       })
-  });
+  })
+
   it('gets a sensor', function(done) {
     request(app)
       .get('/sensors/1')
@@ -67,8 +71,9 @@ describe('POST /sensors', function() {
           res.body.type.should.equal(sensor_sample.type);
         }
         done();
-      });
-  });
+      })
+  })
+
   it('search a sensor using uuid', function(done) {
     request(app)
       .get('/sensors?uuid=' + sensor_sample.uuid)
@@ -81,28 +86,32 @@ describe('POST /sensors', function() {
           res.body.type.should.equal(sensor_sample.type);
         }
         done();
-      });
-  });
+      })
+  })
+
   it('gets a wrong sensor. Handles 404 error', function(done) {
     request(app)
       .get('/sensors/wrong-sensor')
       .expect('Content-type', 'text/plain')
       .expect(404, done);
-  });
+  })
+
   it('saves a new data to sensor :id', function(done) {
     request(app)
       .post('/sensors/1/data')
       .set('Accept', 'application/json')
       .send(sensor_sample_data) 
       .expect(200, done);
-  });
+  })
+
   it('saves again new data to sensor :id', function(done) {
     request(app)
       .post('/sensors/1/data')
       .set('Accept', 'application/json')
       .send(sensor_sample_data) 
       .expect(200, done);
-  });
+  })
+  
   it('gets all data from sensor id', function(done) {
     request(app)
       .get('/sensors/1/data')
@@ -111,8 +120,8 @@ describe('POST /sensors', function() {
         res.body.data.should.equal(
           [sensor_sample_data, sensor_sample_data].join(','));
         done();
-      });
-  });
-});
+      })
+  })
+})
 
 

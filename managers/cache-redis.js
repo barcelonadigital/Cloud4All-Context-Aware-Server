@@ -49,13 +49,7 @@ CacheRedis.prototype.getItem = function(itemClass, id, next) {
 
   that.log("cache getItem(): id = " + id);
   that.connection.hgetall(cacheKeyId, function(err, item) {
-    if (err) {
-      that.log("Error: getItem() id: " + err);
-    } 
-    if (next) {
-      next(err, item);
-    }
-    return item;
+    next(err, item);
   })
 }
 
@@ -120,18 +114,26 @@ CacheRedis.prototype.updateItem = function(itemClass, item, id, next) {
 
 CacheRedis.prototype.postItem = function(itemClass, item, next) {
   /**
-   * Posts a new item to Redis cache
+   * Posts a new item to Redis cache. If id in item, uses its id.
+   * It can 
   **/
 
   var that = this
     , newItem = item
+    , newId = item.id || null
     , cacheKey = itemClass.entityName;
 
   async.waterfall([
     function(callback) {
-      that.connection.incr(cacheKey, function(err, id) {
-        callback(err, id);
-      })
+      if (newId) {
+        that.connection.hexists(cacheKey, newId, function(err, exists) {
+          callback(exists ? new Error("Error New Item id already exist " + newId) : err, newId);
+        })
+      } else {
+        that.connection.incr(cacheKey, function(err, id) {
+          callback(err, id);
+       })
+      }
     },
     function(id, callback) {
       newItem.id = id.toString();
@@ -150,7 +152,7 @@ CacheRedis.prototype.postItem = function(itemClass, item, next) {
     }
   ], function(err, res) {
     // If error after id increment, decrements id again
-    if (err && newItem.id) {
+    if (err && newItem.id && !newId) {
       that.connection.decr(cacheKey)
     }
     next(err, res);
@@ -167,13 +169,26 @@ CacheRedis.prototype.getHashItem = function(itemClass, id, key, next) {
 
   that.log("cache getHashItem(): id, key = " + id + ", " + key);
   that.connection.hget(cacheKeyId, cacheHashId, function(err, item) {
-    if (err) {
-      that.log("Error: getHashItem() id & key: " + err);
-    } 
-    if (next) {
-      next(err, item);
+    next(err, item);
+  })
+}
+
+CacheRedis.prototype.updateHashItem = function(itemClass, id, key, value, next) {
+  /**
+   * Gets item from id 
+  **/
+  var that = this
+    , cacheKeyId = itemClass.entityName + ':' + id;
+
+  that.log("cache updateHashItem(): [id, key, value] = " + [id, key, value]);
+  that.getHashItem(itemClass, id, key, function() {
+    if (item) {
+      that.connection.hset(cacheKeyId, key, value, function(err, item) {
+        next(err, item);
+      })
+    } else {
+      next(err || new Error("Error getting hash key: " + key));
     }
-    return item;
   })
 }
 
@@ -188,17 +203,13 @@ CacheRedis.prototype.getItemFromUuid = function(itemClass, uuid, next) {
     that.log("cache getItem(): uuid = " + uuid);
     that.connection.get(cacheKeyUuid, function(err, id) {
       if (err) {
-        that.log("Error: getItemFromUuid() uuid: " + err);
-        if (next) {
-          next(err);
-        }
+        next(err);
       } else {
-        var item =  that.getItem(itemClass, id, next);
-        return item;
+        that.getItem(itemClass, id, next);
       }
     })
   } else {
-    next(new Error("getItemFromUuId(): uuid does not comply uuid standard " + uuid));
+    next(new Error("uuid does not comply uuid standard " + uuid));
   }
 }
 
@@ -214,16 +225,10 @@ CacheRedis.prototype.postData = function(itemClass, id, data, next) {
       next(err);
     } else {
       that.connection.rpush(cacheKeyData, data, function(err) {
-        if (err) {
-          that.log("Error: postData(): " + err);
-        } 
-        if (next) {
-          next(err);
-        }
+        next(err);
       })
     }
   })
-  return id;
 }
 
 CacheRedis.prototype.getData = function(itemClass, id, next) {
@@ -231,21 +236,15 @@ CacheRedis.prototype.getData = function(itemClass, id, next) {
    * Gets all data from itemclass id
   **/
 
-  var that = this;
-  var cacheKeyData = itemClass.entityName + ':' + id + ':data';
+  var that = this
+    , cacheKeyData = itemClass.entityName + ':' + id + ':data';
 
   that.getItem(itemClass, id, function(err, reply) {
     if (err) {
       next(err);
     } else {
       that.connection.lrange(cacheKeyData, 0, -1, function (err, reply) {
-        if (err) {
-          that.log("Error: getData(): " + err);
-        }
-        if (next) {
-          next(err, reply);
-        }
-        return reply;
+        next(err, reply);
       })
     }
   })

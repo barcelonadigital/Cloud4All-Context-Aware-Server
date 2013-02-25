@@ -38,7 +38,6 @@ if ('test' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-
 // Start redis connection
 app.redisClient = redis.createClient(
   CFG_STORE_REDIS.port, 
@@ -51,7 +50,6 @@ app.envConfig = envConfig;
 app.logmessage = console.log;
 module.exports = app;
 
-
 // here we load de routes 
 var sensor = require('./routes/sensor')
   , config = require('./routes/config')
@@ -63,16 +61,17 @@ app.get('/', site.index);
 // Api:sensors
 app.get('/sensors/:id', sensor.get);
 app.get('/sensors', sensor.search);
+app.get('/sensors/:id/data', sensor.getData);
 app.post('/sensors', sensor.post);
 app.post('/sensors/:id', sensor.update);
-app.get('/sensors/:id/data', sensor.getData);
 app.post('/sensors/:id/data', sensor.postData);
 
 // Api:config
-//app.get('/configs/:id', config.get);
-//app.post('/configs', config.post);
-//app.post('/configs/:id/items', config.postConfigItem);
-//app.get('/configs/:id/items/:key', config.getConfigItem);
+app.get('/configs/:id', config.get);
+app.get('/configs/:id/:key', config.getValue);
+app.post('/configs', config.post);
+app.post('/configs/:id', config.update);
+app.post('/configs/:id/:key', config.updateValue);
 
 http.createServer(app).listen(port, function(){
   console.log("Express server listening on port " + port + ' in "' + app.settings.env + '" mode');

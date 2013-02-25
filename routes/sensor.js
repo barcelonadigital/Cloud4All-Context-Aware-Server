@@ -65,7 +65,7 @@ exports.post = function(req, res, next) {
     if (err) {
       next(err);
     } else {
-      res.send(200, item);
+      res.send(item);
     }
   })
 }
@@ -81,7 +81,7 @@ exports.update = function(req, res, next) {
     if (err) {
       next(err);
     } else {
-      res.send(200, item);
+      res.send(item);
     }
   })
 }
@@ -97,7 +97,7 @@ exports.postData = function(req, res) {
     if (err) {
       next(err);
     } else {
-      res.send(200); 
+      res.send(); 
     }
   })
 }
@@ -111,7 +111,7 @@ exports.getData = function(req, res) {
     if (err) {
       next(err);
     } else {
-      res.send(200, {data: reply.join(',')});
+      res.send({data: reply.join(',')});
     }
   })
 }

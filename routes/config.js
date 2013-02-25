@@ -2,9 +2,9 @@
  * Configuration System API routes.
 
  config = {
-  'id': 'devel',
-  'triggers.on-new-data.data': 'raw',
-  'triggers.on-new-data.threshold': '10',
+  'id': 'base',
+  'triggers.onNewData.data': 'raw',
+  'triggers.onNewData.threshold': '10',
   'triggers.scheduler.data': 'mean',
   'triggers.scheduler.time': '60',
   'client.url': 'http://flowmanager/data',
@@ -17,7 +17,7 @@ var app = require('../app')
   , cache = new CacheRedis(
       app.redisClient, 
       app.logmessage)
-  , configClass= {'entityName': 'config'};
+  , configClass = {'entityName': 'config'};
 
 
 exports.get = function(req, res, next) {
@@ -39,51 +39,68 @@ exports.get = function(req, res, next) {
 
 exports.post = function(req, res, next) {
   /**
-   * Post or update the id config system 
+   * Creates a config system 
   **/
   var item = req.body;
+  item.id = item.id || "base";
+
   cache.postItem(configClass, item, function (err, item) {
     if (err) {
       next(err);
     } else {
-      res.send(200);
+      res.send(item);
     }
   })
 }
 
-exports.getConfigItem = function(req, res, next) {
+exports.update = function(req, res, next) {
   /**
-   * Get the value parameter from key's parameter and config id
+   * Updates a config system 
   **/
-  var id = req.params.id;
-  var key = req.params.key;
+  var item = req.body
+    , id = req.params.id;
 
-  cache.getItem(configClass, id, function (err, item){
+  cache.updateItem(configClass, item, id, function (err, item) {
+    if (err) {
+      next(err);
+    } else {
+      res.send(item);
+    }
+  })
+}
+
+exports.getValue = function(req, res, next) {
+  /**
+   * Gets the value parameter from key's parameter and config id
+  **/
+  var key = req.params.key
+    , id = req.params.id; 
+
+  cache.getHashItem(configClass, id, key, function (err, item){
     if (err) {
       next(err);
     } else if (item) {
-      cache.getItem(configClass)
+      res.send({key: item});
     } else {
       res.send(404);
     }
   })
 }
 
-exports.postConfigItem = function(req, res, next) {
+exports.updateValue = function(req, res, next) {
   /**
    * Put value to key parameter and config id. If parameter does
    * not exists, returns error.
   **/
-  var id = req.params.id;
-  var key = req.params.key;
+  var key = req.params.key
+    , id = req.params.id
+    , value = req.body;
 
-  cache.getItem(configClass, id, function (err, item){
+  cache.updateHashItem(configClass, id, key, value, function (err, item){
     if (err) {
       next(err);
-    } else if (item) {
-      cache.getItem(configClass)
     } else {
-      res.send(404);
+      res.send({key: item});
     }
   })
 }

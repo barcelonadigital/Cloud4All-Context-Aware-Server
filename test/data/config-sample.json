@@ -1,0 +1,8 @@
+{
+	"id": "base",
+	"triggers.onNewData.data" : "raw",
+	"triggers.onNewData.threshold": "10",
+	"triggers.scheduling.data": "mean",
+	"triggers.scheduling.time": "60",
+	"receiver.url": "http://localhost:8888/receiver"
+}
