@@ -32,23 +32,23 @@ Quick Start & Examples
 The best way to get started with the CAS is running it using node
 
 ```bash
-	node app.js
+node app.js
 ```
 
 Then you can then send a POST request to the CAS to add a new sensor. For example, you can send the sample in test/data folder
 
 ```bash
-	curl -H "Content-Type: application/json" -X POST --data @test/data/sensor-sample.json http://localhost:8888/sensors
+curl -H "Content-Type: application/json" -X POST --data @test/data/sensor-sample.json http://localhost:8888/sensors
 ```
 Afterwards you can send a POST request to the CAS to add data to the new sensor.
 
 ```bash
-	curl -H "Content-Type: application/json" -X POST --data @test/data/sensor-sample-data.json http://localhost:8888/sensors/1/data
+curl -H "Content-Type: application/json" -X POST --data @test/data/sensor-sample-data.json http://localhost:8888/sensors/1/data
 ```
 And get all the data stored in CAS from that sensor
 
 ```bash
-	curl http://localhost:8888/sensors/1/data
+curl http://localhost:8888/sensors/1/data
 ```
 
 Setup
