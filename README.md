@@ -51,25 +51,29 @@ Setup
 
 CAS can be configured using a Restful API. To setup a new base configuration, send a POST request to /configs/
 
-	{		
-		"id": "base",
-		"triggers.onNewData.data" : "raw",
-		"triggers.onNewData.threshold": "10",
-		"triggers.scheduling.data": "mean",
-		"triggers.scheduling.time": "60",
-		"receiver.url": "http://localhost:8888/receiver"  
-	}
+```json
+{		
+	"id": "base",
+	"triggers.onNewData.data" : "raw",
+	"triggers.onNewData.threshold": "10",
+	"triggers.scheduling.data": "mean",
+	"triggers.scheduling.time": "60",
+	"receiver.url": "http://localhost:8888/receiver"  
+}
+```
 
-You can also setup a new evice configuration sending a POST request to /configs/ and replacing id key to an *existing* sensor:id id.
+You can also setup a new device configuration sending a POST request to /configs/ and replacing id key to an **existing** sensor:id id.
 
-	{		
-		"id": "sensor:1",
-		"triggers.onNewData.data" : "raw",
-		"triggers.onNewData.threshold": "10",
-		"triggers.scheduling.data": "mean",
-		"triggers.scheduling.time": "60",
-		"receiver.url": "http://localhost:8888/receiver"  
-	} 
+```json
+{		
+	"id": "sensor:1",
+	"triggers.onNewData.data" : "raw",
+	"triggers.onNewData.threshold": "10",
+	"triggers.scheduling.data": "mean",
+	"triggers.scheduling.time": "60",
+	"receiver.url": "http://localhost:8888/receiver"  
+} 
+```
 
 Updating the configuration is possible sending a POST request to /configs/:id where id can be "base" or "sensor:1" respectivelly.
 
