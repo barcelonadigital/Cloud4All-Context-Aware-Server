@@ -167,7 +167,7 @@ CacheRedis.prototype.getHashItem = function(itemClass, id, key, next) {
     , cacheKeyId = itemClass.entityName + ':' + id
     , cacheHashId = key; 
 
-  that.log("cache getHashItem(): id, key = " + id + ", " + key);
+  that.log("cache getHashItem(): [id, key] = " + id + ", " + key);
   that.connection.hget(cacheKeyId, cacheHashId, function(err, item) {
     next(err, item);
   })
@@ -180,11 +180,11 @@ CacheRedis.prototype.updateHashItem = function(itemClass, id, key, value, next) 
   var that = this
     , cacheKeyId = itemClass.entityName + ':' + id;
 
-  that.log("cache updateHashItem(): [id, key, value] = " + [id, key, value]);
-  that.getHashItem(itemClass, id, key, function() {
+  that.log("cache updateHashItem(): [id, key] = " + id + ", " + key);
+  that.getHashItem(itemClass, id, key, function(err, item) {
     if (item) {
-      that.connection.hset(cacheKeyId, key, value, function(err, item) {
-        next(err, item);
+      that.connection.hset(cacheKeyId, key, value, function(err, res) {
+        next(err, value);
       })
     } else {
       next(err || new Error("Error getting hash key: " + key));
@@ -220,6 +220,7 @@ CacheRedis.prototype.postData = function(itemClass, id, data, next) {
   var that = this
     , cacheKeyData = itemClass.entityName + ':' + id + ':data';
 
+  that.log("cache postData(): id = " + id);
   that.getItem(itemClass, id, function (err, reply){
     if (err) {
       next(err);
@@ -239,6 +240,7 @@ CacheRedis.prototype.getData = function(itemClass, id, next) {
   var that = this
     , cacheKeyData = itemClass.entityName + ':' + id + ':data';
 
+  that.log("cache getData(): id = " + id);
   that.getItem(itemClass, id, function(err, reply) {
     if (err) {
       next(err);

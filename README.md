@@ -4,7 +4,8 @@ Cloud4All---Context-Aware-Server
 Description
 -----------
 
-The Context Aware Server (CAS) developed in NodeJs provides a platform that collects and process the data from sensors and when some triggers are fired it sends the processed data to gpii-flowmanager
+The Context Aware Server (CAS) developed in NodeJs provides a platform that collects, stores and process the data from sensors and when some triggers are fired it sends the processed data to a client in json format.
+
 
 License
 -------
@@ -43,6 +44,45 @@ Afterwards you can send a POST request to the CAS to add data to the new sensor.
 And get all the data stored in CAS from that sensor
 
 	curl http://localhost:8888/sensors/1/data
+
+
+Setup
+-----
+
+CAS can be configured using a Restful API. To setup a new base configuration, send a POST request to /configs/
+
+	{		
+		"id": "base",
+		"triggers.onNewData.data" : "raw",
+		"triggers.onNewData.threshold": "10",
+		"triggers.scheduling.data": "mean",
+		"triggers.scheduling.time": "60",
+		"receiver.url": "http://localhost:8888/receiver"  
+	}
+
+You can also setup a new evice configuration sending a POST request to /configs/ and replacing id key to an *existing* sensor:id id.
+
+	{		
+		"id": "sensor:1",
+		"triggers.onNewData.data" : "raw",
+		"triggers.onNewData.threshold": "10",
+		"triggers.scheduling.data": "mean",
+		"triggers.scheduling.time": "60",
+		"receiver.url": "http://localhost:8888/receiver"  
+	} 
+
+Updating the configuration is possible sending a POST request to /configs/:id where id can be "base" or "sensor:1" respectivelly.
+
+Finally, you can also update and get specific values from a specific config system. Use GET to retrieve the value from key config parameter from id configuration:
+
+	GET /configs/:id/:key
+
+You will retrieve a json data with {key:value} format. You can also update a specific value using POST:
+
+	POST /configs/:id/
+	body = {
+		"triggers.onNewData.data" : "raw"
+	}
 
 
 Running Tests

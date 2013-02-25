@@ -74,13 +74,15 @@ exports.getValue = function(req, res, next) {
    * Gets the value parameter from key's parameter and config id
   **/
   var key = req.params.key
-    , id = req.params.id; 
+    , id = req.params.id
+    , result = {};
 
   cache.getHashItem(configClass, id, key, function (err, item){
     if (err) {
       next(err);
     } else if (item) {
-      res.send({key: item});
+      result[key] = item;
+      res.send(result);
     } else {
       res.send(404);
     }
@@ -94,13 +96,15 @@ exports.updateValue = function(req, res, next) {
   **/
   var key = req.params.key
     , id = req.params.id
-    , value = req.body;
+    , value = req.body[key]
+    , result = {}; 
 
   cache.updateHashItem(configClass, id, key, value, function (err, item){
     if (err) {
       next(err);
     } else {
-      res.send({key: item});
+      result[key] = item;
+      res.send(result);
     }
   })
 }
