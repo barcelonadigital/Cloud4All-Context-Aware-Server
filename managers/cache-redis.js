@@ -232,24 +232,40 @@ CacheRedis.prototype.postData = function(itemClass, id, data, next) {
   })
 }
 
-CacheRedis.prototype.getData = function(itemClass, id, next) {
+CacheRedis.prototype.getData = function(itemClass, id, start, end, next) {
   /**
-   * Gets all data from itemclass id
+   * Gets data from start to end itemclass id
   **/
 
   var that = this
-    , cacheKeyData = itemClass.entityName + ':' + id + ':data';
+    , cacheKeyData = itemClass.entityName + ':' + id + ':data'
+    , start = start || 0
+    , end = end || -1;
 
   that.log("cache getData(): id = " + id);
   that.getItem(itemClass, id, function(err, reply) {
     if (err) {
       next(err);
     } else {
-      that.connection.lrange(cacheKeyData, 0, -1, function (err, reply) {
-        next(err, reply);
+      that.connection.lrange(cacheKeyData, start, end, function (err, reply) {
+        next(err, reply.join(','));
       })
     }
   })
+}
+
+CacheRedis.prototype.getAllData = function(itemClass, id, next) {
+  /**
+   * Gets all data from itemclass id
+  **/
+  this.getData(itemClass, id, 0, -1, next);
+}
+
+CacheRedis.prototype.getNewData = function(itemClass, id, next) {
+  /**
+   * Gets new data from itemclass id
+  **/
+  this.getData(itemClass, id, -1, -1, next);
 }
 
 module.exports.CacheRedis = CacheRedis;

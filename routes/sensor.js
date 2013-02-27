@@ -12,6 +12,7 @@
 
 
 var app = require('../app') 
+  , trigger = require('../utils/triggers')
   , CacheRedis = require('../managers/cache-redis').CacheRedis
   , cache = new CacheRedis(
       app.redisClient, 
@@ -65,6 +66,7 @@ exports.post = function(req, res, next) {
     if (err) {
       next(err);
     } else {
+      trigger.emit("new-sensor", item.id);
       res.send(item);
     }
   })
@@ -97,6 +99,7 @@ exports.postData = function(req, res) {
     if (err) {
       next(err);
     } else {
+      trigger.emit("new-data", id);  
       res.send(); 
     }
   })
@@ -106,12 +109,23 @@ exports.getData = function(req, res) {
   /**
    * Gets all data from sensor id
   **/
-  var id = req.params.id;
-  cache.getData(sensorClass, id, function(err, reply) {
+  var id = req.params.id
+    , query = req.query.q || "all"
+    , getData = null;    
+
+  switch(query) {
+    case "all": cache.get = cache.getAllData; break;
+    case "new": cache.get = cache.getNewData; break;
+    default: getData = function () {
+      res.send(new Error("Incorrect query parameter " + query))
+    };
+  }
+
+  cache.get(sensorClass, id, function(err, reply) {
     if (err) {
       next(err);
     } else {
-      res.send({data: reply.join(',')});
+      res.send({data: reply});
     }
   })
 }

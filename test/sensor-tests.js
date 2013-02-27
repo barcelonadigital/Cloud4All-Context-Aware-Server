@@ -122,6 +122,27 @@ describe('Sensor API', function() {
         done();
       })
   })
+
+  it('gets all data from sensor id', function(done) {
+    request(app)
+      .get('/sensors/1/data?q=all')
+      .expect('Content-type', /json/)
+      .expect(200, function (err, res) {
+        res.body.data.should.equal(
+          [sensor_sample_data, sensor_sample_data].join(','));
+        done();
+      })
+  })
+
+  it('gets new data from sensor id', function(done) {
+    request(app)
+      .get('/sensors/1/data?q=new')
+      .expect('Content-type', /json/)
+      .expect(200, function (err, res) {
+        res.body.data.should.equal(sensor_sample_data.join(','));
+        done();
+      })
+  })
 })
 
 

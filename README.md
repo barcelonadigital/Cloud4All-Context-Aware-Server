@@ -10,7 +10,7 @@ The Context Aware Server (CAS) developed in NodeJs provides a platform that coll
 License
 -------
 
-This project has been developed by Barcelona Deigital Health department. Device reporter is shared under New BSD license. This project folder includes a license file. You can share and distribute this project and built software using New BSD license. Please, send any feedback to http://www.cloud4all.info
+This project has been developed by Barcelona Digital Health department. Device reporter is shared under New BSD license. This project folder includes a license file. You can share and distribute this project and built software using New BSD license. Please, send any feedback to http://www.cloud4all.info
 
 
 Installation

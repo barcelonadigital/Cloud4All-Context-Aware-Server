@@ -75,7 +75,7 @@ describe('Config API', function() {
       .get('/configs/base/triggers.onNewData.data')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.should.eql({'triggers.onNewData.data': 'raw'});
+        res.body.should.eql({'triggers.onNewData.data': 'all'});
         done();
       });
   })
@@ -84,10 +84,10 @@ describe('Config API', function() {
     request(app)
       .post('/configs/base/triggers.onNewData.data')
       .set('Accept', 'application/json')
-      .send({'triggers.onNewData.data' : 'mean'})
+      .send({'triggers.onNewData.data' : 'new'})
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.should.eql({'triggers.onNewData.data': 'mean'});
+        res.body.should.eql({'triggers.onNewData.data': 'new'});
         done();
       });
   })

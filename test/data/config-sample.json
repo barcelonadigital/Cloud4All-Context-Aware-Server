@@ -1,6 +1,8 @@
 {	"base": {
 		"id": "base",
-		"triggers.onNewData.data" : "raw",
+		"triggers.onNewData.data" : "all",
+		"triggers.onNewData.aggregation": "raw",
+		"triggers.onNewData.trigger": "threshold",
 		"triggers.onNewData.threshold": "10",
 		"triggers.scheduling.data": "mean",
 		"triggers.scheduling.time": "60",
@@ -8,7 +10,9 @@
 	},
 	"sensor:1" : {
 		"id": "sensor:1",
-		"triggers.onNewData.data" : "raw",
+		"triggers.onNewData.data" : "all",
+		"triggers.onNewData.aggregation": "raw",
+		"triggers.onNewData.trigger": "threshold",
 		"triggers.onNewData.threshold": "10",
 		"triggers.scheduling.data": "mean",
 		"triggers.scheduling.time": "60",
