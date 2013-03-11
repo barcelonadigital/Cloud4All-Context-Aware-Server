@@ -1,21 +1,33 @@
 {	"base": {
 		"id": "base",
-		"triggers.onNewData.data" : "all",
-		"triggers.onNewData.aggregation": "raw",
+		"triggers.onNewData.data": "all",
+		"triggers.onNewData.aggregation": "max",
 		"triggers.onNewData.trigger": "threshold",
 		"triggers.onNewData.threshold": "10",
 		"triggers.scheduling.data": "mean",
 		"triggers.scheduling.time": "60",
-		"receiver.url": "http://localhost:8888/receiver"
+		"triggers.onNewUser.data": "all",
+		"triggers.onNewUser.aggregation": "mean",
+		"triggers.onNewUser.trigger": "threshold",
+		"triggers.onNewUser.threshold": "15",
+		"receiver.host": "localhost",
+		"receiver.port": "8889",
+		"receiver.path": "/receiver"
 	},
 	"sensor:1" : {
 		"id": "sensor:1",
 		"triggers.onNewData.data" : "all",
-		"triggers.onNewData.aggregation": "raw",
+		"triggers.onNewData.aggregation": "sum",
 		"triggers.onNewData.trigger": "threshold",
-		"triggers.onNewData.threshold": "10",
+		"triggers.onNewData.threshold": "15",
 		"triggers.scheduling.data": "mean",
 		"triggers.scheduling.time": "60",
-		"receiver.url": "http://localhost:8888/receiver"
+		"receiver.host": "localhost",
+		"receiver.port": "8889",
+		"receiver.path": "/receiver"
+	},
+	"user:1" : {
+		"id": "user:1",
+		"location.nearness": "3"
 	}
 }

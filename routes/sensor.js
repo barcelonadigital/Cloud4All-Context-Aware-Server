@@ -99,7 +99,7 @@ exports.postData = function(req, res) {
     if (err) {
       next(err);
     } else {
-      trigger.emit("new-data", id);  
+      trigger.emit("onNewData", id, "onNewData");  
       res.send(); 
     }
   })

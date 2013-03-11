@@ -38,6 +38,19 @@ if ('test' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+// testing and development only
+if ('test' || 'development' == app.get('env')) {
+  var receiver = require('./routes/receiver')
+    , testPort = 8889;
+
+  // Api: post from CAS - testing purposes
+  app.post('/receiver', receiver.post);
+
+  http.createServer(app).listen(testPort, function(){
+  console.log("Test server listening on port " + testPort + ' in "' + app.settings.env + '" mode');
+  });
+}
+
 // Start redis connection
 app.redisClient = redis.createClient(
   CFG_STORE_REDIS.port, 
@@ -73,7 +86,8 @@ app.post('/configs', config.post);
 app.post('/configs/:id', config.update);
 app.post('/configs/:id/:key', config.updateValue);
 
+
 http.createServer(app).listen(port, function(){
-  console.log("Express server listening on port " + port + ' in "' + app.settings.env + '" mode');
+  console.log("Server listening on port " + port + ' in "' + app.settings.env + '" mode');
 });
 
