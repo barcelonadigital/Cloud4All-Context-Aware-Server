@@ -17,7 +17,7 @@ function SensorTrigger(sensorClass, configClass) {
 
 util.inherits(SensorTrigger, events.EventEmitter);
 
-SensorTrigger.prototype.getSensorConfig = function(sensor, trigger) {
+SensorTrigger.prototype.getSensorConfig = function (sensor, trigger) {
   var that = this
     , sensorKeyId = that.sensorClass.entityName + ':' + sensor
     , baseKeyId = "base";
@@ -32,9 +32,9 @@ SensorTrigger.prototype.getSensorConfig = function(sensor, trigger) {
     that.emit(that.config.data, sensor);
   }
 
-  that.cache.getItem(that.configClass, sensorKeyId, function(err, config) {
+  that.cache.getItem(that.configClass, sensorKeyId, function (err, config) {
     if (!config) {
-      that.cache.getItem(that.configClass, baseKeyId, function(err, config) {
+      that.cache.getItem(that.configClass, baseKeyId, function (err, config) {
         callBack(config);
       })
     } else {
@@ -43,10 +43,10 @@ SensorTrigger.prototype.getSensorConfig = function(sensor, trigger) {
   })
 }
 
-SensorTrigger.prototype.getAllData = function(sensor) {
+SensorTrigger.prototype.getAllData = function (sensor) {
   var that = this;
 
-  that.cache.getAllData(that.sensorClass, sensor, function(err, data) {
+  that.cache.getAllData(that.sensorClass, sensor, function (err, data) {
     if (err) {
       that.emit("error", err);
     } else {
@@ -55,10 +55,10 @@ SensorTrigger.prototype.getAllData = function(sensor) {
   })
 }
 
-SensorTrigger.prototype.getNewData = function(sensor) {
+SensorTrigger.prototype.getNewData = function (sensor) {
   var that = this;
 
-  that.cache.getNewData(that.sensorClass, sensor, function(err, data) {
+  that.cache.getNewData(that.sensorClass, sensor, function (err, data) {
     if (err) {
       that.emit("error", err);
     } else {
@@ -67,32 +67,34 @@ SensorTrigger.prototype.getNewData = function(sensor) {
   })
 }
 
-SensorTrigger.prototype.getMaxData = function(data) {
+SensorTrigger.prototype.getMaxData = function (data) {
   var that = this;
 
-  agg.aggregate(data, agg.max, function(res){
+  agg.aggregate(data, agg.max, function (res){
     that.emit(that.config.trigger, data, res);
   })
 }
 
-SensorTrigger.prototype.getSumData = function(data) {
+SensorTrigger.prototype.getSumData = function (data) {
   var that = this;
 
-  agg.aggregate(data, agg.sum, function(res){
+  agg.aggregate(data, agg.sum, function (res){
     that.emit(that.config.trigger, data, res);
   })
 }
 
-SensorTrigger.prototype.threshold = function(data, res) {
+SensorTrigger.prototype.threshold = function (data, res) {
   var that = this
     , threshold = that.config.threshold;
 
   if (threshold < res) {
-    that.emit("sendData", data);
+    that.emit("onTriggered", data);
+  } else {
+    that.emit("nonTriggered", threshold, res, data);
   }
 }
 
-SensorTrigger.prototype.sendData = function(data) {
+SensorTrigger.prototype.sendData = function (data) {
   var that = this
     , receiver = that.receiver
     , postData = querystring.stringify({
@@ -101,26 +103,25 @@ SensorTrigger.prototype.sendData = function(data) {
       });
 
   var options = {
-      host: receiver.host,
-      port: receiver.port,
-      path: receiver.path,
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': postData.length
-      }
+    host: receiver.host,
+    port: receiver.port,
+    path: receiver.path,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Length': postData.length
+    }
   };
 
-  var req = http.request(options, function(res) {
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-          console.log("body: " + chunk);
-      });
+  var req = http.request(options, function (res) {
+    res.setEncoding('utf8');
+    res.on('data', function (chunk) {
+      that.emit("receiverOk", chunk, res);
+    });
   });
 
   req.write(postData);
   req.end();
-
 }
 
 trigger = new SensorTrigger();
@@ -134,6 +135,8 @@ trigger.on("new", trigger.getNewData);
 trigger.on("max", trigger.getMaxData);
 trigger.on("sum", trigger.getSumData);
 trigger.on("threshold", trigger.threshold);
-trigger.on("sendData", trigger.sendData);
+trigger.on("onTriggered", trigger.sendData);
 
 module.exports = trigger;
+module.exports.SensorTrigger = SensorTrigger;
+

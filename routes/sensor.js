@@ -19,7 +19,7 @@ var app = require('../app')
       app.logmessage)
   , sensorClass= {'entityName': 'sensor'};
 
-exports.get = function(req, res, next) {
+exports.get = function (req, res, next) {
   /**
    * Get sensor from Redis database
   **/
@@ -36,7 +36,7 @@ exports.get = function(req, res, next) {
   })
 }
 
-exports.search = function(req, res, next) {
+exports.search = function (req, res, next) {
   /**
    * Gets sensor from query search 
   **/
@@ -57,7 +57,7 @@ exports.search = function(req, res, next) {
   }
 }
 
-exports.post = function(req, res, next) {
+exports.post = function (req, res, next) {
   /**
    * Posts new sensor returning sensor with id
   **/
@@ -72,7 +72,7 @@ exports.post = function(req, res, next) {
   })
 }
 
-exports.update = function(req, res, next) {
+exports.update = function (req, res, next) {
   /**
    * Updates an existing sensor id, returning sensor;
   **/
@@ -88,14 +88,14 @@ exports.update = function(req, res, next) {
   })
 }
 
-exports.postData = function(req, res) {
+exports.postData = function (req, res) {
   /**
    * Posts new data from sensor id
   **/
   var id = req.params.id
     , data = req.body;
 
-  cache.postData(sensorClass, id, data, function(err){
+  cache.postData(sensorClass, id, data, function (err){
     if (err) {
       next(err);
     } else {
@@ -105,7 +105,7 @@ exports.postData = function(req, res) {
   })
 }
 
-exports.getData = function(req, res) {
+exports.getData = function (req, res) {
   /**
    * Gets all data from sensor id
   **/
@@ -121,7 +121,7 @@ exports.getData = function(req, res) {
     };
   }
 
-  cache.get(sensorClass, id, function(err, reply) {
+  cache.get(sensorClass, id, function (err, reply) {
     if (err) {
       next(err);
     } else {

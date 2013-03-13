@@ -3,7 +3,7 @@
 **/
 
 
-exports.UUIDCheck = function(uuid) {
+exports.UUIDCheck = function (uuid) {
   /*
   ** Checks if uuid is valid
   */
@@ -12,7 +12,7 @@ exports.UUIDCheck = function(uuid) {
   return uuid.match(re);
 }
 
-exports.deepen = function(o) {
+exports.deepen = function (o) {
    /*
   ** Converts javascript dot notation object to nested object
   */

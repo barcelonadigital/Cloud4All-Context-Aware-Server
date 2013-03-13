@@ -6,15 +6,15 @@ var app = require('../app')
   , should = require('should')
   , config_sample = require('./data/config-sample');
 
-// removes all data from devel database
-app.redisClient.flushall();
 
-describe('Config API', function() {
-  before(function(){
+
+describe('Config API', function () {
+  before(function (){
     console.log("\n\nTESTING CONFIG API\n");
+    app.redisClient.flushall();
   })
 
-  it('saves a new config base system', function(done) {
+  it('saves a new config base system', function (done) {
     request(app)
       .post('/configs')
       .set('Accept', 'application/json')
@@ -23,17 +23,17 @@ describe('Config API', function() {
       .expect(200, done);
   })
 
-  it('gets a config system from base', function(done) {
+  it('gets a config system from base', function (done) {
     request(app)
       .get('/configs/base')
       .expect('Content-type', /json/)
-      .expect(200, function(err, res) {
+      .expect(200, function (err, res) {
         res.body.should.include(config_sample["base"])
         done();
       });
   })
 
-  it('updates an existing config base system', function(done) {
+  it('updates an existing config base system', function (done) {
     request(app)
       .post('/configs/base')
       .set('Accept', 'application/json')
@@ -42,7 +42,7 @@ describe('Config API', function() {
       .expect(200, done);
   })
 
-  it('saves a new sensor 1 config', function(done) {
+  it('saves a new sensor 1 config', function (done) {
     request(app)
       .post('/configs/')
       .set('Accept', 'application/json')
@@ -51,17 +51,17 @@ describe('Config API', function() {
       .expect(200, done);
   })
 
-  it('gets a config from sensor 1', function(done) {
+  it('gets a config from sensor 1', function (done) {
     request(app)
       .get('/configs/sensor:1')
       .expect('Content-type', /json/)
-      .expect(200, function(err, res) {
+      .expect(200, function (err, res) {
         res.body.should.include(config_sample["sensor:1"])
         done();
       });  
   })
 
-  it('updates an existing sensor 1 config system', function(done) {
+  it('updates an existing sensor 1 config system', function (done) {
     request(app)
       .post('/configs/base')
       .set('Accept', 'application/json')
@@ -70,7 +70,7 @@ describe('Config API', function() {
       .expect(200, done);
   })
 
-  it('gets a config value from base', function(done) {
+  it('gets a config value from base', function (done) {
     request(app)
       .get('/configs/base/triggers.onNewData.data')
       .expect('Content-type', /json/)
@@ -80,7 +80,7 @@ describe('Config API', function() {
       });
   })
 
-  it('sets a config value', function(done) {
+  it('sets a config value', function (done) {
     request(app)
       .post('/configs/base/triggers.onNewData.data')
       .set('Accept', 'application/json')

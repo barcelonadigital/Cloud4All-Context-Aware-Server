@@ -9,10 +9,10 @@
 
 var app = require('../app');
 
-exports.post = function(req, res, next) {
+exports.post = function (req, res, next) {
   /**
    * Posts new sensor from CAS
   **/
   var item = req.body;
-  console.log("receiver post() id, data: " + item.id + ", " + item.data);
+  res.send(item);
 }

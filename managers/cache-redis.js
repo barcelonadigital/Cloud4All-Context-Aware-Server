@@ -17,7 +17,7 @@ function CacheRedis(conn, log, defaultExpireSeconds) {
 
 }
 
-CacheRedis.prototype.postUuid = function(itemClass, item, next) {
+CacheRedis.prototype.postUuid = function (itemClass, item, next) {
   /**
    * Posts a uuid, id = key, value for searching by uuid.
   **/
@@ -27,10 +27,10 @@ CacheRedis.prototype.postUuid = function(itemClass, item, next) {
     next(new Error("uuid does not comply with uuid standards: " + item.uuid));
   } else {
     var cacheKeyUuid = itemClass.entityName + ':' + item.uuid;
-    that.log("cache putItem(): key = " + cacheKeyUuid);
-    that.connection.exists(cacheKeyUuid, function(err, res) {
+    that.log("cache postUuid(): key = " + cacheKeyUuid);
+    that.connection.exists(cacheKeyUuid, function (err, res) {
       if (!res) {
-        that.connection.set(cacheKeyUuid, item.id, function(err) {
+        that.connection.set(cacheKeyUuid, item.id, function (err) {
           next(err);
         })
       } else {
@@ -40,7 +40,7 @@ CacheRedis.prototype.postUuid = function(itemClass, item, next) {
   }
 }
 
-CacheRedis.prototype.getItem = function(itemClass, id, next) {
+CacheRedis.prototype.getItem = function (itemClass, id, next) {
   /**
    * Gets item from id 
   **/
@@ -48,12 +48,12 @@ CacheRedis.prototype.getItem = function(itemClass, id, next) {
   var cacheKeyId = itemClass.entityName + ':' + id;
 
   that.log("cache getItem(): id = " + id);
-  that.connection.hgetall(cacheKeyId, function(err, item) {
+  that.connection.hgetall(cacheKeyId, function (err, item) {
     next(err, item);
   })
 }
 
-CacheRedis.prototype.delUuid = function(itemClass, uuid, next) {
+CacheRedis.prototype.delUuid = function (itemClass, uuid, next) {
   /**
    * Deletes uuid, ik pairs from cache
   */
@@ -63,13 +63,14 @@ CacheRedis.prototype.delUuid = function(itemClass, uuid, next) {
     next(new Error("uuid does not comply with uuid standards: " + uuid));
   } else {
     var cacheKeyUuid = itemClass.entityName + ":" + uuid;
-    that.connection.del(cacheKeyUuid, function(err) {
+    that.log("cache delUuid(): uuid = " + uuid);
+    that.connection.del(cacheKeyUuid, function (err) {
       next(err);
     })
   } 
 }
 
-CacheRedis.prototype.updateItem = function(itemClass, item, id, next) {
+CacheRedis.prototype.updateItem = function (itemClass, item, id, next) {
   /**
    * Updates exisiting Item: 
    * In order to search by uuid: store uuid if exists 
@@ -77,89 +78,95 @@ CacheRedis.prototype.updateItem = function(itemClass, item, id, next) {
   **/
   var that = this
     , oldItem = {}
-    , newItem = item
+    , newItem = JSON.parse(JSON.stringify(item))
     , cacheKeyId = itemClass.entityName + ":" + id;
 
   newItem.id = id;
 
   async.waterfall([
-    function(callback) {
-      that.getItem(itemClass, id, function(err, res) {
+    function (callback) {
+      that.getItem(itemClass, id, function (err, res) {
         callback(err, res);
       })
     },
-    function(res, callback) {
+    function (res, callback) {
       oldItem = res;
       newItem.uuid = utils.UUIDCheck(newItem.uuid) ? newItem.uuid : oldItem.uuid;
 
-      that.delUuid(itemClass, oldItem.uuid, function(err) {
+      that.delUuid(itemClass, oldItem.uuid, function (err) {
         callback(err);
       })
     },
-    function(callback) {
+    function (callback) {
       that.log("cache updateItem(): key = " + cacheKeyId);
-      that.connection.hmset(cacheKeyId, newItem, function(err) {
+      that.connection.hmset(cacheKeyId, newItem, function (err) {
         callback(err);
       })
     },
-    function(callback) { 
-      that.postUuid(itemClass, newItem, function(err) {
+    function (callback) { 
+      that.postUuid(itemClass, newItem, function (err) {
         callback(err, newItem);
       })
     },
   ], function (err, res) {
-    next(err, res);
+    if (next) {
+      next(err, res);
+    }
   });
 }
 
-CacheRedis.prototype.postItem = function(itemClass, item, next) {
+CacheRedis.prototype.postItem = function (itemClass, item, next) {
   /**
    * Posts a new item to Redis cache. If id in item, uses its id.
    * It can 
   **/
 
   var that = this
-    , newItem = item
+    , newItem = JSON.parse(JSON.stringify(item))
     , newId = item.id || null
     , cacheKey = itemClass.entityName;
 
+
+
   async.waterfall([
-    function(callback) {
+    function (callback) {
       if (newId) {
-        that.connection.hexists(cacheKey, newId, function(err, exists) {
+        that.connection.hexists(cacheKey, newId, function (err, exists) {
           callback(exists ? new Error("Error New Item id already exist " + newId) : err, newId);
         })
       } else {
-        that.connection.incr(cacheKey, function(err, id) {
+        that.connection.incr(cacheKey, function (err, id) {
           callback(err, id);
        })
       }
     },
-    function(id, callback) {
+    function (id, callback) {
       newItem.id = id.toString();
       newItem.uuid = utils.UUIDCheck(newItem.uuid) ? newItem.uuid : uuid.v4();
 
-      that.postUuid(itemClass, newItem, function(err){
+      that.postUuid(itemClass, newItem, function (err){
         callback(err); 
       })
     },
-    function(callback) {
+    function (callback) {
       var cacheKeyId = itemClass.entityName + ':' + newItem.id;
       that.log("cache postItem(): key = " + cacheKeyId);
-      that.connection.hmset(cacheKeyId, newItem, function(err) {
+      that.connection.hmset(cacheKeyId, newItem, function (err) {
         callback(err, newItem);
       })
     }
-  ], function(err, res) {
+  ], function (err, res) {
     // If error after id increment, decrements id again
     if (err && newItem.id && !newId) {
       that.connection.decr(cacheKey)
     }
-    next(err, res);
+    if (next) {
+      next(err, res);
+    }
   });
 }
 
-CacheRedis.prototype.getHashItem = function(itemClass, id, key, next) {
+CacheRedis.prototype.getHashItem = function (itemClass, id, key, next) {
   /**
    * Gets item from id 
   **/
@@ -168,12 +175,12 @@ CacheRedis.prototype.getHashItem = function(itemClass, id, key, next) {
     , cacheHashId = key; 
 
   that.log("cache getHashItem(): [id, key] = " + id + ", " + key);
-  that.connection.hget(cacheKeyId, cacheHashId, function(err, item) {
+  that.connection.hget(cacheKeyId, cacheHashId, function (err, item) {
     next(err, item);
   })
 }
 
-CacheRedis.prototype.updateHashItem = function(itemClass, id, key, value, next) {
+CacheRedis.prototype.updateHashItem = function (itemClass, id, key, value, next) {
   /**
    * Gets item from id 
   **/
@@ -181,9 +188,9 @@ CacheRedis.prototype.updateHashItem = function(itemClass, id, key, value, next) 
     , cacheKeyId = itemClass.entityName + ':' + id;
 
   that.log("cache updateHashItem(): [id, key] = " + id + ", " + key);
-  that.getHashItem(itemClass, id, key, function(err, item) {
+  that.getHashItem(itemClass, id, key, function (err, item) {
     if (item) {
-      that.connection.hset(cacheKeyId, key, value, function(err, res) {
+      that.connection.hset(cacheKeyId, key, value, function (err, res) {
         next(err, value);
       })
     } else {
@@ -192,7 +199,7 @@ CacheRedis.prototype.updateHashItem = function(itemClass, id, key, value, next) 
   })
 }
 
-CacheRedis.prototype.getItemFromUuid = function(itemClass, uuid, next) {
+CacheRedis.prototype.getItemFromUuid = function (itemClass, uuid, next) {
   /**
    * Gets item from uuid 
   **/
@@ -201,7 +208,7 @@ CacheRedis.prototype.getItemFromUuid = function(itemClass, uuid, next) {
 
   if (utils.UUIDCheck(uuid)) {
     that.log("cache getItem(): uuid = " + uuid);
-    that.connection.get(cacheKeyUuid, function(err, id) {
+    that.connection.get(cacheKeyUuid, function (err, id) {
       if (err) {
         next(err);
       } else {
@@ -213,7 +220,7 @@ CacheRedis.prototype.getItemFromUuid = function(itemClass, uuid, next) {
   }
 }
 
-CacheRedis.prototype.postData = function(itemClass, id, data, next) {
+CacheRedis.prototype.postData = function (itemClass, id, data, next) {
   /**
   * Posts new data from itemclass id
   */
@@ -225,14 +232,14 @@ CacheRedis.prototype.postData = function(itemClass, id, data, next) {
     if (err) {
       next(err);
     } else {
-      that.connection.rpush(cacheKeyData, data, function(err) {
+      that.connection.rpush(cacheKeyData, data, function (err) {
         next(err);
       })
     }
   })
 }
 
-CacheRedis.prototype.getData = function(itemClass, id, start, end, next) {
+CacheRedis.prototype.getData = function (itemClass, id, start, end, next) {
   /**
    * Gets data from start to end itemclass id
   **/
@@ -243,7 +250,7 @@ CacheRedis.prototype.getData = function(itemClass, id, start, end, next) {
     , end = end || -1;
 
   that.log("cache getData(): id = " + id);
-  that.getItem(itemClass, id, function(err, reply) {
+  that.getItem(itemClass, id, function (err, reply) {
     if (err) {
       next(err);
     } else {
@@ -254,14 +261,14 @@ CacheRedis.prototype.getData = function(itemClass, id, start, end, next) {
   })
 }
 
-CacheRedis.prototype.getAllData = function(itemClass, id, next) {
+CacheRedis.prototype.getAllData = function (itemClass, id, next) {
   /**
    * Gets all data from itemclass id
   **/
   this.getData(itemClass, id, 0, -1, next);
 }
 
-CacheRedis.prototype.getNewData = function(itemClass, id, next) {
+CacheRedis.prototype.getNewData = function (itemClass, id, next) {
   /**
    * Gets new data from itemclass id
   **/

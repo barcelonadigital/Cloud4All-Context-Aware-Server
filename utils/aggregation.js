@@ -5,26 +5,26 @@
 var  _ = require('underscore');
 
 
-exports.sum = function(value, next) {
-  var res = value.reduce(function(prev, cur){return prev + cur;});
+exports.sum = function (value, next) {
+  var res = value.reduce(function (prev, cur){return prev + cur;});
   next(res);
 } 
 
-exports.mean = function(value, next) {
-  exports.sum(value, function(res){
+exports.mean = function (value, next) {
+  exports.sum(value, function (res){
     next(res / value.length);
   })
 }
 
-exports.max = function(value, next) {
+exports.max = function (value, next) {
   next(_.max(value));
 }
 
-exports.min = function(value, next) {
+exports.min = function (value, next) {
   next(_.min(value));
 }
 
-exports.aggregate = function(value, operator, next) {
+exports.aggregate = function (value, operator, next) {
   if (value instanceof Array) {
     operator(value.map(parseFloat), next);
   } else if (typeof value == "string") {

@@ -20,7 +20,7 @@ var app = require('../app')
   , configClass = {'entityName': 'config'};
 
 
-exports.get = function(req, res, next) {
+exports.get = function (req, res, next) {
   /**
    * Get a config json from Redis database
   **/
@@ -37,7 +37,7 @@ exports.get = function(req, res, next) {
   })
 }
 
-exports.post = function(req, res, next) {
+exports.post = function (req, res, next) {
   /**
    * Creates a config system 
   **/
@@ -53,7 +53,7 @@ exports.post = function(req, res, next) {
   })
 }
 
-exports.update = function(req, res, next) {
+exports.update = function (req, res, next) {
   /**
    * Updates a config system 
   **/
@@ -69,7 +69,7 @@ exports.update = function(req, res, next) {
   })
 }
 
-exports.getValue = function(req, res, next) {
+exports.getValue = function (req, res, next) {
   /**
    * Gets the value parameter from key's parameter and config id
   **/
@@ -89,7 +89,7 @@ exports.getValue = function(req, res, next) {
   })
 }
 
-exports.updateValue = function(req, res, next) {
+exports.updateValue = function (req, res, next) {
   /**
    * Put value to key parameter and config id. If parameter does
    * not exists, returns error.

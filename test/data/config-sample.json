@@ -3,7 +3,7 @@
 		"triggers.onNewData.data": "all",
 		"triggers.onNewData.aggregation": "max",
 		"triggers.onNewData.trigger": "threshold",
-		"triggers.onNewData.threshold": "10",
+		"triggers.onNewData.threshold": "3",
 		"triggers.scheduling.data": "mean",
 		"triggers.scheduling.time": "60",
 		"triggers.onNewUser.data": "all",

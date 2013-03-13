@@ -41,7 +41,7 @@ if ('test' == app.get('env')) {
 // testing and development only
 if ('test' || 'development' == app.get('env')) {
   var receiver = require('./routes/receiver')
-    , testPort = 8889;
+    , testPort = envConfig.receiver.port;
 
   // Api: post from CAS - testing purposes
   app.post('/receiver', receiver.post);
