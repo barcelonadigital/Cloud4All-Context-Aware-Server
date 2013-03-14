@@ -12,6 +12,17 @@ function SensorTrigger(sensorClass, configClass) {
   this.configClass = configClass || {'entityName': 'config'};
   this.cache = new CacheRedis(app.redisClient, app.logmessage);
 
+  this.on("onNewData", this.getSensorConfig); 
+  this.on("scheduling", this.getSensorConfig); 
+  this.on("onNewUser", this.getSensorConfig); 
+
+  this.on("all", this.getAllData);
+  this.on("new", this.getNewData);
+  this.on("max", this.getMaxData);
+  this.on("sum", this.getSumData);
+  this.on("threshold", this.threshold);
+  this.on("onTriggered", this.sendData);
+
   events.EventEmitter.call(this);
 }
 
@@ -124,19 +135,4 @@ SensorTrigger.prototype.sendData = function (data) {
   req.end();
 }
 
-trigger = new SensorTrigger();
-
-trigger.on("onNewData", trigger.getSensorConfig); 
-trigger.on("scheduling", trigger.getSensorConfig); 
-trigger.on("onNewUser", trigger.getSensorConfig); 
-
-trigger.on("all", trigger.getAllData);
-trigger.on("new", trigger.getNewData);
-trigger.on("max", trigger.getMaxData);
-trigger.on("sum", trigger.getSumData);
-trigger.on("threshold", trigger.threshold);
-trigger.on("onTriggered", trigger.sendData);
-
-module.exports = trigger;
 module.exports.SensorTrigger = SensorTrigger;
-

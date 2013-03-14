@@ -61,12 +61,13 @@ exports.post = function (req, res, next) {
   /**
    * Posts new sensor returning sensor with id
   **/
-  var item = req.body;
+  var item = req.body
+      , e = new trigger.SensorTrigger();
   cache.postItem(sensorClass, item, function (err, item) {
     if (err) {
       next(err);
     } else {
-      trigger.emit("new-sensor", item.id);
+      e.emit("new-sensor", item.id);
       res.send(item);
     }
   })
@@ -93,13 +94,14 @@ exports.postData = function (req, res) {
    * Posts new data from sensor id
   **/
   var id = req.params.id
-    , data = req.body;
+    , data = req.body
+    , e = new trigger.SensorTrigger();
 
   cache.postData(sensorClass, id, data, function (err){
     if (err) {
       next(err);
     } else {
-      trigger.emit("onNewData", id, "onNewData");  
+      e.emit("onNewData", id, "onNewData");  
       res.send(); 
     }
   })
