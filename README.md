@@ -112,18 +112,18 @@ When new data arrives to the Context awareness server, it fires a "onNewData" ev
 
 For example, using the sensor:1 configuration above, when new data arrives, the trigger system will collect "all" the sensor data stored, will "sum" it and then uses a simple threshold method to know if this sum is above the required value "15", if it is such the case, it will send the data to the "localhost" receiver.
 
-## Aggregation Methods
+### Aggregation Methods
 
 	sum = sum of all values
 	mean = mean of all values
 	max = max of all values
 
-## Data Query methods
+### Data Query methods
 
 	all = all stored data
 	new = only last new data
 
-## Trigger methods
+### Trigger methods
 	
 	threshold = triggered when the value is above a threshold. threshold value must be defined. (threshold": "{number}")
 
