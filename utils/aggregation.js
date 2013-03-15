@@ -24,6 +24,10 @@ exports.min = function (value, next) {
   next(_.min(value));
 }
 
+exports.last = function (value, next) {
+  next(_.last(value));
+}
+
 exports.aggregate = function (value, operator, next) {
   if (value instanceof Array) {
     operator(value.map(parseFloat), next);

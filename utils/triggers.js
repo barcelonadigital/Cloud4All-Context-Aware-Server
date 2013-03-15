@@ -21,7 +21,9 @@ function SensorTrigger(sensorClass, configClass) {
   this.on("new", this.getNewData);
   this.on("max", this.getMaxData);
   this.on("sum", this.getSumData);
+  this.on("last", this.getLastData);
   this.on("threshold", this.threshold);
+  this.on("diffRadius", this.diffRadius);
   this.on("send", this.sendData);
   this.on("store", this.storeData);
 
@@ -96,15 +98,46 @@ SensorTrigger.prototype.getSumData = function (data) {
   })
 }
 
+SensorTrigger.prototype.getLastData = function (data) {
+  var that = this;
+
+  agg.aggregate(data, agg.last, function (res){
+    that.emit(that.config.trigger, data, res);
+  })
+}
+
 SensorTrigger.prototype.threshold = function (data, res) {
   var that = this
-    , threshold = that.config.threshold;
+    , threshold = that.config.threshold || "0";
 
   if (threshold < res) {
     that.emit(that.config.triggered, data);
   } else {
     that.emit("nonTriggered", threshold, res, data);
   }
+}
+
+SensorTrigger.prototype.diffRadius = function (data, res) {
+  var that = this
+    , last = res
+    , threshold = that.config.diffRadius || "10"
+    , topThreshold = 1 + threshold / 100
+    , bottomThreshold = 1 - threshold / 100;
+
+  that.cache.getNewData(that.sensorClass, that.id, 
+                        that.dataKey, function (err, reply) {
+    if (err) {
+      that.emit("error", err);
+    } else {
+      agg.aggregate(reply, agg.last, function (res){
+        if (last < bottomThreshold * res || last > topThreshold * res) {
+          that.emit(that.config.triggered, last);
+        } else {
+          that.emit("nonTriggered", threshold, res, last);
+        }
+      })
+    }
+  })
 }
 
 SensorTrigger.prototype.sendData = function (data) {

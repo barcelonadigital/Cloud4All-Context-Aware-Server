@@ -90,4 +90,36 @@ describe('Trigger system API', function () {
       })
     })
   })
+
+  it('tests the diffRadius trigger system', function (done) {
+    var id = 1
+      , data = [1, 2, 3, 4.5]
+      , res = 4.5; 
+
+    e.config.diffRadius = "10";
+    e.config.triggered = "send";
+    e.id = id;
+
+    e.emit("diffRadius", data, res);  
+    e.once("send", function (reply) {
+      reply.should.equal(res);
+      done();
+    })
+  })
+
+  it('tests another diffRadius trigger system', function (done) {
+    var id = 1
+      , data = [1, 2, 3, 4.3]
+      , res = 4.3; 
+
+    e.config.diffRadius = "10";
+    e.config.triggered = "send";
+    e.id = id;
+
+    e.emit("diffRadius", data, res);  
+    e.once("nonTriggered", function (threshold, oldres, data) {
+      data.should.equal(res);
+      done();
+    })
+  })
 })
