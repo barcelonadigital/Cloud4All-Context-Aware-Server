@@ -32,10 +32,8 @@ describe('Trigger system API', function () {
     var id = 1;
 
     e.emit("onNewData", id, "onNewData");  
-    e.once("receiverOk", function (chunk, res) {
-      var data = JSON.parse(chunk);
-      data["data"].should.equal(sensor_sample_data.join(','));
-      data["id"].should.equal(id.toString());
+    e.once("store", function (data) {
+      data.should.equal(sensor_sample_data.join(','));
       done();
     })
   })
@@ -60,8 +58,8 @@ describe('Trigger system API', function () {
 
     cache.postItem(configClass, config_sample["sensor:1"], function () {
       e.emit("onNewData", id, "onNewData");  
-      e.once("nonTriggered", function (threshold, res, data) {
-        res.should.be.below(threshold);
+      e.once("store", function (data) {
+        data.should.equal([sensor_sample_data].join(','));
         done();
       })
     })
@@ -72,11 +70,23 @@ describe('Trigger system API', function () {
 
     cache.postData(sensorClass, id, sensor_sample_data, function () {
       e.emit("onNewData", id, "onNewData");  
-      e.once("receiverOk", function (chunk, res) {
-        var data = JSON.parse(chunk);
-        data["data"].should.equal([sensor_sample_data, sensor_sample_data].join(','));
-        data["id"].should.equal(id.toString());
+      e.once("store", function (data) {
+        data.should.equal([sensor_sample_data].join(','));
         done();
+      })
+    })
+  })
+
+  it('sends new data to sensor and checks stored data', function (done) {
+    var id = 1;
+
+    cache.postData(sensorClass, id, sensor_sample_data, function () {
+      e.emit("onNewData", id, "onNewData");  
+      e.once("ack", function () {
+        cache.getNewData(sensorClass, id, 'sent-data', function (err, reply) {
+          reply.should.equal([sensor_sample_data].join(','));
+          done(err);
+        })
       })
     })
   })

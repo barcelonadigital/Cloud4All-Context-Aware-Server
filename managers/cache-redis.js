@@ -220,14 +220,19 @@ CacheRedis.prototype.getItemFromUuid = function (itemClass, uuid, next) {
   }
 }
 
-CacheRedis.prototype.postData = function (itemClass, id, data, next) {
+CacheRedis.prototype.postData = function (itemClass, id, data, key, next) {
   /**
   * Posts new data from itemclass id
   */
-  var that = this
-    , cacheKeyData = itemClass.entityName + ':' + id + ':data';
 
-  that.log("cache postData(): id = " + id);
+
+  var that = this
+    , dataKey = (typeof next === 'undefined') ? 'data' : key
+    , cacheKeyData = itemClass.entityName + ':' + id + ':' + dataKey; 
+
+  next = (typeof next === 'undefined') ? key : next;
+
+  that.log("cache postData(): key = " + cacheKeyData);
   that.getItem(itemClass, id, function (err, reply){
     if (err) {
       next(err);
@@ -239,15 +244,18 @@ CacheRedis.prototype.postData = function (itemClass, id, data, next) {
   })
 }
 
-CacheRedis.prototype.getData = function (itemClass, id, start, end, next) {
+CacheRedis.prototype.getData = function (itemClass, id, start, end, key, next) {
   /**
    * Gets data from start to end itemclass id
   **/
 
   var that = this
-    , cacheKeyData = itemClass.entityName + ':' + id + ':data'
+    , dataKey = (typeof next === 'undefined') ? 'data' : key
+    , cacheKeyData = itemClass.entityName + ':' + id + ':' +  dataKey 
     , start = start || 0
     , end = end || -1;
+
+  next = (typeof next === 'undefined') ? key : next;
 
   that.log("cache getData(): id = " + id);
   that.getItem(itemClass, id, function (err, reply) {
@@ -261,18 +269,18 @@ CacheRedis.prototype.getData = function (itemClass, id, start, end, next) {
   })
 }
 
-CacheRedis.prototype.getAllData = function (itemClass, id, next) {
+CacheRedis.prototype.getAllData = function (itemClass, id, key, next) {
   /**
    * Gets all data from itemclass id
   **/
-  this.getData(itemClass, id, 0, -1, next);
+  this.getData(itemClass, id, 0, -1, key, next);
 }
 
-CacheRedis.prototype.getNewData = function (itemClass, id, next) {
+CacheRedis.prototype.getNewData = function (itemClass, id, key, next) {
   /**
    * Gets new data from itemclass id
   **/
-  this.getData(itemClass, id, -1, -1, next);
+  this.getData(itemClass, id, -1, -1, key, next);
 }
 
 module.exports.CacheRedis = CacheRedis;

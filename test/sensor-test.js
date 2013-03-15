@@ -16,6 +16,8 @@ describe('Sensor API', function () {
   before(function (){
     console.log("\n\nTESTING SENSOR API\n") 
   });
+
+  app.redisClient.flushall();
   it('saves a new sensor', function (done) {
     request(app)
       .post('/sensors')

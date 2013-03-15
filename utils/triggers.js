@@ -10,6 +10,7 @@ var util = require('util')
 function SensorTrigger(sensorClass, configClass) {
   this.sensorClass = sensorClass || {'entityName': 'sensor'};
   this.configClass = configClass || {'entityName': 'config'};
+  this.dataKey = "sent-data";
   this.cache = new CacheRedis(app.redisClient, app.logmessage);
 
   this.on("onNewData", this.getSensorConfig); 
@@ -21,7 +22,8 @@ function SensorTrigger(sensorClass, configClass) {
   this.on("max", this.getMaxData);
   this.on("sum", this.getSumData);
   this.on("threshold", this.threshold);
-  this.on("onTriggered", this.sendData);
+  this.on("send", this.sendData);
+  this.on("store", this.storeData);
 
   events.EventEmitter.call(this);
 }
@@ -99,7 +101,7 @@ SensorTrigger.prototype.threshold = function (data, res) {
     , threshold = that.config.threshold;
 
   if (threshold < res) {
-    that.emit("onTriggered", data);
+    that.emit(that.config.triggered, data);
   } else {
     that.emit("nonTriggered", threshold, res, data);
   }
@@ -127,12 +129,24 @@ SensorTrigger.prototype.sendData = function (data) {
   var req = http.request(options, function (res) {
     res.setEncoding('utf8');
     res.on('data', function (chunk) {
-      that.emit("receiverOk", chunk, res);
+      that.emit(that.config.send, data);
     });
   });
 
   req.write(postData);
   req.end();
+}
+
+SensorTrigger.prototype.storeData = function (data) {
+  var that = this
+
+  that.cache.postData(that.sensorClass, that.id, data, that.dataKey, function (err, item) {
+    if (err) {
+      that.emit("error", err);
+    } else {
+      that.emit(that.config.store);
+    }
+  })
 }
 
 module.exports.SensorTrigger = SensorTrigger;

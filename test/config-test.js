@@ -6,8 +6,6 @@ var app = require('../app')
   , should = require('should')
   , config_sample = require('./data/config-sample');
 
-
-
 describe('Config API', function () {
   before(function (){
     console.log("\n\nTESTING CONFIG API\n");
@@ -75,7 +73,7 @@ describe('Config API', function () {
       .get('/configs/base/triggers.onNewData.data')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.should.eql({'triggers.onNewData.data': 'all'});
+        res.body.should.eql({'triggers.onNewData.data': 'new'});
         done();
       });
   })
