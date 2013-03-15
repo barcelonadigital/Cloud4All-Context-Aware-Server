@@ -128,7 +128,9 @@ For example, using the sensor:1 configuration above, when new data arrives, the 
 ### Trigger methods
 	
 	threshold = triggered when the value is above a threshold. threshold value must be defined. ("threshold": "{number}")
-	diffRadius = triggered when there is a the last new value `y` and the last sent value `x` do comply the inequattion `|y - x| > {number} / 100 * x` where `{number}` is the defined value in configuration ("diffRadius": "{number}"). Default 10%.
+	diffRadius = triggered when there is a the last new value `y` and the last sent value `x` 
+	do comply the inequattion `|y - x| > {number} / 100 * x` where `{number}` is the defined 
+	value in configuration ("diffRadius": "{number}"). Default 10%.
 
 
 Running Tests
