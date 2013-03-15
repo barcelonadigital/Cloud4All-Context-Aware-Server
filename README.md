@@ -117,15 +117,18 @@ For example, using the sensor:1 configuration above, when new data arrives, the 
 	sum = sum of all values
 	mean = mean of all values
 	max = max of all values
+	min = min of all values
+	last = last of new values
 
 ### Data Query methods
 
 	all = all stored data
-	new = only last new data
+	new = only new data
 
 ### Trigger methods
 	
-	threshold = triggered when the value is above a threshold. threshold value must be defined. (threshold": "{number}")
+	threshold = triggered when the value is above a threshold. threshold value must be defined. ("threshold": "{number}")
+	diffRadius = triggered when there is a the last new value `y` and the last sent value `x` do comply the inequattion `|y - x| > {number} / 100 * x` where `{number}` is the defined value in configuration ("diffRadius": "{number}"). Default 10%.
 
 
 Running Tests
