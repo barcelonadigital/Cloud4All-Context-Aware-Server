@@ -63,29 +63,8 @@ app.envConfig = envConfig;
 app.logmessage = console.log;
 module.exports = app;
 
-// here we load de routes 
-var sensor = require('./routes/sensor')
-  , config = require('./routes/config')
-  , site = require('./routes/site');
-
-// General
-app.get('/', site.index);
-
-// Api:sensors
-app.get('/sensors/:id', sensor.get);
-app.get('/sensors', sensor.search);
-app.get('/sensors/:id/data', sensor.getData);
-app.post('/sensors', sensor.post);
-app.post('/sensors/:id', sensor.update);
-app.post('/sensors/:id/data', sensor.postData);
-
-// Api:config
-app.get('/configs/:id', config.get);
-app.get('/configs/:id/:key', config.getValue);
-app.post('/configs', config.post);
-app.post('/configs/:id', config.update);
-app.post('/configs/:id/:key', config.updateValue);
-
+// Bootstrap routes
+require('./config/routes')(app)
 
 http.createServer(app).listen(port, function(){
   console.log("Server listening on port " + port + ' in "' + app.settings.env + '" mode');

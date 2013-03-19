@@ -1,0 +1,24 @@
+{
+	"gps": "[111,222,333]",
+  	"profile": {
+  		"preferences": {
+  			"display": {
+  				"screenEnhancement": {
+  					"magnification": 2,
+  					"tracking": "mouse",
+                	"applications": [
+                		{
+                			"name": "GNOME Shell Magnifier",
+                			"id": "org.gnome.desktop.a11y.magnifier",
+                 			"priority": 100,
+                 			"parameters": {
+                 				"show-cross-hairs": true
+                 			}
+                 		}
+                 	]
+                }
+            }
+        }
+    },
+  	"uuid": "e8f00a38-92a2-473b-b3db-2dfe6d326bc5"
+}

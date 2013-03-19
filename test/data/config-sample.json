@@ -16,7 +16,8 @@
 		"triggers.onNewUser.threshold": "15",
 		"receiver.host": "localhost",
 		"receiver.port": "8889",
-		"receiver.path": "/receiver"
+		"receiver.path": "/receiver",
+		"user.location.nearness": "3"
 	},
 	"sensor:1" : {
 		"id": "sensor:1",
@@ -37,6 +38,10 @@
 	},
 	"user:1" : {
 		"id": "user:1",
-		"location.nearness": "3"
+		"user.location.nearness": "5",
+		"triggers.onNewUser.data": "nearness",
+		"triggers.onNewUser.aggregation": "mean",
+		"triggers.onNewUser.trigger": "threshold",
+		"triggers.onNewUser.threshold": "15"
 	}
 }

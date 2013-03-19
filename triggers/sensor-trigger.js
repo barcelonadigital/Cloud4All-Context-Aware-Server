@@ -1,10 +1,10 @@
 var util = require('util')
   , http = require('http')
   , querystring = require('querystring')
+  , events = require('events')
   , app = require('../app')
   , utils = require('../utils/utils')
-  , events = require('events')
-  , agg = require('./aggregation')
+  , agg = require('../utils/aggregation')
   , CacheRedis = require('../managers/cache-redis').CacheRedis;
 
 function SensorTrigger(sensorClass, configClass) {
@@ -37,7 +37,7 @@ SensorTrigger.prototype.getSensorConfig = function (sensor, trigger) {
     , sensorKeyId = that.sensorClass.entityName + ':' + sensor
     , baseKeyId = "base";
 
-  that.trigger = trigger;
+  that.trigger = trigger || "onNewData";
   that.id = sensor;
 
   var callBack = function (config) {

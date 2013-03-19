@@ -13,11 +13,17 @@ var app = require('../app')
   , configClass = {'entityName': 'config'};
 
 describe('Sensor API', function () {
-  before(function (){
+  before(function (done){
     console.log("\n\nTESTING SENSOR API\n") 
+    app.redisClient.flushall();
+
+    cache.postItem(configClass, config_sample["base"], function () {
+      cache.postItem(configClass, config_sample["sensor:1"], function (err){
+        done();
+      })
+    })
   });
 
-  app.redisClient.flushall();
   it('saves a new sensor', function (done) {
     request(app)
       .post('/sensors')

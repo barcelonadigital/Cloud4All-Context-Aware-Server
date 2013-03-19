@@ -12,7 +12,7 @@
 
 
 var app = require('../app') 
-  , trigger = require('../utils/triggers')
+  , trigger = require('../triggers/sensor-trigger')
   , CacheRedis = require('../managers/cache-redis').CacheRedis
   , cache = new CacheRedis(
       app.redisClient, 
@@ -67,7 +67,7 @@ exports.post = function (req, res, next) {
     if (err) {
       next(err);
     } else {
-      e.emit("new-sensor", item.id);
+      e.emit("onNewSensor", item.id);
       res.send(item);
     }
   })
