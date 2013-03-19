@@ -65,6 +65,7 @@ exports.post = function (req, res, next) {
   var item = req.body
       , e = new trigger.UserTrigger();
 
+
   item.profile = JSON.stringify(item.profile);
 
   cache.postItem(userClass, item, function (err, item) {
@@ -72,7 +73,6 @@ exports.post = function (req, res, next) {
       next(err);
     } else {
       e.emit("onNewUser", item.id, "onNewUser");
-      console.log(item);
       item.profile = JSON.parse(item.profile);
       res.send(item);
     }

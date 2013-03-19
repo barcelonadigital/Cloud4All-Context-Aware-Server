@@ -31,6 +31,7 @@ describe('user API', function () {
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
         res.body.id.should.equal("1");
+        res.body.profile.preferences.display.screenEnhancement.magnification.should.equal(2)
         res.body.uuid.should.equal(user_sample.uuid);
         done();
       })
