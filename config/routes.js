@@ -5,7 +5,7 @@ var sensor = require('../routes/sensor')
   , site = require('../routes/site');
 
 
-module.exports = function(app) {
+module.exports = function (app) {
   // General
   app.get('/', site.index);
 
