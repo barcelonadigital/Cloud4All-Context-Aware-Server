@@ -12,6 +12,7 @@ var app = require('../app')
   , cache = new CacheRedis(app.redisClient, app.logmessage)
   , configClass = {'entityName': 'config'};
 
+
 describe('Sensor API', function () {
   before(function (done){
     console.log("\n\nTESTING SENSOR API\n") 

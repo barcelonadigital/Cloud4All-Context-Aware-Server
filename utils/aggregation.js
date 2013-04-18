@@ -29,10 +29,14 @@ exports.last = function (value, next) {
 }
 
 exports.aggregate = function (value, operator, next) {
+
+  // values are in temporal dataseries: (timestamp, value)
+  var isOdd = function(val, key) {return key % 2 != 0}
+
   if (value instanceof Array) {
-    operator(value.map(parseFloat), next);
+    operator(value.filter(isOdd).map(parseFloat), next);
   } else if (typeof value == "string") {
     operator(value.replace(/[^0-9.,]+/g,"").split(",")
-                  .map(parseFloat), next);
+                  .filter(isOdd).map(parseFloat), next);
   }
 }

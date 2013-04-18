@@ -225,7 +225,6 @@ CacheRedis.prototype.postData = function (itemClass, id, data, key, next) {
   * Posts new data from itemclass id
   */
 
-
   var that = this
     , dataKey = (typeof next === 'undefined') ? 'data' : key
     , cacheKeyData = itemClass.entityName + ':' + id + ':' + dataKey; 
