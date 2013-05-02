@@ -1,0 +1,18 @@
+{
+	"serial": "serial-2",
+	"_id": "51766326eda027ee15000002",
+	"gps": [1,2,3],
+	"location": "kitchen",
+	"sensors": [
+		{
+			"type": "light",
+			"devid": 1,
+			"_id": "517686388661d24a16000007"
+		},
+		{
+	      	"type": "noise",
+	      	"devid": 2,
+	      	"_id": "517686388661d24a16000006"
+	    }
+	]
+}

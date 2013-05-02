@@ -2,91 +2,49 @@ process.env.NODE_ENV = 'test';
 
 var app = require('../app')
   , request = require('supertest')
-  , sensor = require('../routes/config')
+  , sensor = require('../controllers/config')
+  , Config = require('../models/configs').Config
   , should = require('should')
-  , config_sample = require('./data/config-sample');
+  , sensor_config_sample = require('./data/sensor-config-sample')
+  , new_sensor_config_sample = require('./data/new-sensor-config-sample');
 
 describe('Config API', function () {
-  before(function (){
+  var that = this;
+
+  before(function (done){
     console.log("\n\nTESTING CONFIG API\n");
     app.redisClient.flushall();
+    Config.remove(function () {
+      that.config = new Config(sensor_config_sample);
+      that.config.save(done);
+    });
   })
 
-  it('saves a new config base system', function (done) {
-    request(app)
-      .post('/configs')
-      .set('Accept', 'application/json')
-      .send(config_sample["base"])  
-      .expect('Content-type', /json/)
-      .expect(200, done);
-  })
-
-  it('gets a config system from base', function (done) {
-    request(app)
-      .get('/configs/base')
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        res.body.should.include(config_sample["base"])
-        done();
-      });
-  })
-
-  it('updates an existing config base system', function (done) {
-    request(app)
-      .post('/configs/base')
-      .set('Accept', 'application/json')
-      .send(config_sample["base"])  
-      .expect('Content-type', /json/)
-      .expect(200, done);
-  })
-
-  it('saves a new sensor 1 config', function (done) {
+  it('saves a new sensor config', function (done) {
     request(app)
       .post('/configs/')
       .set('Accept', 'application/json')
-      .send(config_sample["sensor:1"])  
+      .send(new_sensor_config_sample)  
       .expect('Content-type', /json/)
       .expect(200, done);
   })
 
-  it('gets a config from sensor 1', function (done) {
+  it('gets a config from sensor :id', function (done) {
     request(app)
-      .get('/configs/sensor:1')
+      .get('/configs/' + sensor_config_sample._ref)
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.should.include(config_sample["sensor:1"])
+        res.body.should.include(sensor_config_sample);
         done();
       });  
   })
 
-  it('updates an existing sensor 1 config system', function (done) {
+  it('updates an existing sensor :id config system', function (done) {
     request(app)
-      .post('/configs/base')
+      .post('/configs/' + sensor_config_sample._ref)
       .set('Accept', 'application/json')
-      .send(config_sample["base"])  
+      .send(sensor_config_sample)  
       .expect('Content-type', /json/)
       .expect(200, done);
-  })
-
-  it('gets a config value from base', function (done) {
-    request(app)
-      .get('/configs/base/triggers.onNewData.data')
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        res.body.should.eql({'triggers.onNewData.data': 'new'});
-        done();
-      });
-  })
-
-  it('sets a config value', function (done) {
-    request(app)
-      .post('/configs/base/triggers.onNewData.data')
-      .set('Accept', 'application/json')
-      .send({'triggers.onNewData.data' : 'new'})
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        res.body.should.eql({'triggers.onNewData.data': 'new'});
-        done();
-      });
   })
 })

@@ -1,10 +1,5 @@
 /**
  * Receiver API routes.
-
- receiver = {
-  'id': 1,
-  'data': ["1,2,3,4,5,6"]
- }
 **/
 
 var app = require('../app');

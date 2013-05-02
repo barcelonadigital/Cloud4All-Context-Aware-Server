@@ -5,11 +5,7 @@ var app = require('../app')
   , should = require('should')
   , array_sample = [1,2,3,4,5,6]
   , string_sample = "1,2,3,4,5,6"
-  , string_noisy_sample = "([1,2,3,4,5,6])"
-  , config_sample = require('./data/config-sample')
-  , CacheRedis = require('../managers/cache-redis').CacheRedis
-  , cache = new CacheRedis(app.redisClient, app.logmessage)
-  , configClass = {'entityName': 'config'};
+  , string_noisy_sample = "([1,2,3,4,5,6])";
 
 
 describe('Aggregation API', function () {

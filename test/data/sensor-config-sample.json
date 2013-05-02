@@ -1,0 +1,26 @@
+{
+	"_ref": "517686388661d24a16000007",
+	"config": {
+		"triggers": {
+			"onNewData": {
+				"data": "new",
+				"aggregation": "sum",
+				"trigger": "threshold",
+				"threshold": "5",
+				"diffRadius": "10",
+				"triggered": "send",
+				"send": "store",
+				"store": "ack"
+			}, 
+			"scheduling": {
+				"data": "mean",
+				"time": "60"
+			}
+		},
+		"receiver": {
+			"host": "localhost",
+			"port": "8889",
+			"path": "/receiver"
+		}
+	}
+}

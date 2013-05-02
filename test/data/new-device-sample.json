@@ -1,0 +1,15 @@
+{
+	"serial": "serial-3",
+	"gps": [1,2,3],
+	"location": "kitchen",
+	"sensors": [
+		{
+		"type": "light",
+		"devid": 1
+		},
+		{
+		"type": "noise",
+		"devid": 2
+		}
+	]
+}

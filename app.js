@@ -6,12 +6,14 @@
 var express = require('express')
   , http = require('http')
   , path = require('path')
-  , redis = require('redis');
+  , redis = require('redis')
+  , mongoose = require('mongoose');
 
 var common = require('./config/common')
   , envConfig = common.config()
   , CFG_SERVER = envConfig.server
   , CFG_STORE_REDIS = envConfig.storeRedis
+  , CFG_STORE_MONGO = envConfig.storeMongo
   , port = process.env.PORT || CFG_SERVER.port 
   , forks = process.env.FORKS || CFG_SERVER.forks;
 
@@ -40,7 +42,7 @@ if ('test' == app.get('env')) {
 
 // testing and development only
 if ('test' || 'development' == app.get('env')) {
-  var receiver = require('./routes/receiver')
+  var receiver = require('./controllers/receiver')
     , testPort = envConfig.receiver.port;
 
   // Api: post from CAS - testing purposes
@@ -57,6 +59,12 @@ app.redisClient = redis.createClient(
   CFG_STORE_REDIS.host
 )
 app.redisClient.select(CFG_STORE_REDIS.dbname);
+
+// Start mongodb connection
+app.mongoClient = mongoose.connect(
+  CFG_STORE_MONGO.host, 
+  CFG_STORE_MONGO.dbname
+)
 
 // Add other stuff to app
 app.envConfig = envConfig;

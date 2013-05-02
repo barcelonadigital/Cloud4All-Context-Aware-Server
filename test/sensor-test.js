@@ -2,113 +2,39 @@ process.env.NODE_ENV = 'test';
 
 var app = require('../app')
   , request = require('supertest')
-  , sensor = require('../routes/sensor')
+  , sensor = require('../controllers/sensor')
+  , device = require('../controllers/device')
   , should = require('should')
-  , sensor_sample = require('./data/sensor-sample-uuid') 
-  , sensor_sample_no_uuid = require('./data/sensor-sample-no-uuid')
+  , device_sample = require('./data/device-sample') 
   , sensor_sample_data = require('./data/sensor-sample-data')
-  , config_sample = require('./data/config-sample')
+  , Device = require('../models/devices').Device
   , CacheRedis = require('../managers/cache-redis').CacheRedis
   , cache = new CacheRedis(app.redisClient, app.logmessage)
   , configClass = {'entityName': 'config'};
 
 
 describe('Sensor API', function () {
+  var that = this;
+
   before(function (done){
     console.log("\n\nTESTING SENSOR API\n") 
     app.redisClient.flushall();
 
-    cache.postItem(configClass, config_sample["base"], function () {
-      cache.postItem(configClass, config_sample["sensor:1"], function (err){
-        done();
+    Device.remove(function () {
+      Device.fullSave(device_sample, function(err, item) {
+        that.device = new Device(item);
+        that.device.populate('sensors', function(err, item) {
+          that.device = item;
+          that.sensor = that.device.sensors[0];
+          done();
+        })
       })
     })
-  });
-
-  it('saves a new sensor', function (done) {
-    request(app)
-      .post('/sensors')
-      .set('Accept', 'application/json')
-      .send(sensor_sample)  
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        res.body.id.should.equal("1");
-        res.body.uuid.should.equal(sensor_sample.uuid);
-        done();
-      })
-  })
-
-  it('Throws exception when saving new sensor with same uuid', function (done) {
-    request(app)
-      .post('/sensors')
-      .set('Accept', 'application/json')
-      .send(sensor_sample)  
-      .expect('Content-type', /json/)
-      .expect(500, done);
-  })
-
-  it('It admits new sensor without uuid', function (done) {
-    request(app)
-      .post('/sensors')
-      .set('Accept', 'application/json')
-      .send(sensor_sample_no_uuid)  
-      .expect('Content-type', /json/)
-      .expect(200, done);
-  })
-
-  it('updates a sensor', function (done) {
-    request(app)
-      .post('/sensors/1')
-      .set('Accept', 'application/json')
-      .send(sensor_sample)  
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        res.body.id.should.equal("1");
-        res.body.uuid.should.equal(sensor_sample.uuid);
-        done();
-      })
-  })
-
-  it('gets a sensor', function (done) {
-    request(app)
-      .get('/sensors/1')
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        if (err) {
-          console.log(err);
-        } else {
-          res.body.uuid.should.equal(sensor_sample.uuid);
-          res.body.type.should.equal(sensor_sample.type);
-        }
-        done();
-      })
-  })
-
-  it('search a sensor using uuid', function (done) {
-    request(app)
-      .get('/sensors?uuid=' + sensor_sample.uuid)
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        if (err) {
-          console.log(err);
-        } else {
-          res.body.uuid.should.equal(sensor_sample.uuid);
-          res.body.type.should.equal(sensor_sample.type);
-        }
-        done();
-      })
-  })
-
-  it('gets a wrong sensor. Handles 404 error', function (done) {
-    request(app)
-      .get('/sensors/wrong-sensor')
-      .expect('Content-type', 'text/plain')
-      .expect(404, done);
   })
 
   it('saves a new data to sensor :id', function (done) {
     request(app)
-      .post('/sensors/1/data')
+      .post('/sensors/' + that.sensor.id + '/data')
       .set('Accept', 'application/json')
       .send(sensor_sample_data) 
       .expect(200, done);
@@ -116,7 +42,7 @@ describe('Sensor API', function () {
 
   it('saves again new data to sensor :id', function (done) {
     request(app)
-      .post('/sensors/1/data')
+      .post('/sensors/' + that.sensor.id + '/data')
       .set('Accept', 'application/json')
       .send(sensor_sample_data) 
       .expect(200, done);
@@ -124,7 +50,7 @@ describe('Sensor API', function () {
   
   it('gets all data from sensor id', function (done) {
     request(app)
-      .get('/sensors/1/data')
+      .get('/sensors/' + that.sensor.id + '/data')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
         res.body.data.should.equal(
@@ -135,7 +61,7 @@ describe('Sensor API', function () {
 
   it('gets all data from sensor id', function (done) {
     request(app)
-      .get('/sensors/1/data?q=all')
+      .get('/sensors/' + that.sensor.id + '/data?q=all')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
         res.body.data.should.equal(
@@ -146,7 +72,7 @@ describe('Sensor API', function () {
 
   it('gets new data from sensor id', function (done) {
     request(app)
-      .get('/sensors/1/data?q=new')
+      .get('/sensors/' + that.sensor.id + '/data?q=new')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
         res.body.data.should.equal(sensor_sample_data.join(','));
@@ -154,4 +80,3 @@ describe('Sensor API', function () {
       })
   })
 })
-
