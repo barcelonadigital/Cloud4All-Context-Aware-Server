@@ -15,28 +15,28 @@ describe('Aggregation API', function () {
 
   it('sums an array', function (done) {
     agg.aggregate(array_sample, agg.sum, function (res){
-      res.should.equal(12);
+      res[1].should.equal(12);
       done();
     })
   })
 
   it('sums a string', function (done) {
     agg.aggregate(string_sample, agg.sum, function (res){
-      res.should.equal(12);
+      res[1].should.equal(12);
       done();
     })
   })
 
   it('sums a noisy string', function (done) {
     agg.aggregate(string_noisy_sample, agg.sum, function (res){
-      res.should.equal(12);
+      res[1].should.equal(12);
       done();
     })
   })
   
   it('means of a noisy string', function (done) {
     agg.aggregate(array_sample, agg.mean, function (res){
-      res.should.equal(4);
+      res[1].should.equal(4);
       done();
     })
   })

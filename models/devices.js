@@ -10,23 +10,31 @@ var mongoose = require('mongoose')
 
 var DataSchema = new Schema({
   _sensor: {type: Schema.ObjectId, ref: 'Sensor'},
-  timestamp: Date,
+  timestamp: {type: Date, default: Date.now},
   data: Number
 })
+
+DataSchema.statics.getLast = function (sensorId, cb) {
+  this
+    .find({'_sensor': sensorId})
+    .sort('-timestamp')
+    .limit(1)
+    .exec(cb);
+}
 
 var SensorSchema = new Schema({
   devid: String,
   type: String,
 })
 
-SensorSchema.methods.getConfig = function(cb) {
+SensorSchema.methods.getConfig = function (cb) {
   Config.findByRef(this.id, cb);
 }
 
-SensorSchema.pre('save', function(next) {
+SensorSchema.pre('save', function (next) {
   // create default sensor-config
   var id = this.id;
-  Config.findByRef(id, function(err, item) {
+  Config.findByRef(id, function (err, item) {
     if (!item) {
       var config = new Config({_ref: id});
       config.save();
@@ -42,7 +50,7 @@ var DeviceSchema = new Schema({
   sensors:[{type: Schema.ObjectId, ref: "Sensor"}]
 })
 
-DeviceSchema.statics.fullSave = function(data, cb) {
+DeviceSchema.statics.fullSave = function (data, cb) {
   var tasks = [];
   for (var i = 0; i < data.sensors.length; i++) {
     tasks.push(
@@ -56,7 +64,7 @@ DeviceSchema.statics.fullSave = function(data, cb) {
   }
 
   async.parallel(tasks, function (err, results) {
-    data.sensors = results.map(function(el) {return el[0]._id});
+    data.sensors = results.map(function (el) {return el[0]._id});
     var device = new Device(data);
     device.save(cb);
   })
@@ -81,7 +89,7 @@ DeviceSchema.statics.updateById = function (id, item, cb) {
             sensor.devid = item.sensors[i].devid;
             sensor.save();
           } else {
-            new Sensor(item.sensors[sensor]).save(function(err, sensor) {
+            new Sensor(item.sensors[sensor]).save(function (err, sensor) {
               device.sensors.push(sensor.id);
             })
           }

@@ -13,20 +13,20 @@ var UserSchema = new Schema({
   profile: {type: Schema.Types.Mixed}
 })
 
-UserSchema.methods.getConfig = function(cb) {
+UserSchema.methods.getConfig = function (cb) {
   var that = this;
   Config.findByRef(that.id, function (err, item) {
   });
 }
 
-UserSchema.statics.findByUuid = function(uuid, cb) {
+UserSchema.statics.findByUuid = function (uuid, cb) {
   this.findOne({uuid: uuid}, cb);
 }
 
-UserSchema.pre('save', function(done) {
+UserSchema.pre('save', function (done) {
   // create default user-config
   var that = this;
-  Config.findByRef(that.id, function(err, config) {
+  Config.findByRef(that.id, function (err, config) {
     if (!config) {
       new Config({
         _ref: that.id,

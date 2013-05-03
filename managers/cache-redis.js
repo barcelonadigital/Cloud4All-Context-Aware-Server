@@ -232,14 +232,8 @@ CacheRedis.prototype.postData = function (itemClass, id, data, key, next) {
   next = (typeof next === 'undefined') ? key : next;
 
   that.log("cache postData(): key = " + cacheKeyData);
-  that.getItem(itemClass, id, function (err, reply){
-    if (err) {
-      next(err);
-    } else {
-      that.connection.rpush(cacheKeyData, data, function (err) {
-        next(err);
-      })
-    }
+  that.connection.rpush(cacheKeyData, data, function (err) {
+    next(err);
   })
 }
 
@@ -257,14 +251,8 @@ CacheRedis.prototype.getData = function (itemClass, id, start, end, key, next) {
   next = (typeof next === 'undefined') ? key : next;
 
   that.log("cache getData(): id = " + id);
-  that.getItem(itemClass, id, function (err, reply) {
-    if (err) {
-      next(err);
-    } else {
-      that.connection.lrange(cacheKeyData, start, end, function (err, reply) {
-        next(err, reply.join(','));
-      })
-    }
+  that.connection.lrange(cacheKeyData, start, end, function (err, reply) {
+    next(err, reply.join(','));
   })
 }
 

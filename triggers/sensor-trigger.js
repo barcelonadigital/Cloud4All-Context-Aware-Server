@@ -6,6 +6,7 @@ var util = require('util')
   , utils = require('../utils/utils')
   , agg = require('../utils/aggregation')
   , Config = require('../models/configs').Config
+  , Data = require('../models/devices').Data
   , CacheRedis = require('../managers/cache-redis').CacheRedis;
 
 function SensorTrigger(sensorClass, configClass) {
@@ -99,7 +100,7 @@ SensorTrigger.prototype.threshold = function (data, res) {
   var that = this
     , threshold = that.config.threshold || "0";
 
-  if (threshold < res) {
+  if (threshold < res[1]) {
     that.emit(that.config.triggered, data);
   } else {
     that.emit("nonTriggered", threshold, res, data);
@@ -113,18 +114,16 @@ SensorTrigger.prototype.diffRadius = function (data, res) {
     , topThreshold = 1 + threshold / 100
     , bottomThreshold = 1 - threshold / 100;
 
-
-  that.cache.getNewData(that.sensorClass, that.id, that.dataKey, function (err, reply) {
-    if (err) {
+  Data.getLast(that.id, function(err, reply) {
+    if (reply) {
+      var res = [reply[0].timestamp, reply[0].data];
+      if (last[1] < bottomThreshold * res[1] || last[1] > topThreshold * res[1]) {
+        that.emit(that.config.triggered, last);
+      } else {
+        that.emit("nonTriggered", threshold, res, last);
+      }
+    } else if (err) {
       that.emit("error", err);
-    } else {
-      agg.aggregate(reply, agg.last, function (res){
-        if (last < bottomThreshold * res || last > topThreshold * res) {
-          that.emit(that.config.triggered, last);
-        } else {
-          that.emit("nonTriggered", threshold, res, last);
-        }
-      })
     }
   })
 }
@@ -160,9 +159,22 @@ SensorTrigger.prototype.sendData = function (data) {
 }
 
 SensorTrigger.prototype.storeData = function (data) {
+  // store data to mongodb
   var that = this
+    , dataSeries = data instanceof Array ? data : data.split(',')
+    , mongoSeries = [];
 
-  that.cache.postData(that.sensorClass, that.id, data, that.dataKey, function (err, item) {
+  dataSeries = dataSeries.map(parseFloat);
+
+  for (var i = 0; i < dataSeries.length; i+=2) {
+    mongoSeries.push({
+      '_sensor': that.id,
+      'timestamp': dataSeries[i], 
+      'data': dataSeries[i+1]
+    })
+  }
+
+  Data.create(mongoSeries, function (err) {
     if (err) {
       that.emit("error", err);
     } else {

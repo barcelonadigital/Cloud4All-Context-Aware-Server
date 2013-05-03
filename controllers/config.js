@@ -22,7 +22,7 @@ exports.get = function (req, res, next) {
   **/
   var id = req.params.id;
 
-  Config.findByRef(id, function(err, item) {
+  Config.findByRef(id, function (err, item) {
     if (err) {
       next(err);
     } else if (item) {

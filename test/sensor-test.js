@@ -21,9 +21,9 @@ describe('Sensor API', function () {
     app.redisClient.flushall();
 
     Device.remove(function () {
-      Device.fullSave(device_sample, function(err, item) {
+      Device.fullSave(device_sample, function (err, item) {
         that.device = new Device(item);
-        that.device.populate('sensors', function(err, item) {
+        that.device.populate('sensors', function (err, item) {
           that.device = item;
           that.sensor = that.device.sensors[0];
           done();

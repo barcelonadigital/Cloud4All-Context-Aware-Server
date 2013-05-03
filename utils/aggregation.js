@@ -5,38 +5,61 @@
 var  _ = require('underscore');
 
 
-exports.sum = function (value, next) {
+exports.sum = function (value, timestamp, next) {
   var res = value.reduce(function (prev, cur){return prev + cur;});
-  next(res);
+  next([null, res]);
 } 
 
-exports.mean = function (value, next) {
-  exports.sum(value, function (res){
-    next(res / value.length);
+exports.mean = function (value, timestamp, next) {
+  exports.sum(value, timestamp, function (res){
+    next([null, res[1] / value.length]);
   })
 }
 
-exports.max = function (value, next) {
-  next(_.max(value));
+exports.max = function (value, timestamp, next) {
+  var max = value[0]
+    , index = 0;
+
+  value.forEach(function (el, ind) {
+    if (max < el) {
+      max = el;
+      index = ind;
+    }
+  })
+  next([timestamp[index], max]);
 }
 
-exports.min = function (value, next) {
-  next(_.min(value));
+exports.min = function (value, timestamp, next) {
+  var min = value[0]
+    , index = 0;
+
+  value.forEach(function (el, ind) {
+    if (min > el) {
+      min = el;
+      index = ind;
+    }
+  })
+  next([timestamp[index], min]);
 }
 
-exports.last = function (value, next) {
-  next(_.last(value));
+exports.last = function (value, timestamp, next) {
+  next([_.last(timestamp), _.last(value)]);
 }
 
 exports.aggregate = function (value, operator, next) {
-
   // values are in temporal dataseries: (timestamp, value)
-  var isOdd = function(val, key) {return key % 2 != 0}
+  var isOdd = function (val, key) {return key % 2 != 0}
+    , isEven = function (val, key) {return key % 2 == 0}
+    , array;
 
   if (value instanceof Array) {
-    operator(value.filter(isOdd).map(parseFloat), next);
+    array = value;
   } else if (typeof value == "string") {
-    operator(value.replace(/[^0-9.,]+/g,"").split(",")
-                  .filter(isOdd).map(parseFloat), next);
+    array = value.replace(/[^0-9.,]+/g,"").split(",");
   }
+  operator(
+    array.filter(isOdd).map(parseFloat), 
+    array.filter(isEven).map(parseFloat), 
+    next
+  );
 }
