@@ -4,7 +4,7 @@ Cloud4All---Context-Aware-Server
 Description
 -----------
 
-The Context Aware Server (CAS) developed in NodeJs provides a platform that collects, stores and process the data from sensors and when some triggers are fired it sends the processed data to a client in json format.
+The Context Aware Server (CAS) developed in NodeJs provides a platform that collects, stores and process the data from sensors and when some triggers are fired it sends the processed data to a client in json format. Configuration, Sensors and Users are stored in MongoDb and new data is cached in Redis and it can be eventually saved to MongoDb depending on configuration.
 
 
 License
@@ -21,7 +21,7 @@ Download de zip file and uncompress it.
 	cd Cloud4All---Context-Aware-Server-master
 	npm install
 
-It will install all needed packages that can be found in package.json file. Aftwards, you need to install Redis database. In ubuntu/debian
+It will install all needed packages that can be found in package.json file. Aftwards, you need to install Redis and Mongo databases. In ubuntu/debian
 
 	$ apt-get install redis-server
 
@@ -54,64 +54,43 @@ curl http://localhost:8888/sensors/1/data
 Setup
 -----
 
-CAS can be configured using a Restful API. To setup a new base configuration, send a POST request to /configs/
+CAS can be configured using a Restful API. To setup a new user or sensor configuration, send a POST request to /configs/ where _ref indicates the :id of the user or sensor.
 
 ```json
-{		
-	"id": "base",
-	"triggers.onNewData.data": "all",
-	"triggers.onNewData.aggregation": "max",
-	"triggers.onNewData.trigger": "threshold",
-	"triggers.onNewData.threshold": "3",
-	"triggers.onNewData.diffRadius": "10",
-	"triggers.onNewData.triggered": "send",
-	"triggers.onNewData.send": "store",
-	"triggers.onNewData.store": "ack",
-	"triggers.scheduling.data": "mean",
-	"triggers.scheduling.time": "60",
-	"triggers.onNewUser.data": "all",
-	"triggers.onNewUser.aggregation": "mean",
-	"triggers.onNewUser.trigger": "threshold",
-	"triggers.onNewUser.threshold": "15",
-	"receiver.host": "localhost",
-	"receiver.port": "8889",
-	"receiver.path": "/receiver"
+{
+	"_ref": "517686388661d24a16000006",
+	"config": {
+		"triggers": {
+			"onNewData": {
+				"data": "new",
+				"aggregation": "sum",
+				"trigger": "threshold",
+				"threshold": "5",
+				"diffRadius": "10",
+				"triggered": "send",
+				"send": "store",
+				"store": "ack"
+			}, 
+			"scheduling": {
+				"data": "mean",
+				"time": "60"
+			}
+		},
+		"receiver": {
+			"host": "localhost",
+			"port": "8889",
+			"path": "/receiver"
+		}
+	}
 }
 ```
 
-You can also setup a new device configuration sending a POST request to /configs/ and replacing id key to an **existing** sensor:id id.
+Updating the configuration is possible sending a POST request to /configs/:id where id is the id of the sensor or user.
 
-```json
-{		
-	"id": "sensor:1",
-	"triggers.onNewData.data" : "all",
-	"triggers.onNewData.aggregation": "sum",
-	"triggers.onNewData.trigger": "threshold",
-	"triggers.onNewData.threshold": "15",
-	"triggers.onNewData.diffRadius": "10",
-	"triggers.onNewData.triggered": "send",
-	"triggers.onNewData.send": "store",
-	"triggers.onNewData.store": "ack",
-	"triggers.scheduling.data": "mean",
-	"triggers.scheduling.time": "60",
-	"receiver.host": "localhost",
-	"receiver.port": "8889",
-	"receiver.path": "/receiver"
-} 
-```
+Finally, you can also get a specific config system. Use GET to retrieve the value from key config parameter from id configuration:
 
-Updating the configuration is possible sending a POST request to /configs/:id where id can be "base" or "sensor:1" respectivelly.
+	GET /configs/:id
 
-Finally, you can also update and get specific values from a specific config system. Use GET to retrieve the value from key config parameter from id configuration:
-
-	GET /configs/:id/:key
-
-You will retrieve a json data with {key:value} format. You can also update a specific value using POST:
-
-	POST /configs/:id/
-	body = {
-		"triggers.onNewData.data" : "raw"
-	}
 
 Triggering System
 -----------------
