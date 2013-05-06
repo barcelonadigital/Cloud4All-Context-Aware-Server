@@ -3,11 +3,13 @@ process.env.NODE_ENV = 'test';
 var app = require('../app')
   , request = require('supertest')
   , sensor = require('../controllers/sensor')
+  , async = require('async')
   , device = require('../controllers/device')
   , should = require('should')
   , device_sample = require('./data/device-sample') 
   , sensor_sample_data = require('./data/sensor-sample-data')
   , Device = require('../models/devices').Device
+  , Sensor = require('../models/devices').Sensor
   , CacheRedis = require('../managers/cache-redis').CacheRedis
   , cache = new CacheRedis(app.redisClient, app.logmessage)
   , configClass = {'entityName': 'config'};
@@ -20,16 +22,27 @@ describe('Sensor API', function () {
     console.log("\n\nTESTING SENSOR API\n") 
     app.redisClient.flushall();
 
-    Device.remove(function () {
-      Device.fullSave(device_sample, function (err, item) {
-        that.device = new Device(item);
-        that.device.populate('sensors', function (err, item) {
-          that.device = item;
-          that.sensor = that.device.sensors[0];
-          done();
-        })
-      })
-    })
+    async.waterfall([
+      function (callback) {
+        Sensor.remove(callback);
+      },
+      function (item, callback) {
+        Device.remove(callback);
+      },
+      function (item, callback) {
+        Device.fullSave(device_sample, callback);
+      },
+      function (item, callback) {
+        var device = new Device(item);
+        device.populate('sensors', callback);
+      }, 
+      function (item, callback) {
+        that.device = item;
+        that.sensor = that.device.sensors[0];
+        callback(null);
+      }], 
+      done
+    )
   })
 
   it('saves a new data to sensor :id', function (done) {

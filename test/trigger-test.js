@@ -4,15 +4,17 @@ var app = require('../app')
   , request = require('supertest')
   , should = require('should')
   , trigger = require('../triggers/sensor-trigger')
+  , async = require('async')
   , device_sample = require('./data/device-sample') 
   , sensor_sample_data = require('./data/sensor-sample-data')
   , Device = require('../models/devices').Device
+  , Sensor = require('../models/devices').Sensor
   , Data = require('../models/devices').Data
   , Config = require('../models/configs').Config
   , CacheRedis = require('../managers/cache-redis').CacheRedis
   , cache = new CacheRedis(app.redisClient, app.logmessage)
   , sensorClass= {'entityName': 'sensor'}
-  , e = new trigger.SensorTrigger();
+  , e;
 
 describe('Trigger system API', function () {
   var that = this;
@@ -22,27 +24,38 @@ describe('Trigger system API', function () {
     console.log("\n\nTESTING TRIGGER SYSTEM\n") 
     app.redisClient.flushall();
 
-    var callback = function () {
-      Device.fullSave(device_sample, function (err, item) {
-        that.device = new Device(item);
-        that.device.populate('sensors', function (err, item) {
-          that.device = item;
-          that.sensor = that.device.sensors[0];
-          Config.findByRef(that.sensor.id, function (err, item) {
-            that.config = item;
-            cache.postData(sensorClass, that.sensor.id, sensor_sample_data, function (err) {
-              done();
-            })
-          })
-        })
-      })
-    }
-
-    Data.remove(function () {
-      Device.remove(function () {
-        callback();
-      })
-    })
+    async.waterfall([
+      function (callback) {
+        Data.remove(callback);
+      },
+      function (item, callback) {
+        Sensor.remove(callback);
+      },
+      function (item, callback) {
+        Device.remove(callback);
+      },
+      function (item, callback) {
+        Device.fullSave(device_sample, callback);
+      },
+      function (item, callback) {
+        var device = new Device(item);
+        device.populate('sensors', callback);
+      }, 
+      function (item, callback) {
+        that.device = item;
+        that.sensor = that.device.sensors[0];
+        e = new trigger.SensorTrigger(that.sensor);
+        callback(null);
+      },
+      function (callback) {
+        Config.findByRef(that.sensor.id, callback)
+      },
+      function (item, callback) {
+        that.config = item;
+        cache.postData(sensorClass, that.sensor.id, sensor_sample_data, callback);
+      }], 
+      done
+    )
   })
 
   afterEach(function (done)  {
@@ -56,19 +69,19 @@ describe('Trigger system API', function () {
 
   it('emits onNewData from sensor :id', function (done) {
 
-    e.emit("onNewData", that.sensor.id, "onNewData");  
-    e.once("store", function (data) {
-      data.should.equal(sensor_sample_data.join(','));
+    e.emit("onNewData");  
+    e.once("store", function () {
+      e.data.should.equal(sensor_sample_data.join(','));
       done();
     })
   })
 
   it('changes config and emits onNewData', function (done) {
     that.config.config.triggers.onNewData.threshold = "15";
-    Config.updateByRef(that.sensor.id, that.config, function (err, item) {
-      e.emit("onNewData", that.sensor.id, "onNewData");  
-      e.once("nonTriggered", function (threshold, res, data) {
-        res.should.be.below(threshold);
+    Config.updateByRef(that.sensor, that.config, function (err, item) {
+      e.emit("onNewData");  
+      e.once("nonTriggered", function () {
+        e.result.should.be.below(that.config.config.triggers.onNewData.threshold);
         done();
       })
     })
@@ -76,9 +89,9 @@ describe('Trigger system API', function () {
 
   it('sends new data to sensor and emits onNewData', function (done) {
     cache.postData(sensorClass, that.sensor.id, sensor_sample_data, function () {
-      e.emit("onNewData", that.sensor.id, "onNewData");  
+      e.emit("onNewData");  
       e.once("store", function (data) {
-        data.should.equal([sensor_sample_data].join(','));
+        e.data.should.equal([sensor_sample_data].join(','));
         done();
       })
     })
@@ -86,9 +99,9 @@ describe('Trigger system API', function () {
 
   it('sends new data to sensor and checks stored data', function (done) {
     cache.postData(sensorClass, that.sensor.id, sensor_sample_data, function () {
-      e.emit("onNewData", that.sensor.id, "onNewData");  
+      e.emit("onNewData");  
       e.once("ack", function () {
-        Data.find({'_sensor': that.sensor.id}, function (err, item) {
+        Data.find({'_sensor': that.sensor}, function (err, item) {
           done();
         })
       })
@@ -101,11 +114,10 @@ describe('Trigger system API', function () {
 
     e.config.diffRadius = "10";
     e.config.triggered = "send";
-    e.id = that.sensor.id;
+    e.sensor = that.sensor;
 
-    e.emit("diffRadius", data, res);  
-    e.once("send", function (reply) {
-      reply.should.equal(res);
+    e.emit("diffRadius");  
+    e.once("send", function () {
       done();
     })
   })
@@ -116,11 +128,11 @@ describe('Trigger system API', function () {
 
     e.config.diffRadius = "10";
     e.config.triggered = "send";
-    e.id = that.sensor.id;
+    e.sensor = that.sensor;
+    e.result = res;
 
-    e.emit("diffRadius", data, res);  
-    e.once("nonTriggered", function (threshold, oldres, data) {
-      data.should.equal(res);
+    e.emit("diffRadius");  
+    e.once("nonTriggered", function () {
       done();
     })
   })

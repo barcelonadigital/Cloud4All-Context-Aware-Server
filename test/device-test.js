@@ -2,30 +2,113 @@ process.env.NODE_ENV = 'test';
 
 var app = require('../app')
   , request = require('supertest')
+  , async = require('async')
   , should = require('should')
   , Device = require('../models/devices').Device
+  , Sensor = require('../models/devices').Sensor
   , device_sample = require('./data/device-sample') 
   , new_device_sample = require('./data/new-device-sample') 
   , device_sample_id = require('./data/device-sample-id');
 
 
+describe('Device Model', function () {
+  var that = this;
+
+  that.cleanDatabase = function (done) {
+    async.waterfall([
+      function (callback) {
+        Sensor.remove(callback);
+      },
+      function (item, callback) {
+        Device.remove(callback);
+      }],
+      done
+    )
+  }
+
+  before(function (done) {
+    app.redisClient.flushall();
+    console.log("\n\nTESTING DEVICE MODEL\n");
+    done();
+  })
+
+  beforeEach(function (done) {
+    that.cleanDatabase(done);
+  })
+
+  it('saves a device', function (done) {
+    Device.fullSave(device_sample, function (err, item) {
+      item.serial.should.equal(device_sample.serial);
+      item.populate('sensors', function (err, item) {
+        item.sensors[0].should.have.property("devid");
+        item.sensors[0].should.have.property("type");
+        done();
+      })
+    })
+  })
+
+  it('removes a device and its sensors', function (done) {
+    Device.fullSave(device_sample, function (err, device) {
+      Sensor.find({}, function (err, sensors) {
+        sensors.should.not.be.empty;
+        device.remove(function (err) {
+          Sensor.find({maxDistance:10}, function (err, sensors) {
+            sensors.should.be.empty;
+            done();
+          })
+        })
+      })
+    })
+  })
+
+  it('checks nearby function', function (done) {
+    Device.fullSave(device_sample, function (err, device) {
+      var gps = [2.197212, 41.402423];
+      Device.findNear({gps:gps}, function (err, item) {
+        item.should.not.be.empty;
+        done();
+      })
+    })
+  })
+
+  it('checks max distance nearby function', function (done) {
+    Device.fullSave(device_sample, function (err, device) {
+      var gps = [2.197212, 41.402423];
+      Device.findNear({gps:gps, maxDistance:0.01}, function (err, item) {
+        item.should.be.empty;
+        done();
+      })
+    })
+  })
+})
+
 describe('Device API', function () {
   var that = this;
 
-  before(function (done){
+  before(function (done) {
     console.log("\n\nTESTING DEVICE API\n") 
     app.redisClient.flushall();
-
-    Device.remove(function () {
-      Device.fullSave(device_sample, function (err, item) {
+    async.waterfall([
+      function (callback) {
+        Sensor.remove(callback);
+      },
+      function (item, callback) {
+        Device.remove(callback);
+      },
+      function (item, callback) {
+        Device.fullSave(device_sample, callback);
+      },
+      function (item, callback) {
         var device = new Device(item);
-        device.populate('sensors', function (err, item) {
-          that.device = item;
-          done();
-        });
-      });
-    });
-  });
+        device.populate('sensors', callback);
+      }, 
+      function (item, callback) {
+        that.device = item;
+        callback(null);
+      }], 
+      done
+    )
+  })
 
   it('saves a new device', function (done) {
     request(app)

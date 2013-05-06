@@ -31,6 +31,10 @@ SensorSchema.methods.getConfig = function (cb) {
   Config.findByRef(this.id, cb);
 }
 
+SensorSchema.methods.getDevice = function (cb) {
+  Device.findOne({"sensors": this.id}, cb);
+}
+
 SensorSchema.pre('save', function (next) {
   // create default sensor-config
   var id = this.id;
@@ -45,13 +49,33 @@ SensorSchema.pre('save', function (next) {
 
 var DeviceSchema = new Schema({
   serial: {type: String, unique: true},
-  gps: [Number],
+  gps: {type: [Number], index: '2dsphere'},
   location: String,
   sensors:[{type: Schema.ObjectId, ref: "Sensor"}]
 })
 
+DeviceSchema.pre('remove', function (next) {
+  Sensor.remove(this.sensors, next);
+})
+
+DeviceSchema.statics.findNear = function(params, cb) {
+  var km = 111.12;
+
+  params.gps = params.gps;
+  params.maxDistance = params.maxDistance || 1;
+
+  this
+    .model('Device')
+    .find({gps: {
+      $near: params.gps, 
+      $maxDistance: params.maxDistance / km}}, 
+      cb);
+}
+
 DeviceSchema.statics.fullSave = function (data, cb) {
-  var tasks = [];
+  var tasks = []
+    , newSensor = {};
+
   for (var i = 0; i < data.sensors.length; i++) {
     tasks.push(
       (function () {
@@ -64,9 +88,13 @@ DeviceSchema.statics.fullSave = function (data, cb) {
   }
 
   async.parallel(tasks, function (err, results) {
-    data.sensors = results.map(function (el) {return el[0]._id});
-    var device = new Device(data);
-    device.save(cb);
+    newSensor = (JSON.parse(JSON.stringify(data)));
+    newSensor.sensors = results.map(function (el) {return el[0]._id});
+
+    var device = new Device(newSensor);
+    device.save(function (err, item) {
+      cb(err,item); 
+    })
   })
 }
 

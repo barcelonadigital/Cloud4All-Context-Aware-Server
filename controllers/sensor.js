@@ -19,14 +19,17 @@ exports.postData = function (req, res) {
   **/
   var id = req.params.id
     , data = req.body
-    , e = new trigger.SensorTrigger();
+    , e;
 
   cache.postData(sensorClass, id, data, function (err){
     if (err) {
       next(err);
     } else {
-      e.emit("onNewData", id, "onNewData");  
-      res.send(); 
+      Sensor.findById(id, function(err, sensor) {
+        e = new trigger.SensorTrigger(sensor);
+        e.emit("onNewData");  
+        res.send(); 
+      })
     }
   })
 }

@@ -9,9 +9,23 @@ var app = require('../app')
 
 var UserSchema = new Schema({
   uuid: {type: String, unique: true},
-  gps: [Number],
+  gps: {type: [Number], index: '2dsphere'},
   profile: {type: Schema.Types.Mixed}
 })
+
+UserSchema.statics.findNear = function(params, cb) {
+  var km = 111.12;
+
+  params.gps = params.gps;
+  params.maxDistance = params.maxDistance || 1;
+
+  this
+    .model('User')
+    .find({gps: {
+      $near: params.gps, 
+      $maxDistance: params.maxDistance / km}}, 
+      cb);
+}
 
 UserSchema.methods.getConfig = function (cb) {
   var that = this;

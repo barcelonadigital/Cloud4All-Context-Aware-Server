@@ -1,7 +1,7 @@
 {
 	"serial": "serial-2",
 	"_id": "51766326eda027ee15000002",
-	"gps": [1,2,3],
+	"gps": [2.194909, 41.402455],
 	"location": "kitchen",
 	"sensors": [
 		{
