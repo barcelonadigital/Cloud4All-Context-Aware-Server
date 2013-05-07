@@ -55,7 +55,9 @@ var DeviceSchema = new Schema({
 })
 
 DeviceSchema.pre('remove', function (next) {
-  Sensor.remove(this.sensors, next);
+  Sensor.remove(this.sensors).exec();
+  Config.remove(this.sensors.map(function (item) {return {_ref: item}})).exec();
+  next();
 })
 
 DeviceSchema.statics.findNear = function(params, cb) {
@@ -110,11 +112,11 @@ DeviceSchema.statics.updateById = function (id, item, cb) {
       }
       device.gps = item.gps;
       device.location = item.location;
-      for (var i = 0; i < item.sensors.length; i++) {
-        Sensor.findById(item.sensors[i], function (err, sensor) {
+      item.sensors.forEach(function (el, index) {
+        Sensor.findById(el._id, function (err, sensor) {
           if (sensor) {
-            sensor.type = item.sensors[i].type;
-            sensor.devid = item.sensors[i].devid;
+            sensor.type = el.type;
+            sensor.devid = el.devid;
             sensor.save();
           } else {
             new Sensor(item.sensors[sensor]).save(function (err, sensor) {
@@ -122,7 +124,7 @@ DeviceSchema.statics.updateById = function (id, item, cb) {
             })
           }
         })
-      }
+      })
       device.save(cb);
     } else {
       cb(err, device);

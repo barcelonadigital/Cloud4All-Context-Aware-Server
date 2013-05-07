@@ -66,3 +66,26 @@ exports.update = function (req, res, next) {
     }
   })
 }
+
+exports.remove = function (req, res, next) {
+  /**
+   * Deletes an existing user 
+  **/
+  var id = req.params.id;
+
+  Config.findByRef(id, function (err, config) {
+    if (err) {
+      next(err);
+    } else if (config) {
+      config.remove(function (err) {
+        if (err) {
+          next(err);
+        } else {
+          res.send(config);
+        }
+      })
+    } else {
+      res.send(404);
+    }
+  }) 
+}

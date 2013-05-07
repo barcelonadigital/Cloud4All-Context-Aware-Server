@@ -59,3 +59,27 @@ exports.update = function (req, res, next) {
     } 
   })
 }
+
+exports.remove = function (req, res, next) {
+  /**
+   * Deletes device from database
+  **/
+
+  var id = req.params.id;
+
+  Device.findById(id, function (err, device) {
+    if (err) {
+      next(err);
+    } else if (device) {
+      device.remove(function (err) {
+        if (err) {
+          next(err);
+        } else {
+          res.send(device);
+        }
+      })
+    } else {
+      res.send(404);
+    }
+  }) 
+}

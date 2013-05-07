@@ -16,7 +16,7 @@ var app = require('../app')
   , sensorClass= {'entityName': 'sensor'}
   , e;
 
-describe('Trigger system API', function () {
+describe('Sensor trigger system', function () {
   var that = this;
 
   before(function (done) {

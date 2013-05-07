@@ -14,6 +14,7 @@ module.exports = function (app) {
   app.get('/devices/:id', device.get);
   app.post('/devices', device.post);
   app.post('/devices/:id', device.update);
+  app.del('/devices/:id', device.remove);
 
   // Api:sensor-data
   app.get('/sensors/:id/data', sensor.getData);
@@ -25,11 +26,14 @@ module.exports = function (app) {
   app.get('/configs/:id', config.get);
   app.post('/configs', config.post);
   app.post('/configs/:id', config.update);
+  app.del('/configs/:id', config.remove);
+
 
   // Api:users
   app.get('/users/:id', user.get);
   app.get('/users', user.search);
   app.post('/users', user.post);
   app.post('/users/:id', user.update);
+  app.del('/users/:id', user.remove);
 
 }

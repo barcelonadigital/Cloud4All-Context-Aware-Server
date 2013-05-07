@@ -29,13 +29,16 @@ UserSchema.statics.findNear = function(params, cb) {
 
 UserSchema.methods.getConfig = function (cb) {
   var that = this;
-  Config.findByRef(that.id, function (err, item) {
-  });
+  Config.findByRef(that.id, cb);
 }
 
 UserSchema.statics.findByUuid = function (uuid, cb) {
   this.findOne({uuid: uuid}, cb);
 }
+
+UserSchema.pre('remove', function (next) {
+  Config.remove({_ref: this.id}, next);
+})
 
 UserSchema.pre('save', function (done) {
   // create default user-config

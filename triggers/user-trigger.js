@@ -9,28 +9,35 @@ var util = require('util')
   , Config = require('../models/configs').Config;
 
 
-function UserTrigger(userClass, configClass) {
+function UserTrigger(user) {
+  this.userClass = {'entityName': 'user'};
+  this.configClass = {'entityName': 'config'};
+  this.user = user;
+
   this.on("onNewUser", this.getUserConfig); 
+  this.on("rightNow", this.rightNow); 
 
   events.EventEmitter.call(this);
 }
 
 util.inherits(UserTrigger, events.EventEmitter);
 
-UserTrigger.prototype.getUserConfig = function (user, trigger) {
-  var that = this;
-
-  that.trigger = trigger || "onNewUser";
-  that.user = user;
+UserTrigger.prototype.getUserConfig = function (trigger) {
+  var that = this
+    , trigger = "onNewUser"; 
 
   var callBack = function (err, config) {
     config = config.config;
     that.receiver = config.receiver;
-    that.config = config.triggers[that.trigger];
-    that.emit(that.config.data, user);
+    that.config = config.triggers[trigger];
+    that.emit(that.config.trigger);
   }
 
   that.user.getConfig(callBack);
+}
+
+UserTrigger.prototype.rightNow = function () {
+  var that = this;
 }
 
 module.exports.UserTrigger = UserTrigger;

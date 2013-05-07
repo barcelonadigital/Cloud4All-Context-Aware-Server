@@ -18,7 +18,6 @@ function SensorTrigger(sensor) {
 
   this.on("onNewData", this.getSensorConfig); 
   this.on("scheduling", this.getSensorConfig); 
-  this.on("onNewUser", this.getSensorConfig); 
 
   this.on("all", this.getAllData);
   this.on("new", this.getNewData);
@@ -78,7 +77,7 @@ SensorTrigger.prototype.getNewData = function () {
 SensorTrigger.prototype.getMaxData = function () {
   var that = this;
 
-  agg.aggregate(that.data, agg.max, function (res){
+  agg.aggregate(that.data, agg.max, function (res) {
     that.result = res;
     that.emit(that.config.trigger);
   })
@@ -87,7 +86,7 @@ SensorTrigger.prototype.getMaxData = function () {
 SensorTrigger.prototype.getSumData = function () {
   var that = this;
 
-  agg.aggregate(that.data, agg.sum, function (res){
+  agg.aggregate(that.data, agg.sum, function (res) {
     that.result = res; 
     that.emit(that.config.trigger);
   })
@@ -96,7 +95,7 @@ SensorTrigger.prototype.getSumData = function () {
 SensorTrigger.prototype.getLastData = function () {
   var that = this;
 
-  agg.aggregate(that.data, agg.last, function (res){
+  agg.aggregate(that.data, agg.last, function (res) {
     that.result = res;
     that.emit(that.config.trigger);
   })
@@ -137,16 +136,17 @@ SensorTrigger.prototype.diffRadius = function () {
 
 SensorTrigger.prototype.nearbyUsers = function () {
   var that = this
-    , near;
+    , near
+    , maxDistance = that.config.maxDistance || 1
 
   that.sensor.getDevice(function (err, device) {
     if (err) {
       that.emit("error", err);
     } else {
-      User.findNear({gps:device.gps}, function (err, users) {
+      User.findNear({gps: device.gps, maxDistance: maxDistance}, function (err, users) {
         if (users) {
           that.users = users;
-          that.emit(that.config.near);
+          that.emit(that.config.isNear);
         } else if (err) {
           that.emit("error", err);
         } else {
@@ -157,6 +157,39 @@ SensorTrigger.prototype.nearbyUsers = function () {
   })
 }
 
+SensorTrigger.prototype.sendRequest = function (postData) {
+  var that = this
+    , receiver = that.receiver
+    , options = {
+        host: receiver.host,
+        port: receiver.port,
+        path: receiver.path,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': postData.length
+        }
+      };
+
+  var req = http.request(options, function (res) {
+    res.setEncoding('utf8');
+    res.on('data', function (chunk) {
+      that.emit(that.config.send, chunk);
+    })
+  })
+
+  req.write(postData);
+  req.end();
+}
+
+SensorTrigger.prototype.sendProfile = function () {
+  var that = this
+    , receiver = that.receiver
+    , postData = querystring.stringify({});
+
+  that.sendRequest(postData);
+}
+
 SensorTrigger.prototype.sendData = function () {
   var that = this
     , receiver = that.receiver
@@ -165,26 +198,7 @@ SensorTrigger.prototype.sendData = function () {
         data: that.data 
       });
 
-  var options = {
-    host: receiver.host,
-    port: receiver.port,
-    path: receiver.path,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': postData.length
-    }
-  };
-
-  var req = http.request(options, function (res) {
-    res.setEncoding('utf8');
-    res.on('data', function (chunk) {
-      that.emit(that.config.send, chunk);
-    });
-  });
-
-  req.write(postData);
-  req.end();
+  that.sendRequest(postData);
 }
 
 SensorTrigger.prototype.storeData = function () {

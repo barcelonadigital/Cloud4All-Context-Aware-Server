@@ -16,7 +16,7 @@ describe('user API', function () {
 
   before(function (done){
     console.log("\n\nTESTING USER API\n") 
-    app.redisClient.flushall(done);
+    app.redisClient.flushall();
 
     User.remove(function () {
       that.user = new User(user_sample);
@@ -71,6 +71,19 @@ describe('user API', function () {
       .expect(200, function (err, res) {
         res.body.uuid.should.equal(that.user.uuid);
         done();
+      })
+  })
+
+  it('deletes a user by his id', function (done) {
+    request(app)
+      .del('/users/' + that.user.id)
+      .expect('Content-type', /json/)
+      .expect(200, function (err, res) {
+        res.body.uuid.should.equal(that.user.uuid);
+        User.find({_id: that.user.id}, function (err, user) {
+          user.should.be.empty;
+          done();
+        })
       })
   })
 })
