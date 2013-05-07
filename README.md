@@ -85,11 +85,15 @@ CAS can be configured using a Restful API. To setup a new user or sensor configu
 }
 ```
 
-Updating the configuration is possible sending a POST request to /configs/:id where id is the id of the sensor or user.
-
-Finally, you can also get a specific config system. Use GET to retrieve the value from key config parameter from id configuration:
+Updating the configuration is possible sending a POST request to /configs/:id where id is the id of the sensor or user. You can also get a specific config system. Use GET to retrieve the value from key config parameter from id configuration:
 
 	GET /configs/:id
+
+Finally, you can delete users, configs and devices sending a delete request to specific :id:
+	
+	DEL /configs/:id
+	DEL /devices/:id
+	DEL /users/:id
 
 
 Triggering System
