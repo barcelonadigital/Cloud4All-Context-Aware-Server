@@ -60,28 +60,30 @@ CAS can be configured using a Restful API. To setup a new user or sensor configu
 {
 	"_ref": "517686388661d24a16000006",
 	"config": {
-		"triggers": {
-			"onNewData": {
-				"data": "new",
-				"aggregation": "sum",
-				"trigger": "threshold",
-				"threshold": "5",
-				"diffRadius": "10",
-				"triggered": "send",
-				"send": "store",
-				"store": "ack"
-			}, 
-			"scheduling": {
-				"data": "mean",
-				"time": "60"
-			}
-		},
-		"receiver": {
-			"host": "localhost",
-			"port": "8889",
-			"path": "/receiver"
-		}
-	}
+        "triggers": {
+            "onNewData": {
+                "onConfig": "getNewData",
+                "onData": "getSumData",
+                "onAggregated" : "threshold",
+                "onTriggered": "getNearUsers",
+                "onNearby": "sendData",
+                "onSent": "storeData",
+                "onStored": "ack",
+                "diffRadius": "10",
+                "threshold": "5",
+                "maxDistance": 1
+            },
+            "scheduling": {
+                "data": "mean",
+                "time": "60"
+            }
+        },
+        "receiver": {
+            "host": "localhost",
+            "port": "8889",
+            "path": "/receiver"
+        }
+    }
 }
 ```
 
@@ -120,6 +122,15 @@ For example, using the sensor:1 configuration above, when new data arrives, the 
 	
 1. threshold = triggered when the value is above a threshold. threshold value must be defined. `"threshold": "{number}"`
 2. diffRadius = triggered when there is a the last new value `y` and the last sent value `x` do comply the inequattion `|y - x| > {number} / 100 * x` where `{number}` is the defined value in configuration `"diffRadius": "{number}"`. Default 10%.
+
+### User Filter methods
+
+1. getNearUsers = once triggered, check which users are in nearby. $MaxDistance can be configured.
+
+### Send methods
+
+1. SendData: once system is triggered, it sends the data received via json to a server (configured in settings).
+2. SendProfile: once system is triggered, it sends users filetered from User Filter Methods. only useful when Filter methods are applied.
 
 
 Running Tests
