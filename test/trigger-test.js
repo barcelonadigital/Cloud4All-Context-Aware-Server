@@ -60,6 +60,7 @@ describe('Sensor trigger system', function () {
 
   afterEach(function (done)  {
     // update config to its default
+    e.config = that.config.config.triggers.onNewData;
     Config.updateByRef(
       that.sensor.id, 
       {config:app.envConfig.triggers.sensor}, 
@@ -68,12 +69,10 @@ describe('Sensor trigger system', function () {
   })
 
   it('emits onNewData from sensor :id', function (done) {
-
     e.emit("onNewData");  
-    e.once("store", function () {
+    e.once("storeData", function () {
       e.data.should.equal(sensor_sample_data.join(','));
-      done();
-    })
+    }).once("ack", done);
   })
 
   it('changes config and emits onNewData', function (done) {
@@ -90,10 +89,9 @@ describe('Sensor trigger system', function () {
   it('sends new data to sensor and emits onNewData', function (done) {
     cache.postData(sensorClass, that.sensor.id, sensor_sample_data, function () {
       e.emit("onNewData");  
-      e.once("store", function (data) {
+      e.once("storeData", function () {
         e.data.should.equal([sensor_sample_data].join(','));
-        done();
-      })
+      }).once("ack", done);
     })
   })
 
@@ -113,11 +111,11 @@ describe('Sensor trigger system', function () {
       , res = [Date.now(), 4.5]; 
 
     e.config.diffRadius = "10";
-    e.config.triggered = "send";
+    e.config.onTriggered = "sendData";
     e.sensor = that.sensor;
 
     e.emit("diffRadius");  
-    e.once("send", function () {
+    e.once("ack", function () {
       done();
     })
   })
@@ -127,7 +125,7 @@ describe('Sensor trigger system', function () {
       , res = [Date.now(), 4.3]; 
 
     e.config.diffRadius = "10";
-    e.config.triggered = "send";
+    e.config.onTriggered = "sendData";
     e.sensor = that.sensor;
     e.result = res;
 
@@ -135,5 +133,26 @@ describe('Sensor trigger system', function () {
     e.once("nonTriggered", function () {
       done();
     })
+  })
+
+  it('tests sendProfile system', function (done) {
+
+    var data = [[1,1], [2,2], [3,3], [4,4.5]];
+
+    e.config = that.config.config.triggers.onNewData; 
+    e.receiver = that.config.config.receiver;
+
+    e.config.onNearby = "sendProfile";
+    e.sensor = that.sensor;
+    e.data = data;
+
+    e.emit("getNearUsers");  
+    e.once("storeData", function (chunk) {
+      JSON
+        .parse(chunk)[0]
+        .profile.preferences
+        .display.screenEnhancement
+        .magnification.should.equal(1);
+    }).once("ack", done);
   })
 })

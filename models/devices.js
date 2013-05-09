@@ -49,7 +49,7 @@ SensorSchema.pre('save', function (next) {
 
 var DeviceSchema = new Schema({
   serial: {type: String, unique: true},
-  gps: {type: [Number], index: '2dsphere'},
+  gps: {type: [Number], index: '2d'},
   location: String,
   sensors:[{type: Schema.ObjectId, ref: "Sensor"}]
 })
@@ -65,13 +65,13 @@ DeviceSchema.statics.findNear = function(params, cb) {
 
   params.gps = params.gps;
   params.maxDistance = params.maxDistance || 1;
-
+  
   this
     .model('Device')
     .find({gps: {
       $near: params.gps, 
       $maxDistance: params.maxDistance / km}}, 
-      cb);
+      cb); 
 }
 
 DeviceSchema.statics.fullSave = function (data, cb) {

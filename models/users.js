@@ -9,7 +9,7 @@ var app = require('../app')
 
 var UserSchema = new Schema({
   uuid: {type: String, unique: true},
-  gps: {type: [Number], index: '2dsphere'},
+  gps: {type: [Number], index: '2d'},
   profile: {type: Schema.Types.Mixed}
 })
 
