@@ -16,6 +16,7 @@
     "underscore":"*",
     "async":"*",
     "node-uuid":"*",
-    "mongoose":"*"
+    "mongoose":"*",
+    "socket.io":"*"
   }
 }

@@ -3,21 +3,25 @@
  * Module dependencies.
  */
 
-var express = require('express')
-  , http = require('http')
-  , path = require('path')
-  , redis = require('redis')
-  , mongoose = require('mongoose');
+var express = require('express'),
+  http = require('http'),
+  path = require('path'),
+  redis = require('redis'),
+  socketio = require('socket.io'),
+  mongoose = require('mongoose');
 
-var common = require('./config/common')
-  , envConfig = common.config()
-  , CFG_SERVER = envConfig.server
-  , CFG_STORE_REDIS = envConfig.storeRedis
-  , CFG_STORE_MONGO = envConfig.storeMongo
-  , port = process.env.PORT || CFG_SERVER.port 
-  , forks = process.env.FORKS || CFG_SERVER.forks;
+var common = require('./config/common'),
+  envConfig = common.config(),
+  CFG_SERVER = envConfig.server,
+  CFG_STORE_REDIS = envConfig.storeRedis,
+  CFG_STORE_MONGO = envConfig.storeMongo,
+  port = process.env.PORT || CFG_SERVER.port,
+  forks = process.env.FORKS || CFG_SERVER.forks;
 
-var app = express();
+var app = express(),
+  server = http.createServer(app),
+  io = socketio.listen(server);
+
 
 // all environments
 app.set('port', port);
@@ -30,20 +34,20 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
-// development only 
+// development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-// testing only 
+// testing only
 if ('test' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
 // testing and development only
 if ('test' || 'development' == app.get('env')) {
-  var receiver = require('./controllers/receiver')
-    , testPort = envConfig.receiver.port;
+  var receiver = require('./controllers/receiver'),
+    testPort = envConfig.receiver.port;
 
   // Api: post from CAS - testing purposes
   app.post('/receiver', receiver.post);
@@ -55,16 +59,16 @@ if ('test' || 'development' == app.get('env')) {
 
 // Start redis connection
 app.redisClient = redis.createClient(
-  CFG_STORE_REDIS.port, 
+  CFG_STORE_REDIS.port,
   CFG_STORE_REDIS.host
-)
+);
 app.redisClient.select(CFG_STORE_REDIS.dbname);
 
 // Start mongodb connection
 app.mongoClient = mongoose.connect(
-  CFG_STORE_MONGO.host, 
+  CFG_STORE_MONGO.host,
   CFG_STORE_MONGO.dbname
-)
+);
 
 // Add other stuff to app
 app.envConfig = envConfig;
@@ -72,9 +76,12 @@ app.logmessage = console.log;
 module.exports = app;
 
 // Bootstrap routes
-require('./config/routes')(app)
+require('./config/routes')(app);
 
-http.createServer(app).listen(port, function(){
+// Socket IO
+// io.sockets.on('connection', socket);
+
+server.listen(port, function(){
   console.log("Server listening on port " + port + ' in "' + app.settings.env + '" mode');
 });
 

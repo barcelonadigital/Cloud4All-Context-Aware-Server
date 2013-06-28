@@ -2,59 +2,66 @@
  * Sensor API routes.
 **/
 
+"use strict";
 
-var app = require('../app') 
-  , trigger = require('../triggers/sensor-trigger')
-  , CacheRedis = require('../managers/cache-redis').CacheRedis
-  , cache = new CacheRedis(
-      app.redisClient, 
-      app.logmessage)
-  , sensorClass= {'entityName': 'sensor'}
-  , Sensor = require("../models/devices").Sensor;
+var app = require('../app'),
+  trigger = require('../triggers/sensor-trigger'),
+  CacheRedis = require('../managers/cache-redis').CacheRedis,
+  cache = new CacheRedis(
+    app.redisClient,
+    app.logmessage
+  ),
+  sensorClass = {'entityName': 'sensor'},
+  Sensor = require("../models/devices").Sensor;
 
 
 exports.postData = function (req, res) {
   /**
    * Posts new data from sensor id
   **/
-  var id = req.params.id
-    , data = req.body
-    , e;
+  var id = req.params.id,
+    data = req.body,
+    e;
 
-  cache.postData(sensorClass, id, data, function (err){
+  cache.postData(sensorClass, id, data, function (err, next) {
     if (err) {
       next(err);
     } else {
-      Sensor.findById(id, function(err, sensor) {
+      Sensor.findById(id, function (err, sensor) {
         e = new trigger.SensorTrigger(sensor);
-        e.emit("onNewData");  
-        res.send(); 
-      })
+        e.emit("onNewData");
+        res.send();
+      });
     }
-  })
-}
+  });
+};
 
 exports.getData = function (req, res) {
   /**
    * Gets all data from sensor id
   **/
-  var id = req.params.id
-    , query = req.query.q || "all"
-    , getData = null;    
+  var id = req.params.id,
+    query = req.query.q || "all",
+    getData = null;
 
-  switch(query) {
-    case "all": cache.get = cache.getAllData; break;
-    case "new": cache.get = cache.getNewData; break;
-    default: getData = function () {
-      res.send(new Error("Incorrect query parameter " + query))
+  switch (query) {
+  case "all":
+    cache.get = cache.getAllData;
+    break;
+  case "new":
+    cache.get = cache.getNewData;
+    break;
+  default:
+    getData = function () {
+      res.send(new Error("Incorrect query parameter " + query));
     };
   }
 
-  cache.get(sensorClass, id, function (err, reply) {
+  cache.get(sensorClass, id, function (err, reply, next) {
     if (err) {
       next(err);
     } else {
       res.send({data: reply});
     }
-  })
-}
+  });
+};

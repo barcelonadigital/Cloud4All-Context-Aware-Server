@@ -2,9 +2,11 @@
  * Device API routes.
 **/
 
-var app = require('../app') 
-  , trigger = require('../triggers/sensor-trigger')
-  , Device = require("../models/devices").Device;
+"use strict";
+
+var app = require('../app'),
+  trigger = require('../triggers/sensor-trigger'),
+  Device = require("../models/devices").Device;
 
 exports.get = function (req, res, next) {
   /**
@@ -12,7 +14,7 @@ exports.get = function (req, res, next) {
   **/
   var id = req.params.id;
 
-  Device.findById(id, function (err, item){
+  Device.findById(id, function (err, item) {
     if (err) {
       next(err);
     } else if (item) {
@@ -20,16 +22,16 @@ exports.get = function (req, res, next) {
     } else {
       res.send(404);
     }
-  })
-}
+  });
+};
 
 exports.post = function (req, res, next) {
   /**
    * Posts new device returning device with id
   **/
 
-  var item = req.body
-    , e = new trigger.SensorTrigger();
+  var item = req.body,
+    e = new trigger.SensorTrigger();
 
   Device.fullSave(item, function (err, device) {
     if (err) {
@@ -38,16 +40,16 @@ exports.post = function (req, res, next) {
       e.emit("onNewDevice", device.id);
       res.send(device);
     }
-  }) 
-}
+  });
+};
 
 exports.update = function (req, res, next) {
   /**
-   * Updates new device returning device with id. 
+   * Updates new device returning device with id.
    * It does not delete existing devices/sensors
   **/
-  var item = req.body
-    , id = req.params.id;
+  var item = req.body,
+    id = req.params.id;
 
   Device.updateById(id, item, function (err, device) {
     if (err) {
@@ -56,9 +58,9 @@ exports.update = function (req, res, next) {
       res.send(device);
     } else {
       res.send(404);
-    } 
-  })
-}
+    }
+  });
+};
 
 exports.remove = function (req, res, next) {
   /**
@@ -77,9 +79,9 @@ exports.remove = function (req, res, next) {
         } else {
           res.send(device);
         }
-      })
+      });
     } else {
       res.send(404);
     }
-  }) 
-}
+  });
+};

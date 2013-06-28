@@ -2,10 +2,11 @@
  * User API routes.
 **/
 
+"use strict";
 
-var app = require('../app') 
-  , User = require('../models/users').User
-  , trigger = require('../triggers/user-trigger');
+var app = require('../app'),
+  User = require('../models/users').User,
+  trigger = require('../triggers/user-trigger');
 
 exports.get = function (req, res, next) {
   /**
@@ -13,7 +14,7 @@ exports.get = function (req, res, next) {
   **/
   var id = req.params.id;
 
-  User.findById(id, function (err, item){
+  User.findById(id, function (err, item) {
     if (err) {
       next(err);
     } else if (item) {
@@ -21,15 +22,16 @@ exports.get = function (req, res, next) {
     } else {
       res.send(404);
     }
-  })
-}
+  });
+};
 
 exports.search = function (req, res, next) {
   /**
-   * Gets user from query search 
+   * Gets user from query search
   **/
   var query = req.query;
-  var uuid = query['uuid'] || null;
+  var uuid = query.uuid || null;
+
   if (uuid) {
     User.findByUuid(uuid, function (err, item) {
       if (err) {
@@ -39,18 +41,18 @@ exports.search = function (req, res, next) {
       } else {
         res.send(404);
       }
-    })
+    });
   } else {
     res.send(404);
   }
-}
+};
 
 exports.post = function (req, res, next) {
   /**
    * Posts new user returning user with id
   **/
-  var item = req.body
-    , user = new User(item);
+  var item = req.body,
+    user = new User(item);
 
   user.save(function (err, user) {
     if (err) {
@@ -60,15 +62,15 @@ exports.post = function (req, res, next) {
       e.emit("onNewUser");
       res.send(user);
     }
-  }) 
-}
+  });
+};
 
 exports.update = function (req, res, next) {
   /**
    * Updates an existing user id, returning user;
   **/
-  var item = req.body
-    , id = req.params.id;
+  var item = req.body,
+    id = req.params.id;
 
   User.findByIdAndUpdate(id, item, function (err, item) {
     if (err) {
@@ -79,12 +81,12 @@ exports.update = function (req, res, next) {
     } else {
       res.send(404);
     }
-  })
-}
+  });
+};
 
 exports.remove = function (req, res, next) {
   /**
-   * Deletes an existing user 
+   * Deletes an existing user
   **/
   var id = req.params.id;
 
@@ -98,9 +100,9 @@ exports.remove = function (req, res, next) {
         } else {
           res.send(user);
         }
-      })
+      });
     } else {
       res.send(404);
     }
-  }) 
-}
+  });
+};

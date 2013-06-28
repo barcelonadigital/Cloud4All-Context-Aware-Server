@@ -101,9 +101,9 @@ Finally, you can delete users, configs and devices sending a delete request to s
 Triggering System
 -----------------
 
-When new data arrives to the Context awareness server, it fires a "onNewData" event. Afterwards, a listener gets the sensor configuration or the base configuration if absent from the redis database.Then the trigger system will emit specific events depending on the configuration. These events will collect, process the data and send the data to the receiver if the trigger (for example the threshold) is surpassed. 
+When new data arrives to the Context awareness server, it fires a "onNewData" event. Afterwards, a listener gets the sensor configuration from the mongo database. Then the trigger system will emit specific events depending on the configuration. These events will collect, process the data and send the data to the receiver if the trigger (for example the threshold) is surpassed. If nearby options are activated, it will search the near users and it can afterwards send the user's profile complemented with the context data. 
 
-For example, using the sensor:1 configuration above, when new data arrives, the trigger system will collect "all" the sensor data stored, will "sum" it and then uses a simple threshold method to know if this sum is above the required value "15", if it is such the case, it will send the data to the "localhost" receiver.
+For example, using the sensor:1 configuration above, when new data arrives, the trigger system will collect only new data "getNewData" from the sensor, will sum "getSumData" it and then uses a simple threshold "threshold" method to know if this sum is above the required value "5", if it is such the case, it will send then search the near users "getNearUsers" and will send the new data "sendData" to the "localhost" receiver and also store it to MongoDb "storeData".
 
 ### Aggregation Methods
 

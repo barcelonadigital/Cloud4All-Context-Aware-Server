@@ -1,14 +1,17 @@
 {
-	"_ref": "517686388661d24a16000007",
-	"config": {
-		"triggers": {
-			"onNewUser": {
-				"nearness": "5",
-				"data": "nearness",
-				"aggregation": "mean",
-				"trigger": "threshold",
-				"threshold": "15"
-			}
-		}
-	}
+    "_ref": "517686388661d24a16000007",
+    "config": {
+        "triggers": {
+            "onNewUser": {
+                "onConfig": "getNewData",
+                "onData": "getMeanData",
+                "onAggregated" : "threshold",
+                "onTriggered": "sendData",
+                "onSent": "ack",
+                "diffRadius": "10",
+                "threshold": "15",
+                "maxDistance": 1
+            }
+        }
+    }
 }

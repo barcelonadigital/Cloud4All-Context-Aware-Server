@@ -1,10 +1,9 @@
 // here we load de routes 
-var sensor = require('../controllers/sensor')
-  , config = require('../controllers/config')
-  , user = require('../controllers/user')
-  , site = require('../controllers/site')
-  , device = require('../controllers/device');
-
+var sensor = require('../controllers/sensor'),
+  config = require('../controllers/config'),
+  user = require('../controllers/user'),
+  site = require('../controllers/site'),
+  device = require('../controllers/device');
 
 module.exports = function (app) {
   // General
@@ -26,12 +25,10 @@ module.exports = function (app) {
   app.post('/configs/:id', config.update);
   app.del('/configs/:id', config.remove);
 
-
   // Api:users
   app.get('/users/:id', user.get);
   app.get('/users', user.search);
   app.post('/users', user.post);
   app.post('/users/:id', user.update);
   app.del('/users/:id', user.remove);
-
-}
+};
