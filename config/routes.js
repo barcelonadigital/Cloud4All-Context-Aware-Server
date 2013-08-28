@@ -8,12 +8,17 @@ var sensor = require('../controllers/sensor'),
 module.exports = function (app) {
   // General
   app.get('/', site.index);
+  app.get('/partials/:name', site.partials);
 
   // Api:devices
   app.get('/devices/:id', device.get);
   app.post('/devices', device.post);
   app.post('/devices/:id', device.update);
   app.del('/devices/:id', device.remove);
+
+  // Api: sensors
+  app.get('/sensors/:id', sensor.get);
+  app.get('/sensors/', sensor.search);
 
   // Api:sensor-data
   app.get('/sensors/:id/data', sensor.getData);

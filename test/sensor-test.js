@@ -49,6 +49,42 @@ describe('Sensor API', function () {
       );
   });
 
+  it('gets sensor :id', function (done) {
+    request(app)
+      .get('/sensors/' + that.sensor.id)
+      .expect('Content-type', /json/)
+      .expect(200, function (err, res) {
+        res.body._id.should.equal(that.sensor.id);
+        done();
+      });
+  });
+
+  it('gets all sensors', function (done) {
+    request(app)
+      .get('/sensors/')
+      .expect('Content-type', /json/)
+      .expect(200, function (err, res) {
+        done();
+      });
+  });
+
+  it('gets noise sensors', function (done) {
+    request(app)
+      .get('/sensors/?type=noise')
+      .expect('Content-type', /json/)
+      .expect(200, function (err, res) {
+        res.body.should.be.an.instanceOf(Array);
+        done();
+      });
+  });
+
+  it('gets 404 when search not found', function (done) {
+    request(app)
+      .get('/sensors/?type=abracadabra')
+      .expect(404, done);
+  });
+
+
   it('saves a new data to sensor :id', function (done) {
     request(app)
       .post('/sensors/' + that.sensor.id + '/data')

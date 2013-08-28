@@ -43,7 +43,9 @@ describe('Config API', function () {
       .get('/configs/' + sensor_config_sample._ref)
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.should.include(sensor_config_sample);
+        res.body.config.triggers.should.eql(
+          sensor_config_sample.config.triggers
+        );
         done();
       });
   });

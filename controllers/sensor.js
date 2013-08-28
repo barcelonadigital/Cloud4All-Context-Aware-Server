@@ -15,7 +15,42 @@ var app = require('../app'),
   Sensor = require("../models/devices").Sensor;
 
 
-exports.postData = function (req, res) {
+exports.get = function (req, res, next) {
+  /**
+   * Gets device from database
+  **/
+  var id = req.params.id;
+
+  Sensor.findById(id, function (err, item) {
+    if (err) {
+      next(err);
+    } else if (item) {
+      res.send(item);
+    } else {
+      res.send(404);
+    }
+  });
+};
+
+exports.search = function (req, res, next) {
+  /**
+   * search devices from database
+  **/
+
+  var query = req.query || {};
+
+  Sensor.find(query, function (err, sensors) {
+    if (err) {
+      next(err);
+    } else if (sensors.length > 0) {
+      res.send(sensors);
+    } else {
+      res.send(404);
+    }
+  });
+};
+
+exports.postData = function (req, res, next) {
   /**
    * Posts new data from sensor id
   **/
@@ -23,20 +58,26 @@ exports.postData = function (req, res) {
     data = req.body,
     e;
 
-  cache.postData(sensorClass, id, data, function (err, next) {
+  cache.postData(sensorClass, id, data, function (err) {
     if (err) {
       next(err);
     } else {
       Sensor.findById(id, function (err, sensor) {
-        e = new trigger.SensorTrigger(sensor);
-        e.emit("onNewData");
-        res.send();
+        if (err) {
+          next(err);
+        } else if (sensor) {
+          e = new trigger.SensorTrigger(sensor);
+          e.emit("onNewData");
+          res.send();
+        } else {
+          res.send(404);
+        }
       });
     }
   });
 };
 
-exports.getData = function (req, res) {
+exports.getData = function (req, res, next) {
   /**
    * Gets all data from sensor id
   **/

@@ -1,5 +1,5 @@
 
-"use strict";
+'use strict';
 
 var util = require('util'),
   http = require('http'),
@@ -13,25 +13,31 @@ var util = require('util'),
   CacheRedis = require('../managers/cache-redis').CacheRedis;
 
 function SensorTrigger(sensor) {
-  this.sensorClass = {'entityName': 'sensor'};
-  this.dataKey = "sent-data";
+  this.sensorClass = app.envConfig.sensorClass;
+  this.channels = app.envConfig.channels;
   this.cache = new CacheRedis(app.redisClient, app.logmessage);
   this.sensor = sensor;
 
-  this.on("onNewData", this.getSensorConfig, "onNewData");
-  this.on("scheduling", this.getSensorConfig, "scheduling");
+  this.on('onNewData', function () {
+    this.getSensorConfig('onNewData');
+  });
 
-  this.on("getAllData", this.getAllData);
-  this.on("getNewData", this.getNewData);
-  this.on("getMaxData", this.getMaxData);
-  this.on("getSumData", this.getSumData);
-  this.on("getLastData", this.getLastData);
-  this.on("threshold", this.threshold);
-  this.on("diffRadius", this.diffRadius);
-  this.on("getNearUsers", this.getNearUsers);
-  this.on("sendData", this.sendData);
-  this.on("sendProfile", this.sendProfile);
-  this.on("storeData", this.storeData);
+  this.on('scheduling', function () {
+    this.getSensorConfig('scheduling');
+  });
+
+  this.on('getAllData', this.getAllData);
+  this.on('getNewData', this.getNewData);
+  this.on('getMaxData', this.getMaxData);
+  this.on('getSumData', this.getSumData);
+  this.on('getLastData', this.getLastData);
+  this.on('threshold', this.threshold);
+  this.on('diffRadius', this.diffRadius);
+  this.on('getNearUsers', this.getNearUsers);
+  this.on('publishData', this.publishData);
+  this.on('sendData', this.sendData);
+  this.on('sendProfile', this.sendProfile);
+  this.on('storeData', this.storeData);
 
   events.EventEmitter.call(this);
 }
@@ -41,9 +47,9 @@ util.inherits(SensorTrigger, events.EventEmitter);
 SensorTrigger.prototype.getSensorConfig = function (trigger) {
   var that = this,
     sensorKeyId = that.sensorClass.entityName + ':' + that.sensor.id,
-    baseKeyId = "base";
+    baseKeyId = 'base';
 
-  trigger = trigger || "onNewData";
+  trigger = trigger || 'onNewData';
 
   Config.findByRef(that.sensor.id, function (err, item) {
     that.receiver = item.config.receiver;
@@ -57,7 +63,7 @@ SensorTrigger.prototype.getAllData = function () {
 
   that.cache.getAllData(that.sensorClass, that.sensor.id, function (err, data) {
     if (err) {
-      that.emit("error", err);
+      that.emit('error', err);
     } else {
       that.data = data;
       that.emit(that.config.onData);
@@ -70,7 +76,7 @@ SensorTrigger.prototype.getNewData = function () {
 
   that.cache.getNewData(that.sensorClass, that.sensor.id, function (err, data) {
     if (err) {
-      that.emit("error", err);
+      that.emit('error', err);
     } else {
       that.data = data;
       that.emit(that.config.onData);
@@ -107,18 +113,18 @@ SensorTrigger.prototype.getLastData = function () {
 
 SensorTrigger.prototype.threshold = function () {
   var that = this,
-    threshold = that.config.threshold || "0";
+    threshold = that.config.threshold || '0';
 
   if (threshold < that.result[1]) {
     that.emit(that.config.onTriggered);
   } else {
-    that.emit("nonTriggered");
+    that.emit('nonTriggered');
   }
 };
 
 SensorTrigger.prototype.diffRadius = function () {
   var that = this,
-    threshold = that.config.diffRadius || "10",
+    threshold = that.config.diffRadius || '10',
     topThreshold = 1 + threshold / 100,
     bottomThreshold = 1 - threshold / 100;
 
@@ -130,10 +136,10 @@ SensorTrigger.prototype.diffRadius = function () {
       if (actual < bottomThreshold * last || actual > topThreshold * last) {
         that.emit(that.config.onTriggered);
       } else {
-        that.emit("nonTriggered");
+        that.emit('nonTriggered');
       }
     } else if (err) {
-      that.emit("error", err);
+      that.emit('error', err);
     }
   });
 };
@@ -145,16 +151,20 @@ SensorTrigger.prototype.getNearUsers = function () {
 
   that.sensor.getDevice(function (err, device) {
     if (err) {
-      that.emit("error", err);
+      that.emit('error', err);
+    } else if (!device) {
+      that.emit('error', new Error('device not found'));
+    } else if (!device.gps) {
+      that.emit('error', new Error('device gps not found'));
     } else {
       User.findNear({gps: device.gps, maxDistance: maxDistance}, function (err, users) {
         if (users) {
           that.users = users;
           that.emit(that.config.onNearby);
         } else if (err) {
-          that.emit("error", err);
+          that.emit('error', err);
         } else {
-          that.emit("notNear");
+          that.emit('notNear');
         }
       });
     }
@@ -206,6 +216,16 @@ SensorTrigger.prototype.sendData = function () {
   that.sendRequest(postData);
 };
 
+SensorTrigger.prototype.publishData = function () {
+  var that = this;
+
+  app.pub.publish(that.sensor.id, JSON.stringify({
+    data: that.data
+  }));
+
+  that.emit(that.config.onPublished);
+};
+
 SensorTrigger.prototype.storeData = function () {
   // store data to mongodb
   var that = this,
@@ -226,7 +246,7 @@ SensorTrigger.prototype.storeData = function () {
 
   Data.create(mongoSeries, function (err) {
     if (err) {
-      that.emit("error", err);
+      that.emit('error', err);
     } else {
       that.emit(that.config.onStored);
     }

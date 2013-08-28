@@ -4,7 +4,8 @@
         "triggers": {
             "onNewData": {
                 "onConfig": "getNewData",
-                "onData": "getMaxData",
+                "onData": "publishData",
+                "onPublished": "getMaxData",
                 "onAggregated" : "threshold",
                 "onTriggered": "sendData",
                 "onSent": "storeData",
@@ -12,7 +13,7 @@
                 "diffRadius": "10",
                 "threshold": "5",
                 "maxDistance": 1
-            }, 
+            },
             "scheduling": {
                 "data": "mean",
                 "time": "60"

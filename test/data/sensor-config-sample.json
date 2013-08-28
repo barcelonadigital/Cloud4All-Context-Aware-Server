@@ -1,26 +1,28 @@
 {
-	"_ref": "517686388661d24a16000007",
-	"config": {
-		"triggers": {
-			"onNewData": {
-				"data": "new",
-				"aggregation": "sum",
-				"trigger": "threshold",
-				"threshold": "5",
-				"diffRadius": "10",
-				"triggered": "send",
-				"send": "store",
-				"store": "ack"
-			}, 
-			"scheduling": {
-				"data": "mean",
-				"time": "60"
-			}
-		},
-		"receiver": {
-			"host": "localhost",
-			"port": "8889",
-			"path": "/receiver"
-		}
-	}
+    "_ref": "517686388661d24a16000007",
+    "config": {
+        "triggers": {
+            "onNewData": {
+                "onConfig": "getNewData",
+                "onData": "publishData",
+                "onPublished": "getSumData",
+                "onAggregated" : "threshold",
+                "onTriggered": "sendData",
+                "onSent": "storeData",
+                "onStored": "ack",
+                "diffRadius": "10",
+                "threshold": "5",
+                "maxDistance": 1
+            },
+            "scheduling": {
+                "data": "mean",
+                "time": "60"
+            }
+        }
+    },
+    "receiver": {
+        "host": "localhost",
+        "port": "8889",
+        "path": "/receiver"
+    }
 }
