@@ -7,10 +7,10 @@
 angular.module('casApp.controllers', []).
   controller('StreamCtrl', ['$scope', '$routeParams', 'socket', function (sc, params, socket) {
 
+    sc.sensor = params.id;
     sc.data = [];
 
     socket.emit('subscribe', params.id);
-
     socket.on('data', function (data) {
       sc.data.push(data.data);
     });

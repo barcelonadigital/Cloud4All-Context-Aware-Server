@@ -1,4 +1,4 @@
-// here we load de routes 
+// here we load de routes
 var sensor = require('../controllers/sensor'),
   config = require('../controllers/config'),
   user = require('../controllers/user'),
@@ -7,6 +7,7 @@ var sensor = require('../controllers/sensor'),
 
 module.exports = function (app) {
   // General
+
   app.get('/', site.index);
   app.get('/partials/:name', site.partials);
 
@@ -36,4 +37,8 @@ module.exports = function (app) {
   app.post('/users', user.post);
   app.post('/users/:id', user.update);
   app.del('/users/:id', user.remove);
+
+  // Redirect all others to the index (HTML5 History)
+  app.get('*', site.index);
+
 };
