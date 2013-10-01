@@ -19,9 +19,17 @@ exports.get = function (req, res, next) {
   /**
    * Gets device from database
   **/
-  var id = req.params.id;
+  var id = req.params.id,
+    populate = req.query.populate || false,
+    query = null;
 
-  Sensor.findById(id, function (err, item) {
+  query = Sensor.findById(id);
+
+  if (populate) {
+    query.populate({path: '_last', select: 'at value -_id'});
+  }
+
+  query.exec(function (err, item) {
     if (err) {
       next(err);
     } else if (item) {
@@ -37,9 +45,21 @@ exports.search = function (req, res, next) {
    * search devices from database
   **/
 
-  var query = req.query || {};
+  var q = req.query || {},
+    populate = req.query.populate || false,
+    query = null;
 
-  Sensor.find(query, function (err, sensors) {
+  if (populate) {
+    delete q.populate;
+  }
+
+  query = Sensor.find(q);
+
+  if (populate) {
+    query.populate({path: '_last', select: 'at value -_id'});
+  }
+
+  query.exec(function (err, sensors) {
     if (err) {
       next(err);
     } else if (sensors.length > 0) {
@@ -98,11 +118,36 @@ exports.getData = function (req, res, next) {
     };
   }
 
-  cache.get(sensorClass, id, function (err, reply, next) {
+  cache.get(sensorClass, id, function (err, data, next) {
     if (err) {
       next(err);
     } else {
-      res.send({data: reply});
+      res.send(data);
+    }
+  });
+};
+
+exports.searchData = function (req, res, next) {
+  /**
+   * gets new data from start datetime to end datetime
+   * in iso format
+  **/
+  var id = req.params.id,
+    start = req.params.start,
+    end = req.params.end;
+
+  start = (new Date(start)).getTime() || null;
+  end = (new Date(end)).getTime() || null;
+
+  if (!start || !end) {
+    res.send(new Error('Incompatible start or end date ISO-8601 format'));
+  }
+
+  cache.getScoreData(sensorClass, id, start, end, function (err, data) {
+    if (err) {
+      next(err);
+    } else {
+      res.send(data);
     }
   });
 };

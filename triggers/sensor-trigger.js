@@ -115,7 +115,7 @@ SensorTrigger.prototype.threshold = function () {
   var that = this,
     threshold = that.config.threshold || '0';
 
-  if (threshold < that.result[1]) {
+  if (threshold < that.result.value) {
     that.emit(that.config.onTriggered);
   } else {
     that.emit('nonTriggered');
@@ -130,8 +130,8 @@ SensorTrigger.prototype.diffRadius = function () {
 
   Data.getLast(that.sensor.id, function (err, reply) {
     if (reply) {
-      var last = reply[0].data,
-        actual = that.result[1];
+      var last = reply[0].value,
+        actual = that.result.value;
 
       if (actual < bottomThreshold * last || actual > topThreshold * last) {
         that.emit(that.config.onTriggered);
@@ -140,6 +140,8 @@ SensorTrigger.prototype.diffRadius = function () {
       }
     } else if (err) {
       that.emit('error', err);
+    } else {
+      that.emit('nonTriggered');
     }
   });
 };
@@ -219,30 +221,23 @@ SensorTrigger.prototype.sendData = function () {
 SensorTrigger.prototype.publishData = function () {
   var that = this;
 
-  app.pub.publish(that.sensor.id, JSON.stringify({
-    data: that.data
-  }));
-
+  app.pub.publish(that.sensor.id, JSON.stringify(that.data));
   that.emit(that.config.onPublished);
 };
 
 SensorTrigger.prototype.storeData = function () {
   // store data to mongodb
   var that = this,
-    dataSeries = that.data instanceof Array ? that.data : that.data.split(','),
     mongoSeries = [],
     i;
 
-  // flatten the array
-  dataSeries = [].concat.apply([], dataSeries);
-
-  for (i = 0; i < dataSeries.length; i += 2) {
-    mongoSeries.push({
+  mongoSeries = that.data.map(function (el) {
+    return {
       '_sensor': that.sensor.id,
-      'timestamp': dataSeries[i],
-      'data': dataSeries[i + 1]
-    });
-  }
+      'at': el.at,
+      'value': el.value
+    };
+  });
 
   Data.create(mongoSeries, function (err) {
     if (err) {

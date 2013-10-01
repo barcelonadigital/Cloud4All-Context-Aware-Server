@@ -43,7 +43,7 @@ UserSchema.pre('remove', function (next) {
   Config.remove({_ref: this.id}, next);
 });
 
-UserSchema.pre('save', function (done) {
+UserSchema.pre('save', function (next) {
   // create default user-config
   var that = this;
   Config.findByRef(that.id, function (err, config) {
@@ -51,9 +51,9 @@ UserSchema.pre('save', function (done) {
       new Config({
         _ref: that.id,
         config: app.envConfig.triggers.user
-      }).save(done);
+      }).save(next);
     } else {
-      done();
+      next();
     }
   });
 });

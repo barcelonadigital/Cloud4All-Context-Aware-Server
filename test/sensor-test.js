@@ -93,33 +93,13 @@ describe('Sensor API', function () {
       .expect(200, done);
   });
 
-  it('saves again new data to sensor :id', function (done) {
-    request(app)
-      .post('/sensors/' + that.sensor.id + '/data')
-      .set('Accept', 'application/json')
-      .send(sensor_sample_data)
-      .expect(200, done);
-  });
-
   it('gets all data from sensor id', function (done) {
     request(app)
       .get('/sensors/' + that.sensor.id + '/data')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.data.should.equal(
-          [sensor_sample_data, sensor_sample_data].join(',')
-        );
-        done();
-      });
-  });
-
-  it('gets all data from sensor id', function (done) {
-    request(app)
-      .get('/sensors/' + that.sensor.id + '/data?q=all')
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        res.body.data.should.equal(
-          [sensor_sample_data, sensor_sample_data].join(',')
+        res.body.should.eql(
+          sensor_sample_data
         );
         done();
       });
@@ -130,7 +110,34 @@ describe('Sensor API', function () {
       .get('/sensors/' + that.sensor.id + '/data?q=new')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.data.should.equal(sensor_sample_data.join(','));
+        res.body.should.eql(sensor_sample_data);
+        done();
+      });
+  });
+
+  it('searches data from :start to :end', function (done) {
+    var start = sensor_sample_data[0].at,
+      end = sensor_sample_data[1].at;
+
+    request(app)
+      .get('/sensors/' + that.sensor.id +
+        '/data/start/' + start + '/end/' + end)
+      .expect('Content-type', /json/)
+      .expect(200, function (err, res) {
+        res.body.should.eql(sensor_sample_data.slice(0, 2));
+        done();
+      });
+  });
+
+  it('searches from :start to :end with incorrect format', function (done) {
+    var start = "incorrect-data",
+      end = sensor_sample_data[1].at;
+
+    request(app)
+      .get('/sensors/' + that.sensor.id +
+        '/data/start/' + start + '/end/' + end)
+      .expect('Content-type', /json/)
+      .expect(500, function (err, res) {
         done();
       });
   });

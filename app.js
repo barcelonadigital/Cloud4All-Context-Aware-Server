@@ -30,6 +30,7 @@ app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(express["static"](path.join(__dirname, 'public')));
+app.use('/bower_components', express["static"](path.join(__dirname, 'bower_components')));
 app.use(app.router);
 
 
@@ -52,7 +53,7 @@ if ('test' === app.get('env') || 'development' === app.get('env')) {
   app.post('/receiver', receiver.post);
 
   http.createServer(app).listen(testPort, function () {
-    console.log("Test server listening on port " + testPort + ' in "' + app.settings.env + '" mode');
+    console.log("Test client listening on port " + testPort + ' in "' + app.settings.env + '" mode');
   });
 }
 

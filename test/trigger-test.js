@@ -11,6 +11,7 @@ var app = require('../app'),
   async = require('async'),
   device_sample = require('./data/device-sample'),
   sensor_sample_data = require('./data/sensor-sample-data'),
+  new_sensor_sample_data = require('./data/new-sensor-sample-data'),
   Device = require('../models/devices').Device,
   Sensor = require('../models/devices').Sensor,
   Data = require('../models/devices').Data,
@@ -75,7 +76,7 @@ describe('Sensor trigger system', function () {
   it('emits onNewData from sensor :id', function (done) {
     e.emit("onNewData");
     e.once("storeData", function () {
-      e.data.should.equal(sensor_sample_data.join(','));
+      e.data.should.eql(sensor_sample_data);
     }).once("ack", done);
   });
 
@@ -84,17 +85,19 @@ describe('Sensor trigger system', function () {
     Config.updateByRef(that.sensor, that.config, function (err, item) {
       e.emit("onNewData");
       e.once("nonTriggered", function () {
-        e.result.should.be.below(that.config.config.triggers.onNewData.threshold);
+        e.result.value.should.be.below(
+          that.config.config.triggers.onNewData.threshold
+        );
         done();
       });
     });
   });
 
   it('sends new data to sensor and emits onNewData', function (done) {
-    cache.postData(sensorClass, that.sensor.id, sensor_sample_data, function () {
+    cache.postData(sensorClass, that.sensor.id, new_sensor_sample_data, function () {
       e.emit("onNewData");
       e.once("storeData", function () {
-        e.data.should.equal([sensor_sample_data].join(','));
+        e.data.should.eql(new_sensor_sample_data);
       }).once("ack", done);
     });
   });
@@ -111,12 +114,17 @@ describe('Sensor trigger system', function () {
   });
 
   it('tests the diffRadius trigger system', function (done) {
-    var data = [[1, 1], [2, 2], [3, 3], [4, 4.5]],
-      res = [Date.now(), 4.5];
+    var data = [
+        {at: 1, value: 1},
+        {at: 2, value: 2},
+        {at: 3, value: 3},
+        {at: 4, value: 4.5}],
+      res = {at: (new Date()).toISOString(), value: 4.5};
 
     e.config.diffRadius = "10";
     e.config.onTriggered = "sendData";
     e.sensor = that.sensor;
+    e.result = res;
 
     e.emit("diffRadius");
     e.once("ack", function () {
@@ -125,8 +133,12 @@ describe('Sensor trigger system', function () {
   });
 
   it('tests another diffRadius trigger system', function (done) {
-    var data = [[1, 1], [2, 2], [3, 3], [4, 4.5]],
-      res = [Date.now(), 4.3];
+    var data = [
+        {at: 1, value: 1},
+        {at: 2, value: 2},
+        {at: 3, value: 3},
+        {at: 4, value: 4.5}],
+      res = {at: (new Date()).toISOString(), value: 4.3};
 
     e.config.diffRadius = "10";
     e.config.onTriggered = "sendData";
@@ -140,8 +152,11 @@ describe('Sensor trigger system', function () {
   });
 
   it('tests sendProfile system', function (done) {
-
-    var data = [[1, 1], [2, 2], [3, 3], [4, 4.5]];
+    var data = [
+        {at: 1, value: 1},
+        {at: 2, value: 2},
+        {at: 3, value: 3},
+        {at: 4, value: 4.5}];
 
     e.config = that.config.config.triggers.onNewData;
     e.receiver = that.config.config.receiver;
@@ -156,7 +171,7 @@ describe('Sensor trigger system', function () {
         .parse(chunk)[0]
         .profile.preferences
         .display.screenEnhancement
-        .magnification.should.equal(1);
+        .tracking.should.equal("mouse");
     }).once("ack", done);
   });
 });

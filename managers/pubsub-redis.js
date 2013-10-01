@@ -21,7 +21,7 @@ var redis = require('redis');
 function PubSub(options) {
   options = options || {};
 
-  this.host = options && options.host ? options.port : '127.0.0.1';
+  this.host = options && options.host ? options.host : '127.0.0.1';
   this.port = options && options.port ? options.port : 6379;
 
   this.redisOptions = {

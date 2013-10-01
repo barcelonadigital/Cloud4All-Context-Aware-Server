@@ -1,0 +1,7 @@
+p There are {{ sensors.length }} sensors
+div(ng-repeat='sensor in sensors')
+  div Id: {{ sensor._id }}
+  div Type: {{ sensor.type }}
+  div Data: {{ sensor._last.value || "-" }}
+
+  a(href='/stream/{{ sensor._id }}') stream {{ stream._id }}

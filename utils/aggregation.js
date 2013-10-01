@@ -7,63 +7,55 @@
 var  _ = require('underscore');
 
 
-exports.sum = function (value, timestamp, next) {
-  var res = value.reduce(function (prev, cur) {
-    return prev + cur;
-  });
-  next([null, res]);
+exports.sum = function (data, next) {
+  var res = data.reduce(function (prev, cur) {
+    return prev + cur.value;
+  }, 0);
+  next({at: null, value: res});
 };
 
-exports.mean = function (value, timestamp, next) {
-  exports.sum(value, timestamp, function (res) {
-    next([null, res[1] / value.length]);
+exports.mean = function (data, next) {
+  exports.sum(data, function (res) {
+    next({at: null, value: res.value / data.length});
   });
 };
 
-exports.max = function (value, timestamp, next) {
-  var max = value[0],
+exports.max = function (data, next) {
+  var max = data[0],
     index = 0;
 
-  value.forEach(function (el, ind) {
-    if (max < el) {
+  data.forEach(function (el) {
+    if (max.value < el.value) {
       max = el;
-      index = ind;
     }
   });
-  next([timestamp[index], max]);
+  next(max);
 };
 
-exports.min = function (value, timestamp, next) {
-  var min = value[0],
+exports.min = function (data, next) {
+  var min = data[0],
     index = 0;
 
-  value.forEach(function (el, ind) {
-    if (min > el) {
+  data.forEach(function (el) {
+    if (min.value > el.value) {
       min = el;
-      index = ind;
     }
   });
-  next([timestamp[index], min]);
+  next(min);
 };
 
-exports.last = function (value, timestamp, next) {
-  next([_.last(timestamp), _.last(value)]);
+exports.last = function (data, next) {
+  next(_.last(data));
 };
 
-exports.aggregate = function (value, operator, next) {
-  // values are in temporal dataseries: (timestamp, value)
-  var isOdd = function (val, key) {return key % 2 !== 0; },
-    isEven = function (val, key) {return key % 2 === 0; },
-    array;
+exports.aggregate = function (data, operator, next) {
+  /* Aggregate values in temporal dataseries: (timestamp, value)
+  *  sample:
+  * [
+  *   { at: '2013-04-22T00:35:43.12Z', value: '1' },
+  *   { at: '2013-04-22T00:55:43.73Z', value: '2' }
+  * ]
+  */
 
-  if (value instanceof Array) {
-    array = value;
-  } else if (typeof value === "string") {
-    array = value.replace(/[^0-9.,]+/g, "").split(",");
-  }
-  operator(
-    array.filter(isOdd).map(parseFloat),
-    array.filter(isEven).map(parseFloat),
-    next
-  );
+  operator(data, next);
 };

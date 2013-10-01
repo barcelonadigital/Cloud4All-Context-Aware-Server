@@ -19,11 +19,12 @@ module.exports = function (app) {
 
   // Api: sensors
   app.get('/sensors/:id', sensor.get);
-  app.get('/sensors/', sensor.search);
+  app.get('/sensors', sensor.search);
 
   // Api:sensor-data
   app.get('/sensors/:id/data', sensor.getData);
   app.post('/sensors/:id/data', sensor.postData);
+  app.get('/sensors/:id/data/start/:start/end/:end', sensor.searchData);
 
   // Api:config
   app.get('/configs/:id', config.get);

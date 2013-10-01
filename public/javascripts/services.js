@@ -7,10 +7,13 @@
 
 
 // Socket connection
-angular.module('casApp.services', []).
-  factory('socket', function ($rootScope) {
+angular.module('casApp.services', ['ngResource']).
+  factory('socket', ['$rootScope', function ($rootScope) {
     var socket = io.connect();
     return {
+      connect: function (nameSpace) {
+        socket = io.connect(nameSpace);
+      },
       on: function (eventName, callback) {
         socket.on(eventName, function () {
           var args = arguments;
@@ -30,4 +33,8 @@ angular.module('casApp.services', []).
         });
       }
     };
-  });
+  }]).
+
+  factory('sensor', ['$resource', function ($resource) {
+    return $resource('/sensors/:sensorid/');
+  }]);

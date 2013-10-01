@@ -1,0 +1,21 @@
+{
+  "name": "context-aware-server",
+  "version": "0.0.1",
+  "authors": [
+    "mabuse <serra.guillem@gmail.com>"
+  ],
+  "description": "context aware server for streams of data",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
+  "dependencies": {
+    "angular-unstable":"1.1.5",
+    "angular-resource-unstable": "1.1.5",
+    "angular-mocks-unstable":"1.1.5",
+    "d3": "3.3.2"
+  }
+}

@@ -1,10 +1,11 @@
 extends layout
 
 block body
-  div(ng-controller='IndexCtrl')
+  div(ng-controller='DashBoardCtrl')
   div(ng-view)
 
-  script(src='javascripts/lib/angular/angular.js')
+  script(src='/bower_components/angular-unstable/angular.js')
+  script(src='/bower_components/angular-resource-unstable/angular-resource.js')
   script(src='/socket.io/socket.io.js')
   script(src='javascripts/app.js')
   script(src='javascripts/services.js')

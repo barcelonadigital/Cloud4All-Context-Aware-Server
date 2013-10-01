@@ -48,8 +48,15 @@ curl -H "Content-Type: application/json" -X POST --data @test/data/sensor-sample
 And get all the data stored in CAS from that sensor
 
 ```bash
-curl http://localhost:8888/sensors/1/data
+curl http://localhost:8888/sensors/{uuid}/data
 ```
+
+Or also ask for data from :start time and :end time in ISO-8601 format using following request
+
+```bash
+curl http://localhost:8888/sensors/{uuid}/data/start/2013-04-22T00:35:43.12Z/end/2013-04-22T01:15:43.28Z
+```
+
 
 Setup
 -----

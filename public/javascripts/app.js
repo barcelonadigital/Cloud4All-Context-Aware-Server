@@ -13,8 +13,8 @@ angular.module('casApp', [
   config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
     $routeProvider.
       when('/', {
-        templateUrl: '/partials/index',
-        controller: 'IndexCtrl'
+        templateUrl: '/partials/dashboard',
+        controller: 'DashBoardCtrl'
       }).
       when('/stream/:id', {
         templateUrl: '/partials/stream',

@@ -15,21 +15,28 @@ var mongoose = require('mongoose'),
 
 var DataSchema = new Schema({
   _sensor: {type: Schema.ObjectId, ref: 'Sensor'},
-  timestamp: {type: Date, "default": Date.now},
-  data: Number
+  at: {type: Date, "default": Date.now},
+  value: Number
 });
 
 DataSchema.statics.getLast = function (sensorId, cb) {
   this
     .find({'_sensor': sensorId})
-    .sort('-timestamp')
+    .sort('-at')
     .limit(1)
     .exec(cb);
 };
 
+DataSchema.pre('save', function (next) {
+  // save last value to sensor _last
+  var id = this.id;
+  Sensor.findByIdAndUpdate(this._sensor, {$set: {'_last': id}}, next);
+});
+
 var SensorSchema = new Schema({
   devid: String,
-  type: String
+  type: String,
+  _last: {type: Schema.ObjectId, ref: 'Data'}
 });
 
 /**
@@ -49,11 +56,14 @@ SensorSchema.pre('save', function (next) {
   var id = this.id;
   Config.findByRef(id, function (err, item) {
     if (!item) {
-      var config = new Config({_ref: id});
-      config.save();
+      var config = new Config({
+        _ref: id,
+        config: app.envConfig.triggers.sensor
+      }).save(next);
+    } else {
+      next();
     }
   });
-  next();
 });
 
 /**

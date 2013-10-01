@@ -120,7 +120,6 @@ CacheRedis.prototype.updateItem = function (itemClass, item, id, next) {
 CacheRedis.prototype.postItem = function (itemClass, item, next) {
   /**
    * Posts a new item to Redis cache. If id in item, uses its id.
-   * It can
   **/
 
   var that = this,
@@ -223,23 +222,50 @@ CacheRedis.prototype.getItemFromUuid = function (itemClass, uuid, next) {
 CacheRedis.prototype.postData = function (itemClass, id, data, key, next) {
   /**
   * Posts new data from itemclass id
+  * Data Series should be defined such as:
+  * [
+  *  {"at":"2013-04-22T00:35:43.12Z","value":"1"},
+  *  {"at":"2013-04-22T00:55:43.73Z","value":"2"},
+  *  {"at":"2013-04-22T01:15:43.28Z","value":"3"},
+  *  {"at":"2013-04-22T01:35:43.56Z","value":"4"}
+  * ]
+  * It also stores last request date in :last key
   */
 
   var that = this,
     dataKey = (next === undefined) ? 'data' : key,
-    cacheKeyData = itemClass.entityName + ':' + id + ':' + dataKey;
+    params = [],
+    cacheKeyData = itemClass.entityName + ':' + id + ':' + dataKey,
+    cacheKeyLast = itemClass.entityName + ':' + id + ':last';
 
   next = (next === undefined) ? key : next;
 
+  params = [cacheKeyData].concat(
+    data.
+      map(function (el) {
+        return [(new Date(el.at)).getTime().toString(), JSON.stringify(el)];
+      }).
+      reduce(function (a, b) {
+        return a.concat(b);
+      })
+  );
+
   that.log("cache postData(): key = " + cacheKeyData);
-  that.connection.rpush(cacheKeyData, data, function (err) {
-    next(err);
+
+  that.connection.zadd(params, function (err) {
+    if (err) {
+      next(err);
+    } else {
+      that.connection.set(cacheKeyLast, data[0].at, function (err) {
+        next(err);
+      });
+    }
   });
 };
 
 CacheRedis.prototype.getData = function (itemClass, id, start, end, key, next) {
   /**
-   * Gets data from start to end itemclass id
+   * Gets data from start position to end position from itemclass id
   **/
 
   var that = this,
@@ -251,23 +277,63 @@ CacheRedis.prototype.getData = function (itemClass, id, start, end, key, next) {
   next = (next === undefined) ? key : next;
 
   that.log("cache getData(): id = " + id);
-  that.connection.lrange(cacheKeyData, start, end, function (err, reply) {
-    next(err, reply.join(','));
+  that.connection.zrange(cacheKeyData, start, end, function (err, reply) {
+    next(err, that.parseData(reply));
   });
 };
 
-CacheRedis.prototype.getAllData = function (itemClass, id, key, next) {
+CacheRedis.prototype.getScoreData = function (itemClass, id, start, end, key, next) {
+  /**
+   * Gets data from start date to end date from itemclass id
+  **/
+
+  var that = this,
+    dataKey = (next === undefined) ? 'data' : key,
+    cacheKeyData = itemClass.entityName + ':' + id + ':' +  dataKey;
+
+  start = start || '-inf';
+  end = end || '+inf';
+  next = (next === undefined) ? key : next;
+
+  that.log("cache getData(): id = " + id);
+  that.connection.zrangebyscore(cacheKeyData, start, end, function (err, reply) {
+    next(err, that.parseData(reply));
+  });
+};
+
+CacheRedis.prototype.getAllData = function (itemClass, id, next) {
   /**
    * Gets all data from itemclass id
   **/
-  this.getData(itemClass, id, 0, -1, key, next);
+  this.getData(itemClass, id, 0, -1, next);
 };
 
-CacheRedis.prototype.getNewData = function (itemClass, id, key, next) {
+CacheRedis.prototype.getLastData = function (itemClass, id, next) {
   /**
-   * Gets new data from itemclass id
+   * Gets last data from itemclass id
   **/
-  this.getData(itemClass, id, -1, -1, key, next);
+  this.getData(itemClass, id, -1, -1, next);
+};
+
+CacheRedis.prototype.getNewData = function (itemClass, id, next) {
+  /**
+   * Gets last data sent using :last key where we store last request date
+  **/
+  var that = this,
+    cacheKeyLast = itemClass.entityName + ':' + id + ':last';
+
+  this.connection.get(cacheKeyLast, function (err, date) {
+    if (date) {
+      var timestamp = (new Date(date)).getTime();
+      that.getScoreData(itemClass, id, timestamp, '+inf', next);
+    } else {
+      next(err);
+    }
+  });
+};
+
+CacheRedis.prototype.parseData = function (data) {
+  return JSON.parse("[" + data.join(',') + "]");
 };
 
 module.exports.CacheRedis = CacheRedis;

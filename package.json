@@ -8,15 +8,29 @@
   "dependencies": {
     "express": "3.0.6",
     "jade": "*",
-    "redis":"*",
-    "mocha":"*",
-    "should":"*",
-    "expect":"*",
-    "supertest":"*",
-    "underscore":"*",
-    "async":"*",
-    "node-uuid":"*",
-    "mongoose":"*",
-    "socket.io":"*"
+    "redis": "*",
+    "mocha": "*",
+    "should": "*",
+    "expect": "*",
+    "supertest": "*",
+    "underscore": "*",
+    "optimist": "*",
+    "async": "*",
+    "node-uuid": "*",
+    "mongoose": "*",
+    "socket.io": "*"
+  },
+  "devDependencies": {
+    "karma-script-launcher": "~0.1.0",
+    "karma-firefox-launcher": "~0.1.0",
+    "karma-chrome-launcher": "~0.1.0",
+    "karma-html2js-preprocessor": "~0.1.0",
+    "karma-jasmine": "~0.1.3",
+    "karma-requirejs": "~0.1.0",
+    "karma-coffee-preprocessor": "~0.1.0",
+    "karma-phantomjs-launcher": "~0.1.0",
+    "karma": "~0.10.2",
+    "karma-mocha": "~0.1.0",
+    "karma-chai": "0.0.1"
   }
 }
