@@ -6,8 +6,8 @@
 /* Services */
 
 
-// Socket connection
 angular.module('casApp.services', ['ngResource']).
+  // Socket connection
   factory('socket', ['$rootScope', function ($rootScope) {
     var socket = io.connect();
     return {
@@ -34,7 +34,13 @@ angular.module('casApp.services', ['ngResource']).
       }
     };
   }]).
-
+  //sensor api
   factory('sensor', ['$resource', function ($resource) {
     return $resource('/sensors/:sensorid/');
   }]);
+
+//underscore
+angular.module('underscore', [])
+  .factory('_', function () {
+    return window._;
+  });

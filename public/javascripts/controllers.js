@@ -9,17 +9,23 @@ angular.module('casApp.controllers', []).
 
     sc.sensor = params.id;
     sc.data = [];
+    sc.trigger = [];
 
     socket.connect('/stream');
     socket.emit('subscribe', params.id);
     socket.on('data', function (el) {
       sc.data.push(el);
     });
+
+    socket.on('trigger', function (el) {
+      sc.trigger.push(el);
+    });
   }]).
 
-  controller('DashBoardCtrl', ['$scope', 'sensor', 'socket', function (sc, sensor, socket) {
+  controller('DashBoardCtrl', ['$scope', 'sensor', 'socket', '_', function (sc, sensor, socket, _) {
 
     sc.data = {};
+    sc.trigger = {};
     socket.connect('/dashboard');
 
     sc.sensors = sensor.query({'populate': true}, function () {
@@ -29,16 +35,12 @@ angular.module('casApp.controllers', []).
     });
 
     socket.on('data', function (el) {
-      var i = 0,
-        last = {};
+      _.find(sc.sensors, function (sensor) {
+        return sensor._id === el.id;
+      })._last = el.data;
+    });
 
-      for (i = 0; i < sc.sensors.length; i++) {
-        if (sc.sensors[i]._id === el.id) {
-          sc.sensors[i]._last = sc.sensors[i]._last || last;
-          sc.sensors[i]._last.at = el.at;
-          sc.sensors[i]._last.value = el.value;
-          break;
-        }
-      }
+    socket.on('trigger', function (el) {
+      sc.trigger[el.id] = el.data;
     });
   }]);

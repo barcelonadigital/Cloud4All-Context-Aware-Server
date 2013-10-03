@@ -4,7 +4,8 @@
 
 "use strict";
 
-var redis = require('redis');
+var redis = require('redis'),
+  _ = require('underscore');
 
 /**
  * PubSub - Simple Redis Pub/Sub
@@ -35,31 +36,41 @@ function PubSub(options) {
   this.clients = {};
 }
 
-PubSub.prototype.subscribe = function (channel, socket) {
+PubSub.prototype.subscribe = function () {
 
-  if (!(channel in this.clients)) {
-    this.clients[channel] = [socket];
+  var channels = _.initial(arguments),
+    that = this,
+    socket = _.last(arguments);
 
-  } else if (this.clients[channel].indexOf(socket) === -1) {
-    this.clients[channel].push(socket);
-  }
+  channels.forEach(function (channel) {
+    if (!(channel in that.clients)) {
+      that.clients[channel] = [socket];
 
-  this.sub.subscribe(channel);
-
+    } else if (that.clients[channel].indexOf(socket) === -1) {
+      that.clients[channel].push(socket);
+    }
+    that.sub.subscribe(channel);
+  });
 };
 
-PubSub.prototype.unsubscribe = function (channel, socket) {
+PubSub.prototype.unsubscribe = function () {
 
-  if (channel in this.clients) {
-    var index = this.clients[channel].indexOf(socket);
-    if (index >= 0) {
-      this.clients[channel].splice(index, 1);
-      if (this.clients[channel].length === 0) {
-        delete this.clients[channel];
-        this.pub.unsubscribe(channel);
+  var channels = _.initial(arguments),
+    that = this,
+    socket = _.last(arguments);
+
+  channels.forEach(function (channel) {
+    if (channel in that.clients) {
+      var index = that.clients[channel].indexOf(socket);
+      if (index >= 0) {
+        that.clients[channel].splice(index, 1);
+        if (that.clients[channel].length === 0) {
+          delete that.clients[channel];
+          that.pub.unsubscribe(channel);
+        }
       }
     }
-  }
+  });
 };
 
 PubSub.prototype.publish = function () {

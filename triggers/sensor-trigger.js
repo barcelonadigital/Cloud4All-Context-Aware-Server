@@ -4,6 +4,7 @@
 var util = require('util'),
   http = require('http'),
   events = require('events'),
+  _ = require('underscore'),
   app = require('../app'),
   utils = require('../utils/utils'),
   agg = require('../utils/aggregation'),
@@ -39,6 +40,7 @@ function SensorTrigger(sensor) {
   this.on('sendProfile', this.sendProfile);
   this.on('storeData', this.storeData);
 
+
   events.EventEmitter.call(this);
 }
 
@@ -54,7 +56,10 @@ SensorTrigger.prototype.getSensorConfig = function (trigger) {
   Config.findByRef(that.sensor.id, function (err, item) {
     that.receiver = item.config.receiver;
     that.config = item.config.triggers[trigger];
+    that.on(that.config.onTriggered, that.publishTrigger);
+
     that.emit(that.config.onConfig);
+
   });
 };
 
@@ -219,10 +224,20 @@ SensorTrigger.prototype.sendData = function () {
 };
 
 SensorTrigger.prototype.publishData = function () {
-  var that = this;
+  app.pub.publish("data." + this.sensor.id, JSON.stringify(this.data));
+  this.emit(this.config.onPublished);
+};
 
-  app.pub.publish(that.sensor.id, JSON.stringify(that.data));
-  that.emit(that.config.onPublished);
+SensorTrigger.prototype.publishTrigger = function () {
+  var el = {
+    first: _.first(this.data).at,
+    last: _.last(this.data).at,
+    config: this.config
+  };
+
+  debugger;
+
+  app.pub.publish("trigger." + this.sensor.id, JSON.stringify(el));
 };
 
 SensorTrigger.prototype.storeData = function () {

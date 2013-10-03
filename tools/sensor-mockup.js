@@ -10,6 +10,7 @@ var util = require('util'),
 
   var args = optimist.argv,
     id = args.id || null,
+    num = args.num || 1,
     sleep = args.sleep || 1000,
     host = args.host || 'localhost',
     port = args.port || '8888';
@@ -22,10 +23,16 @@ var util = require('util'),
   var path = '/sensors/' + id + '/data';
   var sendData = function () {
 
-    var data = [{
-        at: (new Date()).toISOString(),
+    var data = [],
+      now = Date.now(),
+      i = 0;
+
+    for (i = 0; i < num; i++) {
+      data[i] = {
+        at: new Date(now + sleep * i / (2 * num)).toISOString(),
         value: Math.floor((Math.random() * 10) + 1)
-      }];
+      };
+    }
 
     data = JSON.stringify(data);
 
