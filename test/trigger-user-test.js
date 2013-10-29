@@ -7,6 +7,7 @@ process.env.NODE_ENV = 'test';
 var app = require('../app'),
   request = require('supertest'),
   should = require('should'),
+  _ = require('underscore'),
   trigger = require('../triggers/user-trigger'),
   async = require('async'),
   device_sample = require('./data/device-sample'),
@@ -104,7 +105,19 @@ describe('Sensor trigger system', function () {
     var e = new trigger.UserTrigger(that.user);
     e.emit('onNewUser');
     e.once('sendProfile', function () {
-      e.data[0].data.should.eql(that.data.reverse());
+      e.data[0].data.should.eql(_.clone(that.data).reverse());
+      done();
+    });
+  });
+
+  it('emits on new user :id sends user profile', function (done) {
+    var e = new trigger.UserTrigger(that.user);
+    e.emit('onNewUser');
+    e.once('ack', function (chunk) {
+      var profile = JSON.parse(chunk);
+      profile.context[0].data.should.eql(_.clone(that.data).reverse());
+      profile.uuid.should.eql(that.user.uuid);
+      profile.profile.should.eql(that.user.profile);
       done();
     });
   });

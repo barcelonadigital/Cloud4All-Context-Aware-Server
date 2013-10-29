@@ -26,6 +26,8 @@ function UserTrigger(user) {
   this.on('onNewUser', this.getUserConfig, 'onNewUser');
   this.on('getNearSensors', this.getNearSensors);
   this.on('getLastData', this.getLastData);
+  this.on('sendProfile', this.sendProfile);
+
 
   events.EventEmitter.call(this);
 }
@@ -84,6 +86,40 @@ UserTrigger.prototype.getLastData = function () {
     } else {
       that.emit('noData');
     }
+  });
+};
+
+UserTrigger.prototype.sendRequest = function (postData) {
+  var that = this,
+    data = JSON.stringify(postData),
+    receiver = that.receiver,
+    options = {
+      host: receiver.host,
+      port: receiver.port,
+      path: receiver.path,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
+      }
+    };
+
+  var req = http.request(options, function (res) {
+    res.setEncoding('utf8');
+    res.on('data', function (chunk) {
+      that.emit(that.config.onSent, chunk, that.config);
+    });
+  });
+
+  req.write(data);
+  req.end();
+};
+
+UserTrigger.prototype.sendProfile = function () {
+  this.sendRequest({
+    uuid: this.user.uuid,
+    profile: this.user.profile,
+    context: this.data
   });
 };
 

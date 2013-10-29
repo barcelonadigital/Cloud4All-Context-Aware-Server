@@ -179,6 +179,7 @@ SensorTrigger.prototype.getNearUsers = function () {
 SensorTrigger.prototype.sendRequest = function (postData) {
   var that = this,
     receiver = that.receiver,
+    data = JSON.stringify(postData),
     options = {
       host: receiver.host,
       port: receiver.port,
@@ -186,7 +187,7 @@ SensorTrigger.prototype.sendRequest = function (postData) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': postData.length
+        'Content-Length': data.length
       }
     };
 
@@ -197,28 +198,19 @@ SensorTrigger.prototype.sendRequest = function (postData) {
     });
   });
 
-  req.write(postData);
+  req.write(data);
   req.end();
 };
 
 SensorTrigger.prototype.sendProfile = function () {
-  var that = this,
-    receiver = that.receiver,
-    postData = {};
-
-  postData = JSON.stringify(that.users);
-  that.sendRequest(postData);
+  this.sendRequest(this.users);
 };
 
 SensorTrigger.prototype.sendData = function () {
-  var that = this,
-    receiver = that.receiver,
-    postData = JSON.stringify({
-      id: that.sensor.id,
-      data: that.data
-    });
-
-  that.sendRequest(postData);
+  this.sendRequest({
+    id: this.sensor.id,
+    data: this.data
+  });
 };
 
 SensorTrigger.prototype.publishData = function () {
@@ -232,9 +224,6 @@ SensorTrigger.prototype.publishTrigger = function () {
     last: _.last(this.data).at,
     config: this.config
   };
-
-  debugger;
-
   app.pub.publish("trigger." + this.sensor.id, JSON.stringify(el));
 };
 
