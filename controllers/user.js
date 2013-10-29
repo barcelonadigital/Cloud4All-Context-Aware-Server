@@ -29,22 +29,21 @@ exports.search = function (req, res, next) {
   /**
    * Gets user from query search
   **/
-  var query = req.query;
-  var uuid = query.uuid || null;
 
-  if (uuid) {
-    User.findByUuid(uuid, function (err, item) {
-      if (err) {
-        next(err);
-      } else if (item) {
-        res.send(item);
-      } else {
-        res.send(404);
-      }
-    });
-  } else {
-    res.send(404);
-  }
+  var q = req.query || {},
+    query = null;
+
+  query = User.find(q);
+
+  query.exec(function (err, users) {
+    if (err) {
+      next(err);
+    } else if (users.length > 0) {
+      res.send(users);
+    } else {
+      res.send(404);
+    }
+  });
 };
 
 exports.post = function (req, res, next) {
@@ -72,12 +71,14 @@ exports.update = function (req, res, next) {
   var item = req.body,
     id = req.params.id;
 
-  User.findByIdAndUpdate(id, item, function (err, item) {
+  User.findByIdAndUpdate(id, item, function (err, user) {
     if (err) {
       console.log(err);
       next(err);
-    } else if (item) {
-      res.send(item);
+    } else if (user) {
+      var e = new trigger.UserTrigger(user);
+      e.emit("onNewUser");
+      res.send(user);
     } else {
       res.send(404);
     }

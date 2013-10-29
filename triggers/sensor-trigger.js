@@ -47,9 +47,7 @@ function SensorTrigger(sensor) {
 util.inherits(SensorTrigger, events.EventEmitter);
 
 SensorTrigger.prototype.getSensorConfig = function (trigger) {
-  var that = this,
-    sensorKeyId = that.sensorClass.entityName + ':' + that.sensor.id,
-    baseKeyId = 'base';
+  var that = this;
 
   trigger = trigger || 'onNewData';
 

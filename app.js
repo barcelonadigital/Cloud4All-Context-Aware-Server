@@ -29,6 +29,7 @@ app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
+app.use(require('less-middleware')({ src: __dirname + '/public' }));
 app.use(express["static"](path.join(__dirname, 'public')));
 app.use('/bower_components', express["static"](path.join(__dirname, 'bower_components')));
 app.use(app.router);

@@ -17,7 +17,7 @@ var app = require('../app'),
 
 exports.get = function (req, res, next) {
   /**
-   * Gets device from database
+   * Gets sensor from database
   **/
   var id = req.params.id,
     populate = req.query.populate || false,
@@ -42,7 +42,7 @@ exports.get = function (req, res, next) {
 
 exports.search = function (req, res, next) {
   /**
-   * search devices from database
+   * search sensors from database
   **/
 
   var q = req.query || {},

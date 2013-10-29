@@ -5,7 +5,7 @@
 "use strict";
 
 exports.index = function (req, res) {
-  res.render('dashboard', { title: 'Express' });
+  res.render('index', { title: 'Express' });
 };
 
 exports.partials = function (req, res) {

@@ -1,0 +1,41 @@
+
+/*
+ * Graph canvas stylesheet
+ */
+
+path {
+  stroke-width: 1;
+  fill: none;
+}
+
+.data {
+  stroke: green;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+}
+
+.x.axis {
+  line {
+    stroke: lightgrey;
+  }
+  .minor {
+    stroke-opacity: .5;
+  }
+  path {
+    display: none;
+  }
+  text {
+    font-size: 10px;
+  }
+}
+
+.y.axis line, .y.axis path {
+  fill: none;
+  stroke: #000;
+}
+
+.y.axis text {
+  font-size: 12px;
+}

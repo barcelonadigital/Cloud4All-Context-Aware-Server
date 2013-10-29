@@ -74,7 +74,7 @@ describe('user API', function () {
       .get('/users/' + '?uuid=' + that.user.uuid)
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.uuid.should.equal(that.user.uuid);
+        res.body[0].uuid.should.equal(that.user.uuid);
         done();
       });
   });

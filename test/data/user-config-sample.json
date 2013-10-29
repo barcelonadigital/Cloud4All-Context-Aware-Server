@@ -3,14 +3,11 @@
     "config": {
         "triggers": {
             "onNewUser": {
-                "onConfig": "getNewData",
-                "onData": "getMeanData",
-                "onAggregated" : "threshold",
-                "onTriggered": "sendData",
-                "onSent": "ack",
-                "diffRadius": "10",
-                "threshold": "15",
-                "maxDistance": 1
+                "onConfig": "rightHere",
+                "onRightHere": "rightNow",
+                "onRightNow": "sensorTrigger",
+                "rightNow": "10",
+                "rightHere": "20"
             }
         }
     }

@@ -18,6 +18,7 @@
     "async": "*",
     "node-uuid": "*",
     "mongoose": "*",
+    "less-middleware": "*",
     "socket.io": "*"
   },
   "devDependencies": {

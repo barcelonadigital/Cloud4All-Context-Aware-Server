@@ -25,6 +25,24 @@ exports.get = function (req, res, next) {
   });
 };
 
+exports.search = function (req, res, next) {
+  /**
+   * search devices from database
+  **/
+
+  var q = req.query || {};
+
+  Device.find(q, function (err, devices) {
+    if (err) {
+      next(err);
+    } else if (devices.length > 0) {
+      res.send(devices);
+    } else {
+      res.send(404);
+    }
+  });
+};
+
 exports.post = function (req, res, next) {
   /**
    * Posts new device returning device with id

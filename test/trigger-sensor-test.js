@@ -12,7 +12,9 @@ var app = require('../app'),
   device_sample = require('./data/device-sample'),
   sensor_sample_data = require('./data/sensor-sample-data'),
   new_sensor_sample_data = require('./data/new-sensor-sample-data'),
+  user_sample = require('./data/user-sample'),
   Device = require('../models/devices').Device,
+  User = require('../models/users').User,
   Sensor = require('../models/devices').Sensor,
   Data = require('../models/devices').Data,
   Config = require('../models/configs').Config,
@@ -26,7 +28,7 @@ describe('Sensor trigger system', function () {
 
   before(function (done) {
 
-    console.log("\n\nTESTING TRIGGER SYSTEM\n");
+    console.log("\n\nTESTING SENSOR TRIGGER SYSTEM\n");
     app.redisClient.flushall();
 
     async.waterfall([
@@ -34,10 +36,19 @@ describe('Sensor trigger system', function () {
         Data.remove(callback);
       },
       function (item, callback) {
+        User.remove(callback);
+      },
+      function (item, callback) {
         Sensor.remove(callback);
       },
       function (item, callback) {
         Device.remove(callback);
+      },
+      function (item, callback) {
+        var user = new User(user_sample);
+        user.save(function (err, item) {
+          callback(null, item);
+        });
       },
       function (item, callback) {
         Device.fullSave(device_sample, callback);

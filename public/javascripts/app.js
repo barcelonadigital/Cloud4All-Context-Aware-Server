@@ -9,7 +9,7 @@ angular.module('casApp', [
   'casApp.filters',
   'casApp.services',
   'casApp.directives',
-  'underscore'
+  'casApp.libs'
 ]).
   config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
     $routeProvider.

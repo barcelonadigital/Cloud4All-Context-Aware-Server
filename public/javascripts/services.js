@@ -39,8 +39,17 @@ angular.module('casApp.services', ['ngResource']).
     return $resource('/sensors/:sensorid/');
   }]);
 
-//underscore
-angular.module('underscore', [])
+//external library dependencies
+angular.module('casApp.libs', [])
+  // Underscore
   .factory('_', function () {
     return window._;
+  })
+  // D3
+  .factory('d3', function () {
+    return window.d3;
+  })
+  // Moment
+  .factory('moment', function () {
+    return window.moment;
   });

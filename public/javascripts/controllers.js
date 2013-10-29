@@ -14,7 +14,7 @@ angular.module('casApp.controllers', []).
     socket.connect('/stream');
     socket.emit('subscribe', params.id);
     socket.on('data', function (el) {
-      sc.data.push(el);
+      sc.data = sc.data.concat(el);
     });
 
     socket.on('trigger', function (el) {

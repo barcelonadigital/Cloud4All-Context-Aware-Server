@@ -13,6 +13,7 @@ module.exports = function (app) {
 
   // Api:devices
   app.get('/devices/:id', device.get);
+  app.get('/devices', device.search);
   app.post('/devices', device.post);
   app.post('/devices/:id', device.update);
   app.del('/devices/:id', device.remove);
