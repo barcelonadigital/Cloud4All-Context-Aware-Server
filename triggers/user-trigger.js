@@ -51,7 +51,7 @@ UserTrigger.prototype.getNearSensors = function () {
     maxDistance = that.config.maxDistance || 1;
 
   Device.findNear({gps: that.user.gps, maxDistance: maxDistance}, function (err, devices) {
-    if (devices) {
+    if (devices.length > 0) {
       devices.forEach(function (device) {
         that.sensors = that.sensors.concat(device.sensors);
       });

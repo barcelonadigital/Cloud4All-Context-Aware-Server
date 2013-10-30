@@ -59,9 +59,10 @@ describe('Sensor trigger system', function () {
       function (item, callback) {
         that.device = item;
         that.sensor = that.device.sensors[0];
-        Config.findByRef(that.sensor.id, callback);
+        Config.findByRef(that.user.id, function (err, item) {
+          callback(null, item);
+        });
       },
-
       function (item, callback) {
         that.config = item;
         that.data = [];
@@ -119,6 +120,31 @@ describe('Sensor trigger system', function () {
       profile.uuid.should.eql(that.user.uuid);
       profile.profile.should.eql(that.user.profile);
       done();
+    });
+  });
+
+  it('does not trigger when data is not now', function (done) {
+    var e = new trigger.UserTrigger(that.user);
+
+    that.config.config.triggers.onNewUser.maxTime = "10";
+    Config.updateByRef(that.user, that.config, function (err, item) {
+      e.emit("onNewUser");
+      e.once("noData", function () {
+        done();
+      });
+    });
+  });
+
+  it('does not trigger when sensor is not here', function (done) {
+    var e = new trigger.UserTrigger(that.user);
+
+    that.user.gps[0] = that.user.gps[0] + 1;
+
+    that.user.save(function (err, item) {
+      e.emit("onNewUser");
+      e.once("notNear", function () {
+        done();
+      });
     });
   });
 });
