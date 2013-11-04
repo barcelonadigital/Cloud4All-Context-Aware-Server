@@ -16,36 +16,29 @@ angular.module('casApp.directives', []).
         data: '=',
         startTime: '=',
         endTime: '=',
-        period: '=',
+        timePeriod: '@',
+        timeUnit: '@',
         width: '@',
         height: '@'
       },
       link: function (scope, element, attrs) {
-
-        scope.data = [
-          {"at": "2013-10-10T15:32:02.051Z", "value": 2},
-          {"at": "2013-10-10T15:32:03.052Z", "value": 3},
-          {"at": "2013-10-10T15:32:04.053Z", "value": 10},
-          {"at": "2013-10-10T15:32:05.054Z", "value": 1},
-          {"at": "2013-10-10T15:32:06.054Z", "value": 2}
-        ];
-
-        var endTime = moment(scope.endTime),
-          period = scope.period || 1,
-          startTime = moment(endTime).subtract('days', period);
+        var startTime = moment(scope.startTime),
+          timePeriod = scope.timePeriod || '1',
+          timeUnit = scope.timeUnit || 'hours',
+          endTime = moment(startTime).add(timeUnit, timePeriod);
 
         var height = scope.height - margin.top - margin.bottom,
           width = scope.width - margin.left - margin.right;
 
         var x = d3.time.scale().domain([startTime, endTime]).range([0, width]);
         var y = d3.scale.linear().domain([
-            d3.min(scope.data, function (d) {return d.value; }),
-            d3.max(scope.data, function (d) {return d.value; })
-          ]);
+            d3.min(scope.data, function (d) {return d.value; }) || -10,
+            d3.max(scope.data, function (d) {return d.value; }) || 20
+          ]).range([height, 0]);
 
         var line = d3.svg.line()
           .x(function (d) {
-            return x(d.at);
+            return x(moment(d.at));
           })
           .y(function (d) {
             return y(d.value);
@@ -54,27 +47,53 @@ angular.module('casApp.directives', []).
         var graph = d3.select(element[0])
           .append('svg:svg')
           .attr('width', scope.width)
-          .attr('height', scope.heigth)
+          .attr('height', scope.height)
           .append('svg:g')
           .attr('transform', 'translate(' + margin.bottom + ',' + margin.top + ')');
 
-        var xAxis = d3.svg.axis().scale(x).tickSize(-height).tickSubdivide(1),
+        var xAxis = d3.svg.axis().scale(x).tickSize(height).tickSubdivide(1).orient('bottom'),
           yAxis = d3.svg.axis().scale(y).ticks(6).orient('left');
 
-        graph.append('svg:g')
+        graph.append('g')
           .attr('class', 'x axis')
           .attr('tranform', 'translate(0,' + height + ')')
           .call(xAxis);
 
-        graph.append('svg:g')
+        graph.append('g')
           .attr('class', 'y axis')
-          .attr('tranform', 'translate(-10,0)')
           .call(yAxis);
 
-        graph.append('svg:path')
-          .attr('d', line(scope.data))
-          .attr('class', 'data');
+        graph.append('path')
+          .data([scope.data])
+          .attr('d', line)
+          .attr('class', 'line');
 
+        function updateData() {
+
+          var last = scope.data.length > 0 ? moment(_.last(scope.data).at) : null;
+
+          if (last && last > endTime) {
+            // update x axis
+            startTime = last;
+            endTime = moment(startTime).add(timeUnit, timePeriod);
+            x.domain([startTime, endTime]);
+            // reset data to last value
+            scope.data = [_.last(scope.data)];
+          }
+
+          y.domain([
+            d3.min(scope.data, function (d) {return d.value; }),
+            d3.max(scope.data, function (d) {return d.value; })
+          ]);
+
+          graph.selectAll('path.line')
+            .data([scope.data])
+            .attr('d', line);
+        }
+
+        scope.$watch('data', function () {
+          updateData();
+        });
       }
     };
   }]);
