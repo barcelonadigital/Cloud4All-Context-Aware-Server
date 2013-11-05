@@ -7,7 +7,7 @@
 angular.module('casApp.directives', []).
   directive('lineChart', ['d3', '_', 'moment', function (d3, _, moment) {
 
-    var margin = {top: 20, right: 10, bottom: 20, left: 10};
+    var margin = {top: 20, right: 10, bottom: 20, left: 30};
 
     return {
       restrict: 'E',
@@ -15,7 +15,6 @@ angular.module('casApp.directives', []).
       scope: {
         data: '=',
         startTime: '=',
-        endTime: '=',
         timePeriod: '@',
         timeUnit: '@',
         width: '@',
@@ -32,8 +31,8 @@ angular.module('casApp.directives', []).
 
         var x = d3.time.scale().domain([startTime, endTime]).range([0, width]);
         var y = d3.scale.linear().domain([
-            d3.min(scope.data, function (d) {return d.value; }) || -10,
-            d3.max(scope.data, function (d) {return d.value; }) || 20
+            d3.min(scope.data, function (d) {return d.value; }),
+            d3.max(scope.data, function (d) {return d.value; })
           ]).range([height, 0]);
 
         var line = d3.svg.line()
@@ -49,7 +48,7 @@ angular.module('casApp.directives', []).
           .attr('width', scope.width)
           .attr('height', scope.height)
           .append('svg:g')
-          .attr('transform', 'translate(' + margin.bottom + ',' + margin.top + ')');
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
         var xAxis = d3.svg.axis().scale(x).tickSize(height).tickSubdivide(1).orient('bottom'),
           yAxis = d3.svg.axis().scale(y).ticks(6).orient('left');
@@ -69,22 +68,28 @@ angular.module('casApp.directives', []).
           .attr('class', 'line');
 
         function updateData() {
-
+          //check data scope
           var last = scope.data.length > 0 ? moment(_.last(scope.data).at) : null;
+          var first = scope.data.length > 0 ? moment(_.first(scope.data).at) : null;
 
           if (last && last > endTime) {
-            // update x axis
             startTime = last;
             endTime = moment(startTime).add(timeUnit, timePeriod);
-            x.domain([startTime, endTime]);
-            // reset data to last value
             scope.data = [_.last(scope.data)];
           }
 
+          // update x axis
+          x.domain([startTime, endTime]);
+          xAxis.scale(x);
+          graph.selectAll('g.x.axis').call(xAxis);
+
+          // update y axis
           y.domain([
             d3.min(scope.data, function (d) {return d.value; }),
             d3.max(scope.data, function (d) {return d.value; })
           ]);
+          yAxis.scale(y);
+          graph.selectAll('g.y.axis').call(yAxis);
 
           graph.selectAll('path.line')
             .data([scope.data])

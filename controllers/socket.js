@@ -19,12 +19,12 @@ module.exports = function (app, io) {
 
     switch (root) {
     case 'data':
-      io.of('/stream')['in'](id).emit('data', el);
+      io.of('/stream')['in'](id).emit('data', {'id': id, 'data': el});
       io.of('/dashboard').emit('data', {'id': id, 'data': _.last(el)});
       break;
 
     case 'trigger':
-      io.of('/stream')['in'](id).emit('trigger', el);
+      io.of('/stream')['in'](id).emit('trigger', {'id': id, 'data': el});
       io.of('/dashboard').emit('trigger', {'id': id, 'data': el});
       break;
     }

@@ -14,11 +14,15 @@ angular.module('casApp.controllers', []).
     socket.connect('/stream');
     socket.emit('subscribe', params.id);
     socket.on('data', function (el) {
-      sc.data = sc.data.concat(el);
+      if (el.id == sc.sensor) {
+        sc.data = sc.data.concat(el.data);
+      }
     });
 
     socket.on('trigger', function (el) {
-      sc.trigger.push(el);
+      if (el.id == sc.sensor) {
+        sc.trigger.push(el.data);
+      }
     });
   }]).
 
