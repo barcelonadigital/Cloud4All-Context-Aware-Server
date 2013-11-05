@@ -50,8 +50,8 @@ angular.module('casApp.directives', []).
           .append('svg:g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        var xAxis = d3.svg.axis().scale(x).tickSize(height).tickSubdivide(1).orient('bottom'),
-          yAxis = d3.svg.axis().scale(y).ticks(6).orient('left');
+        var xAxis = d3.svg.axis().scale(x).tickSize(height).orient('bottom'),
+          yAxis = d3.svg.axis().scale(y).orient('left');
 
         graph.append('g')
           .attr('class', 'x axis')
@@ -70,7 +70,6 @@ angular.module('casApp.directives', []).
         function updateData() {
           //check data scope
           var last = scope.data.length > 0 ? moment(_.last(scope.data).at) : null;
-          var first = scope.data.length > 0 ? moment(_.first(scope.data).at) : null;
 
           if (last && last > endTime) {
             startTime = last;
