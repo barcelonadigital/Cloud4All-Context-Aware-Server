@@ -34,9 +34,14 @@ angular.module('casApp.services', ['ngResource']).
       }
     };
   }]).
+
   //sensor api
   factory('sensor', ['$resource', function ($resource) {
     return $resource('/sensors/:sensorid/');
+  }]).
+
+  factory('data', ['$resource', function ($resource) {
+    return $resource('/sensors/:sensorid/data/');
   }]);
 
 //external library dependencies

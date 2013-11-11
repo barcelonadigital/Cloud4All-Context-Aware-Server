@@ -295,7 +295,7 @@ CacheRedis.prototype.getScoreData = function (itemClass, id, start, end, key, ne
   end = end || '+inf';
   next = (next === undefined) ? key : next;
 
-  that.log("cache getData(): id = " + id);
+  that.log("cache getData(): id, start, end = " + id + ", " + start + ", " + end);
   that.connection.zrangebyscore(cacheKeyData, start, end, function (err, reply) {
     next(err, that.parseData(reply));
   });

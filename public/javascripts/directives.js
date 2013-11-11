@@ -14,22 +14,71 @@ angular.module('casApp.directives', []).
       replace: true,
       scope: {
         data: '=',
-        startTime: '=',
-        timePeriod: '@',
-        timeUnit: '@',
+        stream: '=',
+        sensor: '@',
+        period: '@',
+        unit: '@',
         width: '@',
         height: '@'
       },
-      link: function (scope, element, attrs) {
-        var startTime = moment(scope.startTime),
-          timePeriod = scope.timePeriod || '1',
-          timeUnit = scope.timeUnit || 'hours',
-          endTime = moment(startTime).add(timeUnit, timePeriod);
+      controller: ['$scope', 'data', function (sc, data) {
+        sc.updateTime = function (start, end) {
+          sc.start = start || sc.start || moment();
+          sc.end = end || moment(sc.start).add(sc.unit, sc.period);
+        };
 
-        var height = scope.height - margin.top - margin.bottom,
+        sc.updateData = function() {
+          var last = sc.data.length > 0 ? moment(_.last(sc.data).at) : null;
+
+          if (last && last > sc.end) {
+            sc.updateTime(last, moment(last).add(sc.unit, sc.period));
+            sc.data = [_.last(sc.data)];
+          }
+        };
+
+        sc.forward = function () {
+          var now = moment();
+          sc.stream = false;
+
+          if (sc.end < now) {
+            sc.end.add(sc.unit, sc.period);
+            sc.start.add(sc.unit, sc.period);
+          } 
+
+          if (sc.end > now) {
+            sc.stream = true;
+          }
+
+          data.query({
+            sensorid: sc.sensor, 
+            start: sc.start.toISOString(), 
+            end: sc.end.toISOString()}, function (data) {
+              sc.data = data;
+          });
+        };
+
+        sc.back = function () {
+          sc.stream = false;
+
+          sc.end.subtract(sc.unit, sc.period);
+          sc.start.subtract(sc.unit, sc.period);
+
+          data.query({
+            sensorid: sc.sensor,
+            start: sc.start.toISOString(), 
+            end: sc.end.toISOString()}, function (data) {
+              sc.data = data;
+          });
+        };
+      }],
+      link: function (scope, element) {
+        var  height = scope.height - margin.top - margin.bottom,
           width = scope.width - margin.left - margin.right;
 
-        var x = d3.time.scale().domain([startTime, endTime]).range([0, width]);
+        scope.updateTime();
+
+        var x = d3.time.scale().domain([
+            scope.start, scope.end]).range([0, width]);
         var y = d3.scale.linear().domain([
             d3.min(scope.data, function (d) {return d.value; }),
             d3.max(scope.data, function (d) {return d.value; })
@@ -67,18 +116,11 @@ angular.module('casApp.directives', []).
           .attr('d', line)
           .attr('class', 'line');
 
-        function updateData() {
-          //check data scope
-          var last = scope.data.length > 0 ? moment(_.last(scope.data).at) : null;
-
-          if (last && last > endTime) {
-            startTime = last;
-            endTime = moment(startTime).add(timeUnit, timePeriod);
-            scope.data = [_.last(scope.data)];
-          }
+        scope.$watch('data', function () {
+          scope.updateData();
 
           // update x axis
-          x.domain([startTime, endTime]);
+          x.domain([scope.start, scope.end]);
           xAxis.scale(x);
           graph.selectAll('g.x.axis').call(xAxis);
 
@@ -90,14 +132,29 @@ angular.module('casApp.directives', []).
           yAxis.scale(y);
           graph.selectAll('g.y.axis').call(yAxis);
 
+          //update line
           graph.selectAll('path.line')
             .data([scope.data])
             .attr('d', line);
-        }
-
-        scope.$watch('data', function () {
-          updateData();
         });
       }
     };
-  }]);
+  }]).
+
+  directive('paginator', function () {
+    return {
+      require: '^lineChart',
+      restrict: 'E',
+      link: function (scope, element) {
+        scope.$watch('stream', function () {
+          if (scope.stream) {
+            element.children('.forward').addClass('disabled');
+          } else {
+            element.children('.forward').removeClass('disabled');
+          }
+        });
+      },
+      template: '<button class="forward" ng-click="forward()">Page up</button>' +
+                '<button class="back" ng-click="back()">Page down</button>'
+    };
+  });

@@ -9,6 +9,7 @@
     "express": "3.0.6",
     "jade": "*",
     "redis": "*",
+    "moment": "*",
     "mocha": "*",
     "should": "*",
     "expect": "*",

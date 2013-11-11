@@ -5,22 +5,22 @@
 /* Controllers */
 
 angular.module('casApp.controllers', []).
-  controller('StreamCtrl', ['$scope', '$routeParams', 'socket', function (sc, params, socket) {
-
+  controller('StreamCtrl', ['$scope', '$routeParams', 'data', 'socket', function (sc, params, data, socket) {
     sc.sensor = params.id;
     sc.data = [];
     sc.trigger = [];
+    sc.stream = true;
 
     socket.connect('/stream');
     socket.emit('subscribe', params.id);
     socket.on('data', function (el) {
-      if (el.id == sc.sensor) {
+      if (sc.stream && el.id == sc.sensor) {
         sc.data = sc.data.concat(el.data);
       }
     });
 
     socket.on('trigger', function (el) {
-      if (el.id == sc.sensor) {
+      if (sc.stream && el.id == sc.sensor) {
         sc.trigger.push(el.data);
       }
     });

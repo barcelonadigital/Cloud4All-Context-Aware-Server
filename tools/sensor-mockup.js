@@ -3,6 +3,7 @@
 
 var util = require('util'),
   optimist = require('optimist'),
+  moment = require('moment'),
   http = require('http');
 
 
@@ -24,12 +25,12 @@ var util = require('util'),
   var sendData = function () {
 
     var data = [],
-      now = Date.now(),
+      now = moment(),
       i = 0;
 
     for (i = 0; i < num; i++) {
       data[i] = {
-        at: new Date(now + sleep * i / (2 * num)).toISOString(),
+        at: now.add(sleep * i / (2 * num)).toISOString(),
         value: Math.floor((Math.random() * 10) + 1)
       };
     }

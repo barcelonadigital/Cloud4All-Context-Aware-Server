@@ -121,7 +121,7 @@ describe('Sensor API', function () {
 
     request(app)
       .get('/sensors/' + that.sensor.id +
-        '/data/start/' + start + '/end/' + end)
+        '/data?start=' + start + '&end=' + end)
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
         res.body.should.eql(sensor_sample_data.slice(0, 2));
@@ -135,7 +135,7 @@ describe('Sensor API', function () {
 
     request(app)
       .get('/sensors/' + that.sensor.id +
-        '/data/start/' + start + '/end/' + end)
+        '/data?start=' + start + '&end=' + end)
       .expect('Content-type', /json/)
       .expect(500, function (err, res) {
         done();

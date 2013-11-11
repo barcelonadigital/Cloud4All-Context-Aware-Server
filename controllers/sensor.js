@@ -97,57 +97,47 @@ exports.postData = function (req, res, next) {
   });
 };
 
-exports.getData = function (req, res, next) {
-  /**
-   * Gets all data from sensor id
-  **/
-  var id = req.params.id,
-    query = req.query.q || "all",
-    getData = null;
-
-  switch (query) {
-  case "all":
-    cache.get = cache.getAllData;
-    break;
-  case "new":
-    cache.get = cache.getNewData;
-    break;
-  default:
-    getData = function () {
-      res.send(new Error("Incorrect query parameter " + query));
-    };
-  }
-
-  cache.get(sensorClass, id, function (err, data, next) {
-    if (err) {
-      next(err);
-    } else {
-      res.send(data);
-    }
-  });
-};
-
 exports.searchData = function (req, res, next) {
   /**
    * gets new data from start datetime to end datetime
-   * in iso format
+   * in iso format if param ?start and ?end. It gets new data if param 
+   * q='new', otherwise it sends all data.
   **/
   var id = req.params.id,
-    start = req.params.start,
-    end = req.params.end;
+    query = req.query.q || "all",
+    start = req.query.start || null,
+    end = req.query.end || null,
+    getData = null;
 
-  start = (new Date(start)).getTime() || null;
-  end = (new Date(end)).getTime() || null;
+  query = start && end ? "time" : query;
 
-  if (!start || !end) {
-    res.send(new Error('Incompatible start or end date ISO-8601 format'));
-  }
-
-  cache.getScoreData(sensorClass, id, start, end, function (err, data) {
+  var callback = function (err, data, next) {
     if (err) {
       next(err);
     } else {
       res.send(data);
     }
-  });
+  };
+
+  switch (query) {
+  case 'all':
+    cache.getAllData(sensorClass, id, callback);
+    break;
+
+  case 'new':
+    cache.getNewData(sensorClass, id, callback); 
+    break;
+
+  case 'time':
+    start = (new Date(start)).getTime() || null;
+    end = (new Date(end)).getTime() || null;
+    if (!start || !end) {
+      res.send(new Error('Incompatible start or end date ISO-8601 format'));
+    }
+    cache.getScoreData(sensorClass, id, start, end, callback);
+    break;
+
+  default:
+    res.send(new Error("Incorrect query parameter " + query));
+  }
 };

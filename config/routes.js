@@ -23,9 +23,8 @@ module.exports = function (app) {
   app.get('/sensors', sensor.search);
 
   // Api:sensor-data
-  app.get('/sensors/:id/data', sensor.getData);
+  app.get('/sensors/:id/data', sensor.searchData);
   app.post('/sensors/:id/data', sensor.postData);
-  app.get('/sensors/:id/data/start/:start/end/:end', sensor.searchData);
 
   // Api:config
   app.get('/configs/:id', config.get);
