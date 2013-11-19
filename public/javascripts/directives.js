@@ -33,10 +33,14 @@ angular.module('casApp.directives', []).
 
         var x = d3.time.scale().domain([
             scope.start, scope.end]).range([0, width]);
-        var y = d3.scale.linear().domain([
-            d3.min(scope.data, function (d) {return d.value; }),
-            d3.max(scope.data, function (d) {return d.value; })
-          ]).range([height, 0]);
+
+        var min = d3.min(scope.data, function (d) {return d.value; })
+        var max = d3.max(scope.data, function (d) {return d.value; })
+        var thres = Math.abs(max-min);
+
+        var y = d3.scale.linear()
+          .domain([min - thres, max + thres])
+          .range([height, 0]);
 
         var line = d3.svg.line()
           .x(function (d) {
@@ -78,10 +82,11 @@ angular.module('casApp.directives', []).
           graph.selectAll('g.x.axis').call(xAxis);
 
           // update y axis
-          y.domain([
-            d3.min(scope.data, function (d) {return d.value; }),
-            d3.max(scope.data, function (d) {return d.value; })
-          ]);
+          var min = d3.min(scope.data, function (d) {return d.value; })
+          var max = d3.max(scope.data, function (d) {return d.value; })
+          var thres = Math.abs(max-min);
+
+          y.domain([min - thres, max + thres]);
 
           yAxis.scale(y);
           graph.selectAll('g.y.axis').call(yAxis);
