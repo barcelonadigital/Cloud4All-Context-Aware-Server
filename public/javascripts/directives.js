@@ -6,8 +6,8 @@
 
 angular.module('casApp.directives', []).
   directive('lineChart', ['d3', '_', 'moment', function (d3, _, moment) {
-
-    var margin = {top: 20, right: 10, bottom: 20, left: 30};
+    var margin = {top: 10, right: 10, bottom: 100, left: 40};
+    var margin2 = {top: 430, right: 10, bottom: 20, left: 40};
 
     return {
       restrict: 'E',
@@ -15,64 +15,18 @@ angular.module('casApp.directives', []).
       scope: {
         data: '=',
         stream: '=',
-        sensor: '@',
+        start: '=',
+        end: '=',
         period: '@',
         unit: '@',
+        sensor: '@',
         width: '@',
         height: '@'
       },
-      controller: ['$scope', 'data', function (sc, data) {
-        sc.updateTime = function (start, end) {
-          sc.start = start || sc.start || moment();
-          sc.end = end || moment(sc.start).add(sc.unit, sc.period);
-        };
-
-        sc.updateData = function() {
-          var last = sc.data.length > 0 ? moment(_.last(sc.data).at) : null;
-
-          if (last && last > sc.end) {
-            sc.updateTime(last, moment(last).add(sc.unit, sc.period));
-            sc.data = [_.last(sc.data)];
-          }
-        };
-
-        sc.forward = function () {
-          var now = moment();
-          sc.stream = false;
-
-          if (sc.end < now) {
-            sc.end.add(sc.unit, sc.period);
-            sc.start.add(sc.unit, sc.period);
-          } 
-
-          if (sc.end > now) {
-            sc.stream = true;
-          }
-
-          data.query({
-            sensorid: sc.sensor, 
-            start: sc.start.toISOString(), 
-            end: sc.end.toISOString()}, function (data) {
-              sc.data = data;
-          });
-        };
-
-        sc.back = function () {
-          sc.stream = false;
-
-          sc.end.subtract(sc.unit, sc.period);
-          sc.start.subtract(sc.unit, sc.period);
-
-          data.query({
-            sensorid: sc.sensor,
-            start: sc.start.toISOString(), 
-            end: sc.end.toISOString()}, function (data) {
-              sc.data = data;
-          });
-        };
-      }],
+      template: '<div class="line-chart"></div>',
+      controller:'DataCtrl',
       link: function (scope, element) {
-        var  height = scope.height - margin.top - margin.bottom,
+        var height = scope.height - margin.top - margin.bottom,
           width = scope.width - margin.left - margin.right;
 
         scope.updateTime();
@@ -95,31 +49,30 @@ angular.module('casApp.directives', []).
         var graph = d3.select(element[0])
           .append('svg:svg')
           .attr('width', scope.width)
-          .attr('height', scope.height)
-          .append('svg:g')
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          .attr('height', scope.height);
 
         var xAxis = d3.svg.axis().scale(x).tickSize(height).orient('bottom'),
           yAxis = d3.svg.axis().scale(y).orient('left');
 
-        graph.append('g')
+        var focus = graph.append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        focus.append('g')
           .attr('class', 'x axis')
           .attr('tranform', 'translate(0,' + height + ')')
           .call(xAxis);
 
-        graph.append('g')
+        focus.append('g')
           .attr('class', 'y axis')
           .call(yAxis);
 
-        graph.append('path')
+        focus.append('path')
           .data([scope.data])
           .attr('d', line)
           .attr('class', 'line');
 
-        scope.$watch('data', function () {
-          scope.updateData();
-
-          // update x axis
+        function updateGraph () {
+           // update x axis
           x.domain([scope.start, scope.end]);
           xAxis.scale(x);
           graph.selectAll('g.x.axis').call(xAxis);
@@ -129,6 +82,7 @@ angular.module('casApp.directives', []).
             d3.min(scope.data, function (d) {return d.value; }),
             d3.max(scope.data, function (d) {return d.value; })
           ]);
+
           yAxis.scale(y);
           graph.selectAll('g.y.axis').call(yAxis);
 
@@ -136,6 +90,17 @@ angular.module('casApp.directives', []).
           graph.selectAll('path.line')
             .data([scope.data])
             .attr('d', line);
+
+        }
+
+        scope.$watch('data', function () {
+          var last = scope.data.length > 0 ? moment(_.last(scope.data).at) : null;
+
+          if (last && last > scope.end) {
+            scope.updateTime(last, moment(last).add(scope.unit, scope.period));
+            scope.data = [_.last(scope.data)];
+          }
+          updateGraph();
         });
       }
     };
@@ -143,18 +108,9 @@ angular.module('casApp.directives', []).
 
   directive('paginator', function () {
     return {
-      require: '^lineChart',
+      controller: 'DataCtrl',
       restrict: 'E',
-      link: function (scope, element) {
-        scope.$watch('stream', function () {
-          if (scope.stream) {
-            element.children('.forward').addClass('disabled');
-          } else {
-            element.children('.forward').removeClass('disabled');
-          }
-        });
-      },
-      template: '<button class="forward" ng-click="forward()">Page up</button>' +
+      template: '<button class="forward" ng-disabled="stream" ng-click="forward()">Page up</button>' +
                 '<button class="back" ng-click="back()">Page down</button>'
     };
   });

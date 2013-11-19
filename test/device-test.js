@@ -139,12 +139,25 @@ describe('Device API', function () {
   });
 
   it('raises exception when saves a new device with same serial', function (done) {
-    request(app)
-      .post('/devices')
-      .set('Accept', 'application/json')
-      .send(device_sample)
-      .expect('Content-type', /json/)
-      .expect(500, done);
+    /*
+     * We have to be sure that when there is an error, 
+     * new sensors are not created
+    */
+
+    Sensor.find(function (err, sensors) {
+      var old = sensors;
+      request(app)
+        .post('/devices')
+        .set('Accept', 'application/json')
+        .send(device_sample)
+        .expect('Content-type', /json/)
+        .expect(500, function (err, res) {
+          Sensor.find(function (err, sensors) {
+            old.length.should.equal(sensors.length);
+            done();
+          });
+        });
+    });
   });
 
   it('updates a device', function (done) {

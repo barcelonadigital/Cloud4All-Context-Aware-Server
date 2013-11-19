@@ -175,7 +175,7 @@ SensorTrigger.prototype.getNearUsers = function () {
     }
   });
 };
-
+        
 SensorTrigger.prototype.sendRequest = function (postData) {
   var that = this,
     receiver = that.receiver,

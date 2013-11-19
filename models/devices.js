@@ -1,4 +1,3 @@
-
 "use strict";
 /*global Sensor,Device*/
 
@@ -101,7 +100,10 @@ DeviceSchema.statics.findNear = function (params, cb) {
 
 DeviceSchema.statics.fullSave = function (data, cb) {
   var tasks = [],
-    newSensor = {};
+    device = {},
+    newDevice = JSON.parse(JSON.stringify(data)); 
+
+  delete(newDevice.sensors); 
 
   data.sensors.forEach(function (el) {
     tasks.push(
@@ -114,16 +116,20 @@ DeviceSchema.statics.fullSave = function (data, cb) {
     );
   });
 
-  async.parallel(tasks, function (err, results) {
-    newSensor = (JSON.parse(JSON.stringify(data)));
-    newSensor.sensors = results.map(function (el) {
-      return el[0]._id;
-    });
-
-    var device = new Device(newSensor);
-    device.save(function (err, item) {
+  device = new Device(newDevice);
+  device.save(function (err, item) {
+    if (err) {
       cb(err, item);
-    });
+    } else {
+      async.parallel(tasks, function (err, results) {
+        newDevice.sensors = results.map(function (el) {
+          return el[0]._id;
+        });
+        Device.findByIdAndUpdate(device.id, newDevice, function (err, item) {
+          cb(err, item);
+        });
+      });
+    }
   });
 };
 
@@ -132,6 +138,9 @@ DeviceSchema.statics.updateById = function (id, item, cb) {
    * Updates Device and its sensors.
    * It does not delete omitted sensors
   */
+
+  var tasks = [];
+
   this.findById(id, function (err, device) {
     if (device) {
       if (item.serial !== device.serial) {
@@ -139,20 +148,30 @@ DeviceSchema.statics.updateById = function (id, item, cb) {
       }
       device.gps = item.gps;
       device.location = item.location;
-      item.sensors.forEach(function (el, index) {
-        Sensor.findById(el._id, function (err, sensor) {
-          if (sensor) {
-            sensor.type = el.type;
-            sensor.devid = el.devid;
-            sensor.save();
-          } else {
-            new Sensor(item.sensors[sensor]).save(function (err, sensor) {
-              device.sensors.push(sensor.id);
-            });
-          }
+
+      item.sensors.forEach(function (el) {
+        tasks.push(function (cb) {
+          Sensor.findById(el._id, function (err, sensor) {
+            if (sensor) {
+              sensor.type = el.type;
+              sensor.devid = el.devid;
+              sensor.save(cb);
+            } else {
+              new Sensor(item.sensors[sensor]).save(function (err, sensor) {
+                device.sensors.push(sensor.id);
+                cb();
+              });
+            }
+          });
         });
       });
-      device.save(cb);
+      async.parallel(tasks, function (err, res) {
+        if (err) {
+          cb(err);
+        } else {
+          device.save(cb);
+        }
+      });
     } else {
       cb(err, device);
     }

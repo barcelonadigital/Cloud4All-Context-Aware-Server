@@ -10,7 +10,7 @@ angular.module('casApp.controllers', []).
     sc.data = [];
     sc.trigger = [];
     sc.stream = true;
-
+    
     socket.connect('/stream');
     socket.emit('subscribe', params.id);
     socket.on('data', function (el) {
@@ -24,6 +24,71 @@ angular.module('casApp.controllers', []).
         sc.trigger.push(el.data);
       }
     });
+  }]).
+
+  controller('DataCtrl', ['$scope', 'data', function (sc, data) {
+    sc.unit = 'minutes';
+    sc.period = '1'; 
+
+    sc.scales = [
+      {name: '1 minute', sample: 'raw', unit: 'minutes', period: '1'},
+      {name: '5 minutes', sample: 'raw', unit: 'minutes', period: '5'},
+      {name: '30 minutes', sample: 'raw', unit: 'minutes', period: '30'},
+      {name: '1 hour', sample: 'raw', unit: 'hours', period: '1'},
+      {name: '6 hours', sample: 'averaged', unit: 'hours', period: '6'},
+      {name: '1 day', sample: 'averaged', unit: 'days', period: '1'},
+      {name: '7 days', sample: 'averaged', unit: 'days', period: '7'},
+      {name: '1 month', sample: 'averaged', unit: 'months', period: '1'},
+      {name: '3 months', sample: 'averaged', unit: 'months', period: '3'},
+    ];
+
+    sc.scale = sc.scales[0];
+
+    sc.updateTime = function (start, end) {
+      sc.start = start || sc.start || moment();
+      sc.end = end || moment(sc.start).add(sc.unit, sc.period);
+    };
+
+    sc.updateData = function() {
+      data.query({
+        sensorid: sc.sensor, 
+        start: sc.start.toISOString(), 
+        end: sc.end.toISOString()}, function (data) {
+          sc.data = data;
+      });
+    };
+
+    sc.forward = function () {
+      var now = moment();
+      sc.stream = false;
+
+      if (sc.end < now) {
+        sc.end.add(sc.unit, sc.period);
+        sc.start.add(sc.unit, sc.period);
+      } 
+
+      if (sc.end > now) {
+        sc.stream = true;
+      }
+      sc.updateData();
+    };
+
+    sc.back = function () {
+      sc.stream = false;
+
+      sc.end.subtract(sc.unit, sc.period);
+      sc.start.subtract(sc.unit, sc.period);
+      sc.updateData();
+    };
+
+    sc.$watch('scale', function () {
+      sc.unit = sc.scale.unit;
+      sc.period = sc.scale.period;
+
+      sc.updateTime();
+      sc.updateData();
+    });
+
   }]).
 
   controller('DashBoardCtrl', ['$scope', 'sensor', 'socket', '_', function (sc, sensor, socket, _) {
