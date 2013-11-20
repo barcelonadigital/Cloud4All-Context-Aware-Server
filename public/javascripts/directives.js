@@ -27,12 +27,18 @@ angular.module('casApp.directives', []).
       controller:'DataCtrl',
       link: function (scope, element) {
         var height = scope.height - margin.top - margin.bottom,
+          height2 = scope.height - margin2.top - margin2.bottom,
           width = scope.width - margin.left - margin.right;
 
         scope.updateTime();
 
-        var x = d3.time.scale().domain([
-            scope.start, scope.end]).range([0, width]);
+        var x = d3.time.scale()
+          .domain([scope.start, scope.end])
+          .range([0, width]);
+
+        var x2 = d3.time.scale()
+          .domain(x.domain())
+          .range([0, width]);
 
         var min = d3.min(scope.data, function (d) {return d.value; })
         var max = d3.max(scope.data, function (d) {return d.value; })
@@ -42,6 +48,10 @@ angular.module('casApp.directives', []).
           .domain([min - thres, max + thres])
           .range([height, 0]);
 
+        var y2 = d3.scale.linear()
+          .domain(y.domain())
+          .range([height2, 0]);
+
         var line = d3.svg.line()
           .x(function (d) {
             return x(moment(d.at));
@@ -50,36 +60,86 @@ angular.module('casApp.directives', []).
             return y(d.value);
           });
 
+        var line2 = d3.svg.line()
+          .x(function (d) {
+            return x2(moment(d.at));
+          })
+          .y(function (d) {
+            return y2(d.value);
+          });
+
         var graph = d3.select(element[0])
           .append('svg:svg')
           .attr('width', scope.width)
           .attr('height', scope.height);
 
-        var xAxis = d3.svg.axis().scale(x).tickSize(height).orient('bottom'),
+        var xAxis = d3.svg.axis().scale(x).orient('bottom'),
+          xAxis2 = d3.svg.axis().scale(x2).orient('bottom'),
           yAxis = d3.svg.axis().scale(y).orient('left');
 
-        var focus = graph.append("g")
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var brush = d3.svg.brush()
+          .x(x2)
+          .on("brush", brushed);
+
+        var defs = graph.append("defs").append("clipPath")
+          .attr("id", "clip")
+          .append("rect")
+          .attr("width", width)
+          .attr("height", height);
+
+        var focus = graph.append('g')
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        var context = graph.append('g')
+          .attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
+
+        focus.append('path')
+          .attr("clip-path", "url(#clip)")
+          .data([scope.data])
+          .attr('d', line)
+          .attr('class', 'line');
 
         focus.append('g')
           .attr('class', 'x axis')
-          .attr('tranform', 'translate(0,' + height + ')')
+          .attr('transform', 'translate(0,' + height + ')')
           .call(xAxis);
 
         focus.append('g')
           .attr('class', 'y axis')
           .call(yAxis);
 
-        focus.append('path')
+        context.append('path')
           .data([scope.data])
-          .attr('d', line)
+          .attr('d', line2)
           .attr('class', 'line');
+
+        context.append('g')
+          .attr('class', 'x axis')
+          .attr('transform', 'translate(0,' + height2 + ')')
+          .call(xAxis2);
+
+        context.append('g')
+          .attr('class', 'x brush')
+          .call(brush)
+          .selectAll('rect')
+          .attr('y', -6)
+          .attr('height', height2 + 7);
+
+        function brushed() {
+          x.domain(brush.empty() ? x2.domain() : brush.extent());
+          focus.select('path.line').attr('d', line);
+          focus.select('.x.axis').call(xAxis);
+        }
 
         function updateGraph () {
            // update x axis
           x.domain([scope.start, scope.end]);
+          x2.domain([scope.start, scope.end]);
           xAxis.scale(x);
-          graph.selectAll('g.x.axis').call(xAxis);
+          xAxis2.scale(x2);
+
+          focus.selectAll('g.x.axis').call(xAxis);
+          context.selectAll('g.x.axis').call(xAxis2);
 
           // update y axis
           var min = d3.min(scope.data, function (d) {return d.value; })
@@ -87,15 +147,20 @@ angular.module('casApp.directives', []).
           var thres = Math.abs(max-min);
 
           y.domain([min - thres, max + thres]);
+          y2.domain([min - thres, max + thres]);
 
           yAxis.scale(y);
-          graph.selectAll('g.y.axis').call(yAxis);
+
+          focus.selectAll('g.y.axis').call(yAxis);
 
           //update line
-          graph.selectAll('path.line')
+          focus.selectAll('path.line')
             .data([scope.data])
             .attr('d', line);
 
+          context.selectAll('path.line')
+            .data([scope.data])
+            .attr('d', line2);
         }
 
         scope.$watch('data', function () {
