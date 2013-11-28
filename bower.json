@@ -13,10 +13,11 @@
     "test"
   ],
   "dependencies": {
-    "angular-unstable":"1.1.5",
+    "angular":"1.2.2",
+    "angular-resource": "1.2.2",
+    "angular-route": "1.2.2",
+    "angular-mocks":"1.2.2",
     "underscore": "1.5.2",
-    "angular-resource-unstable": "1.1.5",
-    "angular-mocks-unstable":"1.1.5",
     "d3": "3.3.10",
     "moment": "2.3.1"
   }

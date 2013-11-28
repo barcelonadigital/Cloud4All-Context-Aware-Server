@@ -69,7 +69,7 @@ angular.module('casApp.directives', []).
           });
 
         var graph = d3.select(element[0])
-          .append('svg:svg')
+          .append('svg')
           .attr('width', scope.width)
           .attr('height', scope.height);
 
@@ -79,13 +79,13 @@ angular.module('casApp.directives', []).
 
         var brush = d3.svg.brush()
           .x(x2)
-          .on("brush", brushed);
+          .on('brush', brushed);
 
-        var defs = graph.append("defs").append("clipPath")
-          .attr("id", "clip")
-          .append("rect")
-          .attr("width", width)
-          .attr("height", height);
+        var clip = graph.append('defs').append('clipPath')
+          .attr('id', 'clip')
+          .append('rect')
+          .attr('width', width)
+          .attr('height', height);
 
         var focus = graph.append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -93,9 +93,10 @@ angular.module('casApp.directives', []).
         var context = graph.append('g')
           .attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
 
-        focus.append('path')
-          .attr("clip-path", "url(#clip)")
+        focus.append('g')
           .data([scope.data])
+          .attr('clip-path', 'url(#clip)')
+          .append('path')
           .attr('d', line)
           .attr('class', 'line');
 
