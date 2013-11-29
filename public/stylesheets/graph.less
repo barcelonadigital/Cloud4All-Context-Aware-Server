@@ -51,3 +51,27 @@ path {
   fill: steelblue;
 }
 
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus {
+  circle {
+    fill: steelblue;
+  }
+  line {
+    stroke: #a8a8a8;
+    shape-rendering: crispEdges;
+    .y {
+      stroke: steelblue;
+      stroke-dasharray: 3 3;
+      opacity: .5;
+    }
+  }
+  text.y {
+    color: #a8a8a8; 
+    font-size: 9px;
+  }
+}
+

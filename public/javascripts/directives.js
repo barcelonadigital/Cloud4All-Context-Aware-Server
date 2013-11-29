@@ -30,6 +30,14 @@ angular.module('casApp.directives', []).
           height2 = scope.height - margin2.top - margin2.bottom,
           width = scope.width - margin.left - margin.right;
 
+        var bisectDate = d3.bisector(function (d) { 
+          return moment(d.at);
+        }).left;
+
+        var formatData = function (d) {
+         return d.at.format("dddd, MMMM Do YYYY, h:mm:ss a") + ', ' + d.value;
+        };
+
         scope.updateTime();
 
         var x = d3.time.scale()
@@ -93,6 +101,10 @@ angular.module('casApp.directives', []).
         var context = graph.append('g')
           .attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
 
+        var tip = focus.append("g")
+          .attr("class", "focus")
+          .style("display", "none");
+
         focus.append('g')
           .data([scope.data])
           .attr('clip-path', 'url(#clip)')
@@ -126,14 +138,67 @@ angular.module('casApp.directives', []).
           .attr('y', -6)
           .attr('height', height2 + 7);
 
-        function brushed() {
+        tip.append('line')
+          .attr('class', 'x');
+
+        tip.append('line')
+          .attr('class', 'y')
+          .attr('x1', width - 6) 
+          .attr('x2', width + 6); 
+
+        tip.append('circle')
+          .attr('class', 'y')
+          .attr('r', 4);
+
+        tip.append('text')
+          .attr('class', 'y')
+          .attr('dy', '-1em');
+
+        focus.append('rect')
+          .attr('class', 'overlay')
+          .attr('width', width)
+          .attr('height', height)
+          .on('mouseover', function () {
+            tip.style('display', null); 
+          })
+          .on('mouseout', function () { 
+            tip.style('display', 'none'); 
+          })
+          .on('mousemove', mousemove);
+
+        function mousemove () {
+
+          var x0 = x.invert(d3.mouse(this)[0]),
+            i = bisectDate(scope.data, x0, 1),
+            d0 = scope.data[i - 1],
+            d1 = scope.data[i];
+
+          if (d0 && d1) {
+            var d = x0 - d0.at > d1.at - x0 ? d1 : d0;
+
+            d.at = moment(d.at);
+
+            tip.select('circle.y')
+              .attr('transform', 'translate(' + x(d.at) + ',' + y(d.value) + ')');
+            tip.select('text.y')
+              .attr('transform', 'translate(' + x(d.at) + ',' + y(d.value) + ')')
+              .text(formatData(d));
+            tip.select('.x')
+              .attr('transform', 'translate(' + x(d.at) + ',0)');
+            tip.select('.y')
+              .attr('transform', 'translate(' + width * -1 + ', ' + y(d.value) + ')')
+              .attr('x', width + x(d.at));
+          }
+        } 
+
+        function brushed () {
           x.domain(brush.empty() ? x2.domain() : brush.extent());
           focus.select('path.line').attr('d', line);
           focus.select('.x.axis').call(xAxis);
         }
 
         function updateGraph () {
-           // update x axis
+          // update x axis
           x.domain([scope.start, scope.end]);
           x2.domain([scope.start, scope.end]);
           xAxis.scale(x);
@@ -162,6 +227,10 @@ angular.module('casApp.directives', []).
           context.selectAll('path.line')
             .data([scope.data])
             .attr('d', line2);
+
+          tip.select('line.x')
+            .attr('y1', y.range()[0] - 6)
+            .attr('y2', y.range()[0] + 6);
         }
 
         scope.$watch('data', function () {
@@ -170,8 +239,9 @@ angular.module('casApp.directives', []).
           if (last && last > scope.end) {
             scope.updateTime(last, moment(last).add(scope.unit, scope.period));
             scope.data = [_.last(scope.data)];
+          } if (scope.data.length > 0 ) {
+            updateGraph();
           }
-          updateGraph();
         });
       }
     };
