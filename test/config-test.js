@@ -40,7 +40,7 @@ describe('Config API', function () {
 
   it('gets a config from sensor :id', function (done) {
     request(app)
-      .get('/configs/' + sensor_config_sample._ref)
+      .get('/configs/' + sensor_config_sample.id)
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
         res.body.config.triggers.should.eql(
@@ -52,7 +52,7 @@ describe('Config API', function () {
 
   it('updates an existing sensor :id config system', function (done) {
     request(app)
-      .post('/configs/' + sensor_config_sample._ref)
+      .post('/configs/' + sensor_config_sample.id)
       .set('Accept', 'application/json')
       .send(sensor_config_sample)
       .expect('Content-type', /json/)

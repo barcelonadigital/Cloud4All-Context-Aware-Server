@@ -39,3 +39,18 @@ exports.deepen = function (o) {
   }
   return oo;
 };
+
+exports.compare = function (type, a, b) {
+  switch(type) {
+    case "gt":
+      return a > b;
+    case "gte":
+      return a >= b;
+    case "lte":
+      return a <= b;
+    case "lt":
+      return a < b;
+    default:
+      return new Error("incorrect comparison type: " + type);
+  }
+};

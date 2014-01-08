@@ -2,7 +2,7 @@
  * Sensor API routes.
 **/
 
-"use strict";
+'use strict';
 
 var app = require('../app'),
   trigger = require('../triggers/sensor-trigger'),
@@ -12,7 +12,8 @@ var app = require('../app'),
     app.logmessage
   ),
   sensorClass = {'entityName': 'sensor'},
-  Sensor = require("../models/devices").Sensor;
+  Data = require('../models/devices').Data,
+  Sensor = require('../models/devices').Sensor;
 
 
 exports.get = function (req, res, next) {
@@ -73,26 +74,30 @@ exports.search = function (req, res, next) {
 exports.postData = function (req, res, next) {
   /**
    * Posts new data from sensor id
-  **/
+  */
+
   var id = req.params.id,
     data = req.body,
+    series = [],
     e;
 
-  cache.postData(sensorClass, id, data, function (err) {
+  Sensor.findById(id, function (err, sensor) {
     if (err) {
       next(err);
-    } else {
-      Sensor.findById(id, function (err, sensor) {
-        if (err) {
-          next(err);
-        } else if (sensor) {
-          e = new trigger.SensorTrigger(sensor);
-          e.emit("onNewData");
-          res.send();
-        } else {
-          res.send(404);
-        }
+    } else if (sensor) {
+      series = data.map(function (el) {
+        return {
+          '_sensor': sensor.id,
+          'at': el.at,
+          'value': el.value
+          };
       });
+
+      e = new trigger.SensorTrigger(sensor);
+      e.emit('onNewData', series);
+      res.send();
+    } else {
+      res.send(404);
     }
   });
 };
@@ -104,12 +109,12 @@ exports.searchData = function (req, res, next) {
    * q='new', otherwise it sends all data.
   **/
   var id = req.params.id,
-    query = req.query.q || "all",
+    query = req.query.q || 'all',
     start = req.query.start || null,
     end = req.query.end || null,
     getData = null;
 
-  query = start && end ? "time" : query;
+  query = start && end ? 'time' : query;
 
   var callback = function (err, data, next) {
     if (err) {
@@ -121,23 +126,24 @@ exports.searchData = function (req, res, next) {
 
   switch (query) {
   case 'all':
-    cache.getAllData(sensorClass, id, callback);
+    Data.getAllData(id, callback);
     break;
 
-  case 'new':
-    cache.getNewData(sensorClass, id, callback); 
+  case 'last':
+    Data.getLast(id, callback); 
     break;
 
   case 'time':
-    start = (new Date(start)).getTime() || null;
-    end = (new Date(end)).getTime() || null;
+    start = new Date(start) || null;
+    end = new Date(end) || null;
     if (!start || !end) {
       res.send(new Error('Incompatible start or end date ISO-8601 format'));
     }
-    cache.getScoreData(sensorClass, id, start, end, callback);
+    Data.getTime(id, start, end, callback);
     break;
 
   default:
-    res.send(new Error("Incorrect query parameter " + query));
+    res.send(new Error('Incorrect query parameter ' + query));
   }
 };
+

@@ -14,7 +14,7 @@ exports.get = function (req, res, next) {
   **/
   var id = req.params.id;
 
-  Config.findByRef(id, function (err, item) {
+  Config.findById(id, function (err, item) {
     if (err) {
       next(err);
     } else if (item) {
@@ -31,11 +31,30 @@ exports.post = function (req, res, next) {
   **/
   var item = req.body,
     config = new Config(item);
+    
   config.save(function (err) {
     if (err) {
       next(err);
     } else {
       res.send(config);
+    }
+  });
+};
+
+exports.search = function (req, res, next) {
+  /**
+   * search devices from database
+  **/
+
+  var q = req.query || {};
+
+  Config.find(q, function (err, configs) {
+    if (err) {
+      next(err);
+    } else if (configs.length > 0) {
+      res.send(configs);
+    } else {
+      res.send(404);
     }
   });
 };
@@ -47,7 +66,7 @@ exports.update = function (req, res, next) {
   var item = req.body,
     id = req.params.id;
 
-  Config.updateByRef(id, item, function (err, config) {
+  Config.findByIdAndUpdate(id, item, function (err, config) {
     if (err) {
       next(err);
     } else if (config) {
@@ -64,7 +83,7 @@ exports.remove = function (req, res, next) {
   **/
   var id = req.params.id;
 
-  Config.findByRef(id, function (err, config) {
+  Config.findById(id, function (err, config) {
     if (err) {
       next(err);
     } else if (config) {

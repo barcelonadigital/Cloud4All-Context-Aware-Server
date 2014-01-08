@@ -12,8 +12,10 @@ var app = require('../app'),
   device_sample = require('./data/device-sample'),
   sensor_sample_data = require('./data/sensor-sample-data'),
   new_sensor_sample_data = require('./data/new-sensor-sample-data'),
+  trigger_sample = require('./data/trigger-sample'),
   user_sample = require('./data/user-sample'),
   Device = require('../models/devices').Device,
+  Trigger = require('../models/triggers').Trigger,
   User = require('../models/users').User,
   Sensor = require('../models/devices').Sensor,
   Data = require('../models/devices').Data,
@@ -42,6 +44,9 @@ describe('Sensor trigger system', function () {
         Sensor.remove(callback);
       },
       function (item, callback) {
+        Trigger.remove(callback);
+      },
+      function (item, callback) {
         Device.remove(callback);
       },
       function (item, callback) {
@@ -62,6 +67,12 @@ describe('Sensor trigger system', function () {
         that.sensor = that.device.sensors[0];
         e = new trigger.SensorTrigger(that.sensor);
         callback(null);
+      },
+      function (callback) {
+        var trigger = new Trigger(trigger_sample);
+        trigger.save(function (err, item) {
+          callback(null);
+        });
       },
       function (callback) {
         Config.findByRef(that.sensor.id, callback);

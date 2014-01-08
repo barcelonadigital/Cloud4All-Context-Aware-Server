@@ -12,7 +12,7 @@ var app = require('../app'),
 
 var ConfigSchema = new Schema({
   _ref: {type: Schema.ObjectId, unique: true},
-  config: {type: Schema.Types.Mixed, "default": app.envConfig.triggers.sensor}
+  config: {type: Schema.Types.Mixed, 'default': app.envConfig.triggers.sensor},
 });
 
 ConfigSchema.statics.findByRef = function (ref, cb) {

@@ -239,9 +239,8 @@ angular.module('casApp.directives', []).
           if (last && last > scope.end) {
             scope.updateTime(last, moment(last).add(scope.unit, scope.period));
             scope.data = [_.last(scope.data)];
-          } if (scope.data.length > 0 ) {
-            updateGraph();
-          }
+          } 
+          updateGraph();
         });
       }
     };

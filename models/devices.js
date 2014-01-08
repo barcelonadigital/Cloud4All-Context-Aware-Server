@@ -6,6 +6,7 @@ var mongoose = require('mongoose'),
   app = require('../app'),
   async = require('async'),
   Config = require('./configs').Config,
+  TriggerSchema = require('./triggers').TriggerSchema,
   Schema = mongoose.Schema;
 
 /**
@@ -18,11 +19,32 @@ var DataSchema = new Schema({
   value: Number
 });
 
-DataSchema.statics.getLast = function (sensorId, cb) {
+DataSchema.statics.getLast = function (id, cb) {
   this
-    .find({'_sensor': sensorId})
+    .find({'_sensor': id})
     .sort('-at')
     .limit(1)
+    .exec(cb);
+};
+
+DataSchema.statics.getAll = function (id, cb) {
+  this
+    .find({'_sensor': id})
+    .sort('-at')
+    .exec(cb);
+};
+
+DataSchema.statics.getTime = function (id, start, end, cb) {
+
+  console.log("START: ", start);
+  console.log("END: ", end);
+
+  this
+    .find({
+      _sensor: id, 
+      at: {'$gte': start, '$lte': end}
+    })
+    .sort('at')
     .exec(cb);
 };
 

@@ -219,6 +219,7 @@ CacheRedis.prototype.getItemFromUuid = function (itemClass, uuid, next) {
   }
 };
 
+
 CacheRedis.prototype.postData = function (itemClass, id, data, key, next) {
   /**
   * Posts new data from itemclass id
@@ -295,7 +296,7 @@ CacheRedis.prototype.getScoreData = function (itemClass, id, start, end, key, ne
   end = end || '+inf';
   next = (next === undefined) ? key : next;
 
-  that.log("cache getData(): id, start, end = " + id + ", " + start + ", " + end);
+  that.log("cache getScoreData(): id, start, end = " + id + ", " + start + ", " + end);
   that.connection.zrangebyscore(cacheKeyData, start, end, function (err, reply) {
     next(err, that.parseData(reply));
   });
