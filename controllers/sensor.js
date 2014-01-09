@@ -6,11 +6,6 @@
 
 var app = require('../app'),
   trigger = require('../triggers/sensor-trigger'),
-  CacheRedis = require('../managers/cache-redis').CacheRedis,
-  cache = new CacheRedis(
-    app.redisClient,
-    app.logmessage
-  ),
   sensorClass = {'entityName': 'sensor'},
   Data = require('../models/devices').Data,
   Sensor = require('../models/devices').Sensor;
@@ -126,7 +121,7 @@ exports.searchData = function (req, res, next) {
 
   switch (query) {
   case 'all':
-    Data.getAllData(id, callback);
+    Data.getAll(id, callback);
     break;
 
   case 'last':

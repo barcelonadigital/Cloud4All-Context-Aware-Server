@@ -24,27 +24,28 @@ DataSchema.statics.getLast = function (id, cb) {
     .find({'_sensor': id})
     .sort('-at')
     .limit(1)
-    .exec(cb);
+    .select('at value -_id')
+    .exec(function (err, item) {
+      cb(err, item[0] || []);
+    });
 };
 
 DataSchema.statics.getAll = function (id, cb) {
   this
     .find({'_sensor': id})
-    .sort('-at')
+    .sort('at')
+    .select('at value -_id')
     .exec(cb);
 };
 
 DataSchema.statics.getTime = function (id, start, end, cb) {
-
-  console.log("START: ", start);
-  console.log("END: ", end);
-
   this
     .find({
       _sensor: id, 
       at: {'$gte': start, '$lte': end}
     })
     .sort('at')
+    .select('at value -_id')
     .exec(cb);
 };
 

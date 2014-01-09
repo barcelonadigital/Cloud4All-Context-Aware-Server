@@ -20,9 +20,6 @@ var app = require('../app'),
   Sensor = require('../models/devices').Sensor,
   Data = require('../models/devices').Data,
   Config = require('../models/configs').Config,
-  CacheRedis = require('../managers/cache-redis').CacheRedis,
-  cache = new CacheRedis(app.redisClient, app.logmessage),
-  sensorClass = {'entityName': 'sensor'},
   e;
 
 describe('Sensor trigger system', function () {
@@ -69,8 +66,9 @@ describe('Sensor trigger system', function () {
         callback(null);
       },
       function (callback) {
-        var trigger = new Trigger(trigger_sample);
-        trigger.save(function (err, item) {
+        that.trigger = new Trigger(trigger_sample);
+        that.trigger._sensor.id = that.sensor.id;
+        that.trigger.save(function (err, item) {
           callback(null);
         });
       },
@@ -79,7 +77,13 @@ describe('Sensor trigger system', function () {
       },
       function (item, callback) {
         that.config = item;
-        cache.postData(sensorClass, that.sensor.id, sensor_sample_data, callback);
+        that.data = sensor_sample_data.map(function (el) {
+          return {
+            '_sensor': that.sensor.id, 
+            'at': el.at, 
+            'value': el.value};
+        });
+        Data.create(that.data, callback);
       }],
       done
       );
@@ -95,97 +99,37 @@ describe('Sensor trigger system', function () {
     );
   });
 
-  it('emits onNewData from sensor :id', function (done) {
-    e.emit("onNewData");
-    e.once("storeData", function () {
-      e.data.should.eql(sensor_sample_data);
-    }).once("ack", done);
+  it('emits onNewData from sensor :id, checks triggered', function (done) {
+    e.emit("onNewData", that.data);
+    e.once("getNearUsers", function () {
+      e.data.should.eql(that.data);
+      done();
+    });
   });
 
-  it('changes config and emits onNewData', function (done) {
-    that.config.config.triggers.onNewData.threshold = "15";
-    Config.updateByRef(that.sensor, that.config, function (err, item) {
-      e.emit("onNewData");
-      e.once("nonTriggered", function () {
-        e.result.value.should.be.below(
-          that.config.config.triggers.onNewData.threshold
-        );
+  it('changes trigger and emits onNewData, checks nonTriggered', function (done) {
+    that.trigger.update({"threshold": 5}, function () {
+      e.emit("onNewData", that.data);
+      e.once("ack", function () {
+        e.fired.length.should.eql(0);
+        that.trigger.update({"threshold": 3}, done);
+      });
+    })
+  });
+
+  it('sends new data to sensor and checks stored data', function (done) {
+    e.emit("onNewData", that.data);
+    e.once("ack", function () {
+      Data.find({'_sensor': that.sensor}, function (err, item) {
         done();
       });
     });
   });
 
-  it('sends new data to sensor and emits onNewData', function (done) {
-    cache.postData(sensorClass, that.sensor.id, new_sensor_sample_data, function () {
-      e.emit("onNewData");
-      e.once("storeData", function () {
-        e.data.should.eql(new_sensor_sample_data);
-      }).once("ack", done);
-    });
-  });
-
-  it('sends new data to sensor and checks stored data', function (done) {
-    cache.postData(sensorClass, that.sensor.id, sensor_sample_data, function () {
-      e.emit("onNewData");
-      e.once("ack", function () {
-        Data.find({'_sensor': that.sensor}, function (err, item) {
-          done();
-        });
-      });
-    });
-  });
-
-  it('tests the diffRadius trigger system', function (done) {
-    var data = [
-        {at: 1, value: 1},
-        {at: 2, value: 2},
-        {at: 3, value: 3},
-        {at: 4, value: 4.5}],
-      res = {at: (new Date()).toISOString(), value: 4.5};
-
-    e.config.diffRadius = "10";
-    e.config.onTriggered = "sendData";
-    e.sensor = that.sensor;
-    e.result = res;
-
-    e.emit("diffRadius");
-    e.once("ack", function () {
-      done();
-    });
-  });
-
-  it('tests another diffRadius trigger system', function (done) {
-    var data = [
-        {at: 1, value: 1},
-        {at: 2, value: 2},
-        {at: 3, value: 3},
-        {at: 4, value: 4.5}],
-      res = {at: (new Date()).toISOString(), value: 4.3};
-
-    e.config.diffRadius = "10";
-    e.config.onTriggered = "sendData";
-    e.sensor = that.sensor;
-    e.result = res;
-
-    e.emit("diffRadius");
-    e.once("nonTriggered", function () {
-      done();
-    });
-  });
-
   it('tests sendProfile system', function (done) {
-    var data = [
-        {at: 1, value: 1},
-        {at: 2, value: 2},
-        {at: 3, value: 3},
-        {at: 4, value: 4.5}];
-
-    e.config = that.config.config.triggers.onNewData;
-    e.receiver = that.config.config.receiver;
-
     e.config.onNearby = "sendProfile";
     e.sensor = that.sensor;
-    e.data = data;
+    e.data = that.data;
 
     e.emit("getNearUsers");
     e.once("storeData", function (chunk) {

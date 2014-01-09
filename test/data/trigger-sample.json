@@ -4,5 +4,5 @@
   "threshold": 3, 
   "hysteresis": 0, 
   "operator": "gt", 
-  "triggered": false, 
+  "triggered": false
 }

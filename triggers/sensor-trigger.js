@@ -13,15 +13,13 @@ var util = require('util'),
   Data = require('../models/devices').Data,
   User = require('../models/users').User,
   Trigger = require('../models/triggers').Trigger,
-  TriggerHistory = require('../models/triggers').TriggerHistory,
-  CacheRedis = require('../managers/cache-redis').CacheRedis;
+  TriggerHistory = require('../models/triggers').TriggerHistory;
 
 function SensorTrigger(sensor) {
   var that = this;
 
   this.sensorClass = app.envConfig.sensorClass;
   this.channels = app.envConfig.channels;
-  this.cache = new CacheRedis(app.redisClient, app.logmessage);
   this.data = [];
   this.triggers = [];
   this.fired = [];
@@ -41,7 +39,6 @@ function SensorTrigger(sensor) {
   this.on('sendData', this.sendData);
   this.on('sendProfile', this.sendProfile);
   this.on('storeData', this.storeData);
-
 
   events.EventEmitter.call(this);
 }
@@ -65,6 +62,8 @@ SensorTrigger.prototype.getSensorConfig = function (trigger) {
 SensorTrigger.prototype.getSensorTriggers = function () {
   var that = this;
 
+  this.triggers = [];
+
   Trigger.findByRef(that.sensor.id, function (err, items) {
     that.triggers = items;
     that.emit(that.config.onTriggers);
@@ -78,6 +77,8 @@ SensorTrigger.prototype.trigger = function () {
   /* for each new data check every trigger and if fired
    * store it to fired
   */
+
+  this.fired = [];
 
   var callback = function () {
     that.data.forEach(function (el, ind) {
@@ -111,7 +112,7 @@ SensorTrigger.prototype.trigger = function () {
       // TODO: save triggers
       that.emit(that.config.onTriggered);
     } else {
-      that.emit(that.config.nonTriggered);
+      that.emit(that.config.onNonTriggered);
     }
   };
 
@@ -145,7 +146,7 @@ SensorTrigger.prototype.getNearUsers = function () {
         } else if (err) {
           that.emit('error', err);
         } else {
-          that.emit('notNear');
+          that.emit(that.config.onNotNear);
         }
       });
     }

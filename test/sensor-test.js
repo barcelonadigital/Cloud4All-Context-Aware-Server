@@ -13,10 +13,7 @@ var app = require('../app'),
   device_sample = require('./data/device-sample'),
   sensor_sample_data = require('./data/sensor-sample-data'),
   Device = require('../models/devices').Device,
-  Sensor = require('../models/devices').Sensor,
-  CacheRedis = require('../managers/cache-redis').CacheRedis,
-  cache = new CacheRedis(app.redisClient, app.logmessage),
-  configClass = {'entityName': 'config'};
+  Sensor = require('../models/devices').Sensor;
 
 
 describe('Sensor API', function () {
@@ -105,12 +102,12 @@ describe('Sensor API', function () {
       });
   });
 
-  it('gets new data from sensor id', function (done) {
+  it('gets last data from sensor id', function (done) {
     request(app)
-      .get('/sensors/' + that.sensor.id + '/data?q=new')
+      .get('/sensors/' + that.sensor.id + '/data?q=last')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.should.eql(sensor_sample_data);
+        res.body.should.eql(sensor_sample_data[3]);
         done();
       });
   });
