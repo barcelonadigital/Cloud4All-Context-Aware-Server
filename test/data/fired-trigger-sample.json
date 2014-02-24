@@ -1,0 +1,14 @@
+{
+  "at":"2013-04-22T00:35:43.120Z",
+  "value":1,
+  "_sensor": "52cc202abc98f84149000001",
+  "trigger": {
+    "triggered": true,
+    "type": "threshold",
+    "threshold": 3,
+    "hysteresis": 0,
+    "operator": "gt",
+    "__v": 0,
+    "_id": "530b70dae9c194040571d969"
+  }
+}
