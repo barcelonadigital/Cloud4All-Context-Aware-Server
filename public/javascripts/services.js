@@ -37,11 +37,28 @@ angular.module('casApp.services', ['ngResource']).
 
   //sensor api
   factory('sensor', ['$resource', function ($resource) {
-    return $resource('/sensors/:sensorid/');
+    return $resource('/sensors/:id/');
   }]).
 
+  //trigger api
+  factory('trigger', ['$resource', function ($resource) {
+    return $resource('/triggers/:id/');
+  }]).
+
+  //triggers link api
+  factory('triggerLink', ['$resource', function ($resource) {
+    return $resource('/sensors/:sensorId/triggers/:id');
+  }]).
+
+
+  //trigger history api
+  factory('fired', ['$resource', function ($resource) {
+    return $resource('/fired-triggers/:id/');
+  }]).
+
+  //data api
   factory('data', ['$resource', function ($resource) {
-    return $resource('/sensors/:sensorid/data/');
+    return $resource('/sensors/:id/data/');
   }]);
 
 //external library dependencies

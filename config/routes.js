@@ -4,6 +4,7 @@ var sensor = require('../controllers/sensor'),
   user = require('../controllers/user'),
   site = require('../controllers/site'),
   trigger = require('../controllers/trigger'),
+  triggerHistory = require('../controllers/trigger-history'),
   device = require('../controllers/device');
 
 module.exports = function (app) {
@@ -23,16 +24,24 @@ module.exports = function (app) {
   app.get('/sensors/:id', sensor.get);
   app.get('/sensors', sensor.search);
 
-  // Api:sensor-data, 
+  // Api:sensor-data,
   app.get('/sensors/:id/data', sensor.searchData);
   app.post('/sensors/:id/data', sensor.postData);
 
   // Api:triggers
   app.get('/triggers/:id', trigger.get);
-  app.get('/triggers', trigger.search);
-  app.post('/triggers', trigger.post);
+  app.get('/triggers/', trigger.search);
   app.post('/triggers/:id', trigger.update);
   app.del('/triggers/:id', trigger.remove);
+
+  app.get('/sensors/:sensorId/triggers', trigger.searchBySensor);
+  app.post('/sensors/:sensorId/triggers', trigger.postBySensor);
+
+  // Api:trigger-history
+  app.get('/fired-triggers/:id', triggerHistory.get);
+  app.get('/fired-triggers', triggerHistory.search);
+  app.get('/sensors/:sensorId/fired-triggers/date/:start/:end',
+          triggerHistory.getTimeBySensor);
 
   // Api:config
   app.get('/configs/:id', config.get);

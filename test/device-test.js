@@ -140,7 +140,7 @@ describe('Device API', function () {
 
   it('raises exception when saves a new device with same serial', function (done) {
     /*
-     * We have to be sure that when there is an error, 
+     * We have to be sure that when there is an error,
      * new sensors are not created
     */
 

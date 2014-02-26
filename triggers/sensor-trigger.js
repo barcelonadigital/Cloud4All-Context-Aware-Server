@@ -26,7 +26,9 @@ function SensorTrigger(sensor) {
   this.sensor = sensor;
 
   this.on('onNewData', function (data) {
-    that.data = data; that.getSensorConfig('onNewData'); });
+    that.data = data;
+    that.getSensorConfig('onNewData');
+  });
 
   this.on('scheduling', function () {
     that.getSensorConfig('scheduling');
@@ -37,6 +39,7 @@ function SensorTrigger(sensor) {
   this.on('getNearUsers', this.getNearUsers);
   this.on('publishData', this.publishData);
   this.on('sendData', this.sendData);
+  this.on('saveFired', this.saveFired);
   this.on('sendProfile', this.sendProfile);
   this.on('storeData', this.storeData);
 
@@ -69,9 +72,9 @@ SensorTrigger.prototype.getSensorTriggers = function () {
     that.emit(that.config.onTriggers);
   });
 };
+
 SensorTrigger.prototype.trigger = function () {
   var that = this,
-    i = 0,
     last = null;
 
   /* for each new data check every trigger and if fired
@@ -85,15 +88,14 @@ SensorTrigger.prototype.trigger = function () {
       that.triggers.forEach(function (trigger) {
         var threshold = trigger.threshold,
           triggered = false,
-          changed = false,
           top = 1 + threshold / 100,
           bottom = 1 - threshold / 100,
           actual = el.value;
 
-        if (trigger.type == 'threshold') {
+        if (trigger.type === 'threshold') {
           triggered = utils.compare(trigger.operator, actual, threshold);
-        } else if (trigger.type == 'radius') {
-          triggered = (last == null) ? false : actual < bottom * last || actual > top * last;
+        } else if (trigger.type === 'radius') {
+          triggered = (last === null) ? false : actual < bottom * last || actual > top * last;
           last = actual;
         }
 
@@ -116,11 +118,11 @@ SensorTrigger.prototype.trigger = function () {
     }
   };
 
-  if (that.triggers.filter(function (el) {return el.trigger == 'radius'}).length > 0) {
+  if (that.triggers.filter(function (el) {return el.trigger === 'radius'; }).length > 0) {
     Data.getLast(that.sensor.id, function (err, reply) {
       last = reply ? reply.value : null;
       callback();
-    }); 
+    });
   } else {
     callback();
   }
@@ -128,7 +130,6 @@ SensorTrigger.prototype.trigger = function () {
 
 SensorTrigger.prototype.getNearUsers = function () {
   var that = this,
-    near,
     maxDistance = that.config.maxDistance || 1;
 
   that.sensor.getDevice(function (err, device) {
@@ -152,16 +153,15 @@ SensorTrigger.prototype.getNearUsers = function () {
     }
   });
 };
-        
+
 SensorTrigger.prototype.sendRequest = function (postData, sender) {
   var that = this,
-    receiver = that.receiver,
     data = JSON.stringify(postData),
-    sender = url.parse(sender || ''),
+    urlSender = url.parse(sender || ''),
     options = {
-      hostname: sender.hostname || this.receiver.host,
-      port: sender.port || this.receiver.port,
-      path: sender.path || this.receiver.path,
+      hostname: urlSender.hostname || this.receiver.host,
+      port: urlSender.port || this.receiver.port,
+      path: urlSender.path || this.receiver.path,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -202,19 +202,24 @@ SensorTrigger.prototype.publishData = function () {
 };
 
 SensorTrigger.prototype.publishTrigger = function () {
-  var el = {
-    first: _.first(this.data).at,
-    last: _.last(this.data).at,
-    config: this.config
-  };
   app.pub.publish("trigger." + this.sensor.id, JSON.stringify(this.fired));
+};
+
+SensorTrigger.prototype.saveFired = function () {
+  var that = this;
+
+  TriggerHistory.create(that.fired, function (err) {
+    if (err) {
+      that.emit('error', err);
+    } else {
+      that.emit(that.config.onSavedFired);
+    }
+  });
 };
 
 SensorTrigger.prototype.storeData = function () {
   // store data to mongodb
-  var that = this,
-    mongoSeries = [],
-    i;
+  var that = this;
 
   Data.create(that.data, function (err) {
     if (err) {

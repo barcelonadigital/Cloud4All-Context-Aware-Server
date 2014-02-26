@@ -25,6 +25,7 @@ exports.get = function (req, res, next) {
     query.populate({path: '_last', select: 'at value -_id'});
   }
 
+  debugger;
   query.exec(function (err, item) {
     if (err) {
       next(err);
@@ -85,7 +86,7 @@ exports.postData = function (req, res, next) {
           '_sensor': sensor.id,
           'at': el.at,
           'value': el.value
-          };
+        };
       });
 
       e = new trigger.SensorTrigger(sensor);
@@ -100,7 +101,7 @@ exports.postData = function (req, res, next) {
 exports.searchData = function (req, res, next) {
   /**
    * gets new data from start datetime to end datetime
-   * in iso format if param ?start and ?end. It gets new data if param 
+   * in iso format if param ?start and ?end. It gets new data if param
    * q='new', otherwise it sends all data.
   **/
   var id = req.params.id,
@@ -125,20 +126,22 @@ exports.searchData = function (req, res, next) {
     break;
 
   case 'last':
-    Data.getLast(id, callback); 
+    Data.getLast(id, callback);
     break;
 
   case 'time':
-    start = new Date(start) || null;
-    end = new Date(end) || null;
+    start = new Date(start);
+    end = new Date(end);
     if (!start || !end) {
       res.send(new Error('Incompatible start or end date ISO-8601 format'));
+    } else {
+      Data.getTime(id, start, end, callback);
     }
-    Data.getTime(id, start, end, callback);
     break;
 
   default:
     res.send(new Error('Incorrect query parameter ' + query));
   }
 };
+
 

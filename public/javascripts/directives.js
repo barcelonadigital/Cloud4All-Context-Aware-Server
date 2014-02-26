@@ -14,7 +14,7 @@ angular.module('casApp.directives', []).
       replace: true,
       scope: {
         data: '=',
-        stream: '=',
+        trigger: '=',
         start: '=',
         end: '=',
         period: '@',
@@ -24,18 +24,18 @@ angular.module('casApp.directives', []).
         height: '@'
       },
       template: '<div class="line-chart"></div>',
-      controller:'DataCtrl',
+      controller: 'DataCtrl',
       link: function (scope, element) {
         var height = scope.height - margin.top - margin.bottom,
           height2 = scope.height - margin2.top - margin2.bottom,
           width = scope.width - margin.left - margin.right;
 
-        var bisectDate = d3.bisector(function (d) { 
+        var bisectDate = d3.bisector(function (d) {
           return moment(d.at);
         }).left;
 
         var formatData = function (d) {
-         return d.at.format("dddd, MMMM Do YYYY, h:mm:ss a") + ', ' + d.value;
+          return d.at.format("dddd, MMMM Do YYYY, h:mm:ss a") + ', ' + d.value;
         };
 
         scope.updateTime();
@@ -48,9 +48,9 @@ angular.module('casApp.directives', []).
           .domain(x.domain())
           .range([0, width]);
 
-        var min = d3.min(scope.data, function (d) {return d.value; })
-        var max = d3.max(scope.data, function (d) {return d.value; })
-        var thres = Math.abs(max-min);
+        var min = d3.min(scope.data, function (d) {return d.value; });
+        var max = d3.max(scope.data, function (d) {return d.value; });
+        var thres = Math.abs(max - min);
 
         var y = d3.scale.linear()
           .domain([min - thres, max + thres])
@@ -85,11 +85,7 @@ angular.module('casApp.directives', []).
           xAxis2 = d3.svg.axis().scale(x2).orient('bottom'),
           yAxis = d3.svg.axis().scale(y).orient('left');
 
-        var brush = d3.svg.brush()
-          .x(x2)
-          .on('brush', brushed);
-
-        var clip = graph.append('defs').append('clipPath')
+        graph.append('defs').append('clipPath')
           .attr('id', 'clip')
           .append('rect')
           .attr('width', width)
@@ -101,9 +97,13 @@ angular.module('casApp.directives', []).
         var context = graph.append('g')
           .attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
 
-        var tip = focus.append("g")
-          .attr("class", "focus")
-          .style("display", "none");
+        var tip = focus.append('g')
+          .attr('class', 'focus')
+          .style('display', 'none');
+
+        var brush = d3.svg.brush()
+          .x(x2)
+          .on('brush', brushed);
 
         focus.append('g')
           .data([scope.data])
@@ -116,6 +116,7 @@ angular.module('casApp.directives', []).
           .attr('class', 'x axis')
           .attr('transform', 'translate(0,' + height + ')')
           .call(xAxis);
+
 
         focus.append('g')
           .attr('class', 'y axis')
@@ -143,8 +144,8 @@ angular.module('casApp.directives', []).
 
         tip.append('line')
           .attr('class', 'y')
-          .attr('x1', width - 6) 
-          .attr('x2', width + 6); 
+          .attr('x1', width - 6)
+          .attr('x2', width + 6);
 
         tip.append('circle')
           .attr('class', 'y')
@@ -159,14 +160,14 @@ angular.module('casApp.directives', []).
           .attr('width', width)
           .attr('height', height)
           .on('mouseover', function () {
-            tip.style('display', null); 
+            tip.style('display', null);
           })
-          .on('mouseout', function () { 
-            tip.style('display', 'none'); 
+          .on('mouseout', function () {
+            tip.style('display', 'none');
           })
           .on('mousemove', mousemove);
 
-        function mousemove () {
+        function mousemove() {
 
           var x0 = x.invert(d3.mouse(this)[0]),
             i = bisectDate(scope.data, x0, 1),
@@ -189,15 +190,15 @@ angular.module('casApp.directives', []).
               .attr('transform', 'translate(' + width * -1 + ', ' + y(d.value) + ')')
               .attr('x', width + x(d.at));
           }
-        } 
+        }
 
-        function brushed () {
+        function brushed() {
           x.domain(brush.empty() ? x2.domain() : brush.extent());
           focus.select('path.line').attr('d', line);
           focus.select('.x.axis').call(xAxis);
         }
 
-        function updateGraph () {
+        function updateGraph() {
           // update x axis
           x.domain([scope.start, scope.end]);
           x2.domain([scope.start, scope.end]);
@@ -208,9 +209,9 @@ angular.module('casApp.directives', []).
           context.selectAll('g.x.axis').call(xAxis2);
 
           // update y axis
-          var min = d3.min(scope.data, function (d) {return d.value; })
-          var max = d3.max(scope.data, function (d) {return d.value; })
-          var thres = Math.abs(max-min);
+          min = d3.min(scope.data, function (d) {return d.value; });
+          max = d3.max(scope.data, function (d) {return d.value; });
+          thres = Math.abs(max - min);
 
           y.domain([min - thres, max + thres]);
           y2.domain([min - thres, max + thres]);
@@ -224,6 +225,17 @@ angular.module('casApp.directives', []).
             .data([scope.data])
             .attr('d', line);
 
+          var circles = focus.selectAll('circle')
+            .data(scope.trigger);
+
+          circles.enter()
+            .append('circle')
+            .attr('cx', function (d) { return x(moment(d.at)); })
+            .attr('cy', function (d) { return y(d.value); })
+            .attr('r', 5);
+
+          circles.exit().remove();
+
           context.selectAll('path.line')
             .data([scope.data])
             .attr('d', line2);
@@ -231,6 +243,7 @@ angular.module('casApp.directives', []).
           tip.select('line.x')
             .attr('y1', y.range()[0] - 6)
             .attr('y2', y.range()[0] + 6);
+
         }
 
         scope.$watch('data', function () {
@@ -239,7 +252,8 @@ angular.module('casApp.directives', []).
           if (last && last > scope.end) {
             scope.updateTime(last, moment(last).add(scope.unit, scope.period));
             scope.data = [_.last(scope.data)];
-          } 
+            scope.trigger = [];
+          }
           updateGraph();
         });
       }

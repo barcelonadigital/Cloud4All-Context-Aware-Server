@@ -28,4 +28,20 @@ describe('Generic utils ', function () {
     res.a.a.should.equal(1);
     done();
   });
+
+  it('checks operators comparison', function (done) {
+    var a = 3,
+      b = 4;
+
+    utils.compare('gt', a, b).should.not.be.ok;
+    utils.compare('lt', a, b).should.be.ok;
+    utils.compare('gte', a, b).should.not.be.ok;
+    utils.compare('gte', a, a).should.be.ok;
+    utils.compare('lte', a, b).should.be.ok;
+    utils.compare('lte', a, a).should.be.ok;
+    utils.compare('eq', a, a).should.be.ok;
+    utils.compare('neq', a, a).should.be.nok;
+    utils.compare('neq', a, b).should.be.ok;
+    done();
+  });
 });

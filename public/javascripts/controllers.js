@@ -1,6 +1,6 @@
 'use strict';
 
-/*globals angular*/
+/*globals angular,moment */
 
 /* Controllers */
 
@@ -10,25 +10,26 @@ angular.module('casApp.controllers', []).
     sc.data = [];
     sc.trigger = [];
     sc.stream = true;
-    
+
     socket.connect('/stream');
     socket.emit('subscribe', params.id);
+
     socket.on('data', function (el) {
-      if (sc.stream && el.id == sc.sensor) {
+      if (sc.stream && el.id === sc.sensor) {
         sc.data = sc.data.concat(el.data);
       }
     });
 
     socket.on('trigger', function (el) {
-      if (sc.stream && el.id == sc.sensor) {
-        sc.trigger.push(el.data);
+      if (sc.stream && el.id === sc.sensor) {
+        sc.trigger = sc.trigger.concat(el.data);
       }
     });
   }]).
 
-  controller('DataCtrl', ['$scope', 'data', function (sc, data) {
+  controller('DataCtrl', ['$scope', 'data', 'triggerHistory', function (sc, data, trigger) {
     sc.unit = 'minutes';
-    sc.period = '1'; 
+    sc.period = '1';
 
     sc.scales = [
       {name: '1 minute', sample: 'raw', unit: 'minutes', period: '1'},
@@ -39,7 +40,7 @@ angular.module('casApp.controllers', []).
       {name: '1 day', sample: 'averaged', unit: 'days', period: '1'},
       {name: '7 days', sample: 'averaged', unit: 'days', period: '7'},
       {name: '1 month', sample: 'averaged', unit: 'months', period: '1'},
-      {name: '3 months', sample: 'averaged', unit: 'months', period: '3'},
+      {name: '3 months', sample: 'averaged', unit: 'months', period: '3'}
     ];
 
     sc.scale = sc.scales[0];
@@ -49,12 +50,23 @@ angular.module('casApp.controllers', []).
       sc.end = end || moment(sc.start).add(sc.unit, sc.period);
     };
 
-    sc.updateData = function() {
+    sc.updateData = function () {
       data.query({
-        sensorid: sc.sensor, 
-        start: sc.start.toISOString(), 
-        end: sc.end.toISOString()}, function (data) {
-          sc.data = data;
+        id: sc.sensor,
+        start: sc.start.toISOString(),
+        end: sc.end.toISOString()
+      }, function (data) {
+        sc.data = data;
+      });
+    };
+
+    sc.updateTrigger = function () {
+      trigger.query({
+        id: sc.sensor,
+        start: sc.start.toISOString(),
+        end: sc.end.toISOString()
+      }, function (trigger) {
+        sc.trigger = trigger;
       });
     };
 
@@ -65,7 +77,7 @@ angular.module('casApp.controllers', []).
       if (sc.end < now) {
         sc.end.add(sc.unit, sc.period);
         sc.start.add(sc.unit, sc.period);
-      } 
+      }
 
       if (sc.end > now) {
         sc.stream = true;

@@ -5,6 +5,7 @@
 "use strict";
 
 var app = require('../app'),
+  Sensor = require('../models/devices').Sensor,
   TriggerHistory = require("../models/triggers").TriggerHistory;
 
 exports.get = function (req, res, next) {
@@ -26,33 +27,36 @@ exports.get = function (req, res, next) {
 
 exports.search = function (req, res, next) {
   /**
-   * Search triggers from database
+   * standard search and also if ?start and ?end
+   * gets new fired triggers from start datetime to end datetime
+   * in iso format if param ?start and ?end. It gets new data if param
   **/
 
   var q = req.query || {};
 
-  TriggerHistory.find(q, function (err, item) {
+  TriggerHistory.find(q, function (err, items) {
     if (err) {
-      next(err);
-    } else if (item.length > 0) {
-      res.send(item);
+      res.send(err);
     } else {
-      res.send(404);
+      res.send(items);
     }
   });
 };
 
-exports.getTime = function (req, res, next) {
+exports.getTimeBySensor = function (req, res, next) {
   /**
+   * standard search and also if ?start and ?end
    * gets new fired triggers from start datetime to end datetime
    * in iso format if param ?start and ?end. It gets new data if param
   **/
-  var id = req.params.id,
+
+  var sensorId = req.params.sensorId,
     start = req.params.start || null,
     end = req.params.end || null;
 
   if (!start || !end) {
-    return res.send(new Error('start and end dates are required'));
+    res.send(new Error('start and end params required'));
+    return;
   }
 
   start = new Date(start);
@@ -60,14 +64,24 @@ exports.getTime = function (req, res, next) {
 
   if (!start || !end) {
     res.send(new Error('Incompatible start or end date ISO-8601 format'));
-  } else {
-    TriggerHistory.getTime(id, start, end, function (err, items) {
-      if (err) {
-        next(err);
-      } else {
-        res.send(items);
-      }
-    });
+    return;
   }
+
+  Sensor.findById(sensorId, function (err, item) {
+    if (err) {
+      res.send(err);
+    } else if (item) {
+      TriggerHistory.getTime(start, end, function (err, items) {
+        if (err) {
+          res.send(err);
+        } else {
+          res.send(items);
+        }
+      });
+    } else {
+      res.send(404);
+    }
+  });
 };
+
 

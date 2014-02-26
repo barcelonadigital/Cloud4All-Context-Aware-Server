@@ -50,6 +50,10 @@ exports.compare = function (type, a, b) {
       return a <= b;
     case "lt":
       return a < b;
+    case "eq":
+      return a === b;
+    case "neq":
+      return a !== b;
     default:
       return new Error("incorrect comparison type: " + type);
   }

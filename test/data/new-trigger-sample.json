@@ -1,8 +1,8 @@
 {
-  "_sensor": "52cc202abc98f84149000001", 
-  "type": "threshold", 
-  "threshold": 3, 
-  "hysteresis": 0, 
-  "operator": "lt", 
+  "_sensor": "52cc202abc98f84149000001",
+  "type": "threshold",
+  "threshold": 3,
+  "hysteresis": 0,
+  "operator": "lt",
   "triggered": false
 }

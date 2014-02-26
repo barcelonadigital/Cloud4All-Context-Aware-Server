@@ -5,7 +5,8 @@
 "use strict";
 
 var app = require('../app'),
-  Trigger = require("../models/triggers").Trigger;
+  Sensor = require('../models/devices').Sensor,
+  Trigger = require('../models/triggers').Trigger;
 
 exports.get = function (req, res, next) {
   /**
@@ -48,7 +49,7 @@ exports.post = function (req, res, next) {
   **/
 
   var item = req.body,
-     trigger = new Trigger(item);  
+    trigger = new Trigger(item);
 
   trigger.save(function (err) {
     if (err) {
@@ -90,6 +91,61 @@ exports.remove = function (req, res, next) {
       next(err);
     } else if (trigger) {
       trigger.remove(function (err) {
+        if (err) {
+          next(err);
+        } else {
+          res.send(trigger);
+        }
+      });
+    } else {
+      res.send(404);
+    }
+  });
+};
+
+exports.searchBySensor = function (req, res, next) {
+  /**
+   * Search triggers from database
+  **/
+
+  var sensorId = req.params.sensorId,
+    q = req.query || {};
+
+  q._sensor = sensorId;
+
+  Sensor.findById(sensorId, function (err, item) {
+    if (err) {
+      next(err);
+    } else if (item) {
+      Trigger.find(q, function (err, triggers) {
+        if (err) {
+          next(err);
+        } else {
+          res.send(triggers);
+        }
+      });
+    } else {
+      res.send(404);
+    }
+  });
+};
+
+exports.postBySensor = function (req, res, next) {
+  /**
+   * Posts new trigger returning trigger with id
+  **/
+
+  var sensorId = req.params.sensorId,
+    item = req.body,
+    trigger = new Trigger(item);
+
+  trigger._sensor = sensorId;
+
+  Sensor.findById(sensorId, function (err, item) {
+    if (err) {
+      next(err);
+    } else if (item) {
+      trigger.save(function (err) {
         if (err) {
           next(err);
         } else {

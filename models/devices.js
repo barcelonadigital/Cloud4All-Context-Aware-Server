@@ -41,7 +41,7 @@ DataSchema.statics.getAll = function (id, cb) {
 DataSchema.statics.getTime = function (id, start, end, cb) {
   this
     .find({
-      _sensor: id, 
+      _sensor: id,
       at: {'$gte': start, '$lte': end}
     })
     .sort('at')
@@ -124,9 +124,9 @@ DeviceSchema.statics.findNear = function (params, cb) {
 DeviceSchema.statics.fullSave = function (data, cb) {
   var tasks = [],
     device = {},
-    newDevice = JSON.parse(JSON.stringify(data)); 
+    newDevice = JSON.parse(JSON.stringify(data));
 
-  delete(newDevice.sensors); 
+  delete (newDevice.sensors);
 
   data.sensors.forEach(function (el) {
     tasks.push(

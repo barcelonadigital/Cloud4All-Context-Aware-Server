@@ -10,7 +10,7 @@ var app = require('../app'),
 
 exports.get = function (req, res, next) {
   /**
-   * Get a config json from external reference id 
+   * Get a config json from external reference id
   **/
   var id = req.params.id;
 
@@ -31,7 +31,7 @@ exports.post = function (req, res, next) {
   **/
   var item = req.body,
     config = new Config(item);
-    
+
   config.save(function (err) {
     if (err) {
       next(err);
@@ -61,7 +61,7 @@ exports.search = function (req, res, next) {
 
 exports.update = function (req, res, next) {
   /**
-   * Updates a config system 
+   * Updates a config system
   **/
   var item = req.body,
     id = req.params.id;
@@ -79,7 +79,7 @@ exports.update = function (req, res, next) {
 
 exports.remove = function (req, res, next) {
   /**
-   * Deletes an existing user 
+   * Deletes an existing user
   **/
   var id = req.params.id;
 
