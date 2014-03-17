@@ -15,7 +15,7 @@ var triggerTypes = {
 };
 
 var operatorTypes = {
-  values: ['gt', 'gte', 'lte', 'lt', 'eq', 'neq', 'change', 'frozen', 'live'],
+  values: ['gt', 'gte', 'lte', 'lt', 'eq', 'neq'],
   message: 'enum validator failed for path `{PATH}` with value `{VALUE}`'
 };
 

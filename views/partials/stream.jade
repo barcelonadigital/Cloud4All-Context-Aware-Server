@@ -1,8 +1,7 @@
 h2 Stream of data {{ sensor }}
 
-line-chart(data = 'data', trigger = 'trigger', start = 'start', end = 'end',
-           sensor = '{{ sensor }}', height = '500', width = '900', unit = 'minutes', period = '1')
+line-chart(data = 'data' fired = 'fired' start = 'start' end = 'end'
+           sensor = '{{ sensor }}' height = '500' width = '900' unit = 'minutes', period = '1')
 paginator()
-select(ng-model="scale", ng-options="c.name group by c.sample for c in scales")
-
-
+select(ng-model = 'scale' ng-options = 'c.name group by c.sample for c in scales' )
+trigger-list()

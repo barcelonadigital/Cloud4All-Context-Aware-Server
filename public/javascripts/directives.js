@@ -14,7 +14,7 @@ angular.module('casApp.directives', []).
       replace: true,
       scope: {
         data: '=',
-        trigger: '=',
+        fired: '=',
         start: '=',
         end: '=',
         period: '@',
@@ -226,7 +226,7 @@ angular.module('casApp.directives', []).
             .attr('d', line);
 
           var circles = focus.selectAll('circle')
-            .data(scope.trigger);
+            .data(scope.fired);
 
           circles.enter()
             .append('circle')
@@ -251,8 +251,10 @@ angular.module('casApp.directives', []).
 
           if (last && last > scope.end) {
             scope.updateTime(last, moment(last).add(scope.unit, scope.period));
+            scope.updateFired(last, moment(last).add(scope.unit, scope.period));
+
             scope.data = [_.last(scope.data)];
-            scope.trigger = [];
+            scope.fired = [];
           }
           updateGraph();
         });
@@ -266,5 +268,13 @@ angular.module('casApp.directives', []).
       restrict: 'E',
       template: '<button class="forward" ng-disabled="stream" ng-click="forward()">Page up</button>' +
                 '<button class="back" ng-click="back()">Page down</button>'
+    };
+  }).
+
+  directive('triggerList', function () {
+    return {
+      controller: 'TriggerCtrl',
+      restrict: 'E',
+      templateUrl: '/partials/triggers'
     };
   });

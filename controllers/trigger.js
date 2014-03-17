@@ -68,6 +68,8 @@ exports.update = function (req, res, next) {
   var item = req.body,
     id = req.params.id;
 
+  delete item._id;
+
   Trigger.findByIdAndUpdate(id, item, function (err, trigger) {
     if (err) {
       next(err);

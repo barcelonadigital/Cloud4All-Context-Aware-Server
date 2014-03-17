@@ -5,29 +5,71 @@
 /* Controllers */
 
 angular.module('casApp.controllers', []).
-  controller('StreamCtrl', ['$scope', '$routeParams', 'data', 'socket', function (sc, params, data, socket) {
-    sc.sensor = params.id;
-    sc.data = [];
-    sc.trigger = [];
-    sc.stream = true;
+  controller('TriggerCtrl', ['$scope', 'trigger', '_', function (sc, trigger, _) {
+    sc.operators = [
+      {name: 'greater than', value: 'gt'},
+      {name: 'greater than equal', value: 'gte'},
+      {name: 'less than', value: 'lt'},
+      {name: 'less than equal', value: 'lte'},
+      {name: 'equal', value: 'eq'},
+      {name: 'non equal', value: 'neq'},
+    ];
 
-    socket.connect('/stream');
-    socket.emit('subscribe', params.id);
+    sc.types = [
+      {name: 'threshold', value: 'threshold'},
+      {name: 'radius', value: 'radius'}
+    ];
 
-    socket.on('data', function (el) {
-      if (sc.stream && el.id === sc.sensor) {
-        sc.data = sc.data.concat(el.data);
+    sc.add = function () {
+      sc.triggers.push({});
+      _.last(sc.triggers).edit = true;
+    };
+
+    sc.remove = function (el) {
+      el.$remove(function () {
+        sc.triggers = _.without(sc.triggers, el);
+      });
+    };
+
+    sc.submit = function (el) {
+      if (el._id) {
+        trigger.save(el);
+      } else {
+        sc.triggers[sc.triggers.indexOf(el)] = trigger.create(
+          {sensorId: sc.sensor},
+          el
+        );
       }
-    });
+    };
 
-    socket.on('trigger', function (el) {
-      if (sc.stream && el.id === sc.sensor) {
-        sc.trigger = sc.trigger.concat(el.data);
-      }
-    });
   }]).
 
-  controller('DataCtrl', ['$scope', 'data', 'triggerHistory', function (sc, data, trigger) {
+  controller('StreamCtrl', ['$scope', '$routeParams', 'data', 'socket', 'trigger',
+    function (sc, params, data, socket, trigger) {
+      sc.sensor = params.id;
+      sc.data = [];
+      sc.fired = [];
+      sc.stream = true;
+
+      sc.triggers = trigger.query({sensorId: sc.sensor});
+
+      socket.connect('/stream');
+      socket.emit('subscribe', params.id);
+
+      socket.on('data', function (el) {
+        if (sc.stream && el.id === sc.sensor) {
+          sc.data = sc.data.concat(el.data);
+        }
+      });
+
+      socket.on('fired', function (el) {
+        if (sc.stream && el.id === sc.sensor) {
+          sc.fired = sc.fired.concat(el.data);
+        }
+      });
+    }]).
+
+  controller('DataCtrl', ['$scope', 'data', 'fired', function (sc, data, fired) {
     sc.unit = 'minutes';
     sc.period = '1';
 
@@ -60,13 +102,13 @@ angular.module('casApp.controllers', []).
       });
     };
 
-    sc.updateTrigger = function () {
-      trigger.query({
+    sc.updateFired = function () {
+      fired.query({
         id: sc.sensor,
         start: sc.start.toISOString(),
         end: sc.end.toISOString()
-      }, function (trigger) {
-        sc.trigger = trigger;
+      }, function (fired) {
+        sc.fired = fired;
       });
     };
 
@@ -106,7 +148,7 @@ angular.module('casApp.controllers', []).
   controller('DashBoardCtrl', ['$scope', 'sensor', 'socket', '_', function (sc, sensor, socket, _) {
 
     sc.data = {};
-    sc.trigger = {};
+    sc.fired = {};
     socket.connect('/dashboard');
 
     sc.sensors = sensor.query({'populate': true}, function () {
@@ -121,7 +163,7 @@ angular.module('casApp.controllers', []).
       })._last = el.data;
     });
 
-    socket.on('trigger', function (el) {
-      sc.trigger[el.id] = el.data;
+    socket.on('fired', function (el) {
+      sc.fired[el.id] = el.data;
     });
   }]);
