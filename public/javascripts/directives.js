@@ -275,6 +275,6 @@ angular.module('casApp.directives', []).
     return {
       controller: 'TriggerCtrl',
       restrict: 'E',
-      templateUrl: '/partials/triggers'
+      templateUrl: '/templates/triggers'
     };
   });

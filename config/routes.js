@@ -12,6 +12,7 @@ module.exports = function (app) {
 
   app.get('/', site.index);
   app.get('/partials/:name', site.partials);
+  app.get('/templates/:name', site.templates);
 
   // Api:devices
   app.get('/devices/:id', device.get);

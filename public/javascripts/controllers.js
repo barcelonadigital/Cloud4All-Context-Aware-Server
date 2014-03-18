@@ -20,6 +20,12 @@ angular.module('casApp.controllers', []).
       {name: 'radius', value: 'radius'}
     ];
 
+    sc.getName = function (el) {
+      return sc.operators.filter(function (item) {
+        return item.value === el;
+      })[0].name;
+    };
+
     sc.add = function () {
       sc.triggers.push({});
       _.last(sc.triggers).edit = true;
