@@ -1,0 +1,12 @@
+ul
+  li.trigger(ng-repeat = 'trigger in triggers')
+    span(id = '{{ trigger._id }}' ng-hide = 'trigger.edit') The
+      {{ trigger.type }} is {{ getName(trigger.operator) }} {{trigger.threshold }}
+    button(ng-click = 'trigger.edit = !trigger.edit' ng-hide = 'trigger.edit') Edit
+    button(ng-hide = 'trigger.edit' ng-click = 'remove(trigger)') Remove
+    form(name = 'editTrigger' ng-show = 'trigger.edit' ng-submit = 'submit(trigger)')
+      select(ng-model = 'trigger.type' ng-options = 'type.value as type.name for type in types')
+      select(ng-model = 'trigger.operator' ng-options = 'op.value as op.name for op in operators')
+      input(type = 'number' ng-model = 'trigger.threshold' required)
+      input(type = 'submit' value = 'Submit' ng-click = 'trigger.edit = !trigger.edit')
+button(ng-click = 'add()') Add
