@@ -1,7 +1,7 @@
 ul
   li.trigger(ng-repeat = 'trigger in triggers')
     span(id = '{{ trigger._id }}' ng-hide = 'trigger.edit') The
-      {{ trigger.type }} is {{ getName(trigger.operator) }} {{trigger.threshold }}
+      {{ trigger.type }} is {{ getOperatorName(trigger) }} {{trigger.threshold }}
     button(ng-click = 'trigger.edit = !trigger.edit' ng-hide = 'trigger.edit') Edit
     button(ng-hide = 'trigger.edit' ng-click = 'remove(trigger)') Remove
     form(name = 'editTrigger' ng-show = 'trigger.edit' ng-submit = 'submit(trigger)')

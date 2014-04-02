@@ -23,9 +23,9 @@ module.exports = function (app, io) {
       io.of('/dashboard').emit('data', {'id': id, 'data': _.last(el)});
       break;
 
-    case 'trigger':
-      io.of('/stream')['in'](id).emit('trigger', {'id': id, 'data': el});
-      io.of('/dashboard').emit('trigger', {'id': id, 'data': el});
+    case 'fired':
+      io.of('/stream')['in'](id).emit('fired', {'id': id, 'data': el});
+      io.of('/dashboard').emit('fired', {'id': id, 'data': el});
       break;
     }
   });
@@ -41,13 +41,13 @@ module.exports = function (app, io) {
 
       currentRooms = rooms;
       rooms.forEach(function (room) {
-        psManager.subscribe('data.' + room, 'trigger.' + room, socket);
+        psManager.subscribe('data.' + room, 'fired.' + room, socket);
       });
     });
 
     socket.on('disconnect', function () {
       currentRooms.forEach(function (room) {
-        psManager.unsubscribe('data.' + room, 'trigger.' + room, socket);
+        psManager.unsubscribe('data.' + room, 'fired.' + room, socket);
       });
     });
   });
@@ -60,13 +60,13 @@ module.exports = function (app, io) {
     var currentRoom = null;
 
     socket.on('subscribe', function (room) {
-      psManager.subscribe('data.' + room, 'trigger.' + room, socket);
+      psManager.subscribe('data.' + room, 'fired.' + room, socket);
       socket.join(room);
       currentRoom = room;
     });
 
     socket.on('disconnect', function () {
-      psManager.unsubscribe('data.' + currentRoom, 'trigger.' + currentRoom, socket);
+      psManager.unsubscribe('data.' + currentRoom, 'fired.' + currentRoom, socket);
     });
   });
 };

@@ -111,7 +111,6 @@ SensorTrigger.prototype.trigger = function () {
     });
 
     if (that.fired.length > 0) {
-      // TODO: save triggers
       that.emit(that.config.onTriggered);
     } else {
       that.emit(that.config.onNonTriggered);
@@ -202,7 +201,8 @@ SensorTrigger.prototype.publishData = function () {
 };
 
 SensorTrigger.prototype.publishTrigger = function () {
-  app.pub.publish("trigger." + this.sensor.id, JSON.stringify(this.fired));
+  console.log(this.sensor.id);
+  app.pub.publish("fired." + this.sensor.id, JSON.stringify(this.fired));
 };
 
 SensorTrigger.prototype.saveFired = function () {

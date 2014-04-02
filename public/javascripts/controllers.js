@@ -20,9 +20,12 @@ angular.module('casApp.controllers', []).
       {name: 'radius', value: 'radius'}
     ];
 
-    sc.getName = function (el) {
+    sc.getOperatorName = function (el) {
+      if (!el.operator) {
+        return null;
+      }
       return sc.operators.filter(function (item) {
-        return item.value === el;
+        return item.value === el.operator;
       })[0].name;
     };
 
