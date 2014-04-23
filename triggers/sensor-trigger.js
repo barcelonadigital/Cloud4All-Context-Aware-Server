@@ -201,7 +201,6 @@ SensorTrigger.prototype.publishData = function () {
 };
 
 SensorTrigger.prototype.publishTrigger = function () {
-  console.log(this.sensor.id);
   app.pub.publish("fired." + this.sensor.id, JSON.stringify(this.fired));
 };
 

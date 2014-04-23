@@ -5,7 +5,8 @@
 "use strict";
 
 var app = require('../app'),
-  Config = require("../models/configs").Config;
+  Sensor = require('../models/devices').Sensor,
+  Config = require('../models/configs').Config;
 
 
 exports.get = function (req, res, next) {
@@ -58,6 +59,34 @@ exports.search = function (req, res, next) {
     }
   });
 };
+
+exports.searchBySensor = function (req, res, next) {
+  /**
+   * Search triggers from database
+  **/
+
+  var id = req.params.id,
+    q = req.query || {};
+
+  q._ref = id;
+
+  Sensor.findById(id, function (err, item) {
+    if (err) {
+      next(err);
+    } else if (item) {
+      Config.find(q, function (err, config) {
+        if (err) {
+          next(err);
+        } else {
+          res.send(config);
+        }
+      });
+    } else {
+      res.send(404);
+    }
+  });
+};
+
 
 exports.update = function (req, res, next) {
   /**

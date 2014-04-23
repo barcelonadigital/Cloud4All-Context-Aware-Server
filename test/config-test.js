@@ -38,7 +38,7 @@ describe('Config API', function () {
       });
   });
 
-  it('gets a config from sensor :id', function (done) {
+  it('gets a config from config :id', function (done) {
     request(app)
       .get('/configs/' + that.config.id)
       .expect('Content-type', /json/)

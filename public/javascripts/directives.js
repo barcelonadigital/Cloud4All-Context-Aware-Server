@@ -6,8 +6,9 @@
 
 angular.module('casApp.directives', []).
   directive('lineChart', ['d3', '_', 'moment', function (d3, _, moment) {
-    var margin = {top: 10, right: 10, bottom: 100, left: 40};
-    var margin2 = {top: 430, right: 10, bottom: 20, left: 40};
+
+    var margin = {top: 10, right: 10, bottom: 100, left: 40},
+      margin2 = {top: 430, right: 10, bottom: 20, left: 40};
 
     return {
       restrict: 'E',
@@ -117,7 +118,6 @@ angular.module('casApp.directives', []).
           .attr('transform', 'translate(0,' + height + ')')
           .call(xAxis);
 
-
         focus.append('g')
           .attr('class', 'y axis')
           .call(yAxis);
@@ -195,6 +195,10 @@ angular.module('casApp.directives', []).
         function brushed() {
           x.domain(brush.empty() ? x2.domain() : brush.extent());
           focus.select('path.line').attr('d', line);
+          focus.selectAll('circle')
+            .attr('clip-path', 'url(#clip)')
+            .attr("cx", function (d) { return x(moment(d.at)); })
+            .attr("cy", function (d) { return y(d.value); });
           focus.select('.x.axis').call(xAxis);
         }
 
@@ -228,11 +232,15 @@ angular.module('casApp.directives', []).
           var circles = focus.selectAll('circle')
             .data(scope.fired);
 
-          circles.enter()
-            .append('circle')
-            .attr('cx', function (d) { return x(moment(d.at)); })
-            .attr('cy', function (d) { return y(d.value); })
-            .attr('r', 5);
+          circles
+            .attr("cx", function (d) { return x(moment(d.at)); })
+            .attr("cy", function (d) { return y(d.value); })
+            .enter()
+              .append('circle')
+              .attr('clip-path', 'url(#clip)')
+              .attr('cx', function (d) { return x(moment(d.at)); })
+              .attr('cy', function (d) { return y(d.value); })
+              .attr('r', 5);
 
           circles.exit().remove();
 
@@ -260,9 +268,7 @@ angular.module('casApp.directives', []).
         });
       }
     };
-  }]).
-
-  directive('paginator', function () {
+  }]).directive('paginator', function () {
     return {
       controller: 'DataCtrl',
       restrict: 'E',

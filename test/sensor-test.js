@@ -56,6 +56,16 @@ describe('Sensor API', function () {
       });
   });
 
+  it('gets config from sensor :id', function (done) {
+    request(app)
+      .get('/sensors/' + that.sensor.id + '/config/')
+      .expect('Content-type', /json/)
+      .expect(200, function (err, res) {
+        res.body[0]._ref.should.equal(that.sensor.id);
+        done();
+      });
+  });
+
   it('gets all sensors', function (done) {
     request(app)
       .get('/sensors/')

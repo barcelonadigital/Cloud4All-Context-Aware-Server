@@ -25,7 +25,7 @@ exports.get = function (req, res, next) {
   });
 };
 
-exports.search = function (req, res, next) {
+exports.search = function (req, res) {
   /**
    * standard search and also if ?start and ?end
    * gets new fired triggers from start datetime to end datetime
@@ -43,14 +43,14 @@ exports.search = function (req, res, next) {
   });
 };
 
-exports.getTimeBySensor = function (req, res, next) {
+exports.getTimeBySensor = function (req, res) {
   /**
    * standard search and also if ?start and ?end
    * gets new fired triggers from start datetime to end datetime
    * in iso format if param ?start and ?end. It gets new data if param
   **/
 
-  var sensorId = req.params.sensorId,
+  var id = req.params.id,
     start = req.params.start || null,
     end = req.params.end || null;
 
@@ -67,7 +67,7 @@ exports.getTimeBySensor = function (req, res, next) {
     return;
   }
 
-  Sensor.findById(sensorId, function (err, item) {
+  Sensor.findById(id, function (err, item) {
     if (err) {
       res.send(err);
     } else if (item) {

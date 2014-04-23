@@ -112,8 +112,8 @@ angular.module('casApp.controllers', []).
     };
 
     sc.updateFired = function () {
-      fired.query({
-        id: sc.sensor,
+      fired.lapse({
+        sensorId: sc.sensor,
         start: sc.start.toISOString(),
         end: sc.end.toISOString()
       }, function (fired) {
@@ -134,6 +134,7 @@ angular.module('casApp.controllers', []).
         sc.stream = true;
       }
       sc.updateData();
+      sc.updateFired();
     };
 
     sc.back = function () {
@@ -142,6 +143,7 @@ angular.module('casApp.controllers', []).
       sc.end.subtract(sc.unit, sc.period);
       sc.start.subtract(sc.unit, sc.period);
       sc.updateData();
+      sc.updateFired();
     };
 
     sc.$watch('scale', function () {

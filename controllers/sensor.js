@@ -78,6 +78,7 @@ exports.postData = function (req, res, next) {
     e;
 
   Sensor.findById(id, function (err, sensor) {
+    debugger;
     if (err) {
       next(err);
     } else if (sensor) {

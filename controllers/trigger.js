@@ -110,12 +110,12 @@ exports.searchBySensor = function (req, res, next) {
    * Search triggers from database
   **/
 
-  var sensorId = req.params.sensorId,
+  var id = req.params.id,
     q = req.query || {};
 
-  q._sensor = sensorId;
+  q._sensor = id;
 
-  Sensor.findById(sensorId, function (err, item) {
+  Sensor.findById(id, function (err, item) {
     if (err) {
       next(err);
     } else if (item) {
@@ -137,13 +137,13 @@ exports.postBySensor = function (req, res, next) {
    * Posts new trigger returning trigger with id
   **/
 
-  var sensorId = req.params.sensorId,
+  var id = req.params.id,
     item = req.body,
     trigger = new Trigger(item);
 
-  trigger._sensor = sensorId;
+  trigger._sensor = id;
 
-  Sensor.findById(sensorId, function (err, item) {
+  Sensor.findById(id, function (err, item) {
     if (err) {
       next(err);
     } else if (item) {

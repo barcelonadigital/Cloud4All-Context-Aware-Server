@@ -35,13 +35,13 @@ module.exports = function (app) {
   app.post('/triggers/:id', trigger.update);
   app.del('/triggers/:id', trigger.remove);
 
-  app.get('/sensors/:sensorId/triggers', trigger.searchBySensor);
-  app.post('/sensors/:sensorId/triggers', trigger.postBySensor);
+  app.get('/sensors/:id/triggers', trigger.searchBySensor);
+  app.post('/sensors/:id/triggers', trigger.postBySensor);
 
   // Api:trigger-history
   app.get('/fired-triggers/:id', triggerHistory.get);
   app.get('/fired-triggers', triggerHistory.search);
-  app.get('/sensors/:sensorId/fired-triggers/date/:start/:end',
+  app.get('/sensors/:id/fired-triggers/date/:start/:end',
           triggerHistory.getTimeBySensor);
 
   // Api:config
@@ -50,6 +50,8 @@ module.exports = function (app) {
   app.post('/configs', config.post);
   app.post('/configs/:id', config.update);
   app.del('/configs/:id', config.remove);
+
+  app.get('/sensors/:id/config', config.searchBySensor);
 
   // Api:users
   app.get('/users/:id', user.get);
