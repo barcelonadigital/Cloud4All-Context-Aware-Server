@@ -1,6 +1,6 @@
 {
   "name": "context-aware-server",
-  "version": "0.0.1",
+  "version": "0.0.9",
   "private": true,
   "scripts": {
     "start": "node app"

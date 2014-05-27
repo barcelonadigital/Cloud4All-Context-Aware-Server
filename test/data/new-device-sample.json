@@ -4,11 +4,15 @@
 	"location": "kitchen",
 	"sensors": [
 		{
-		"type": "light",
+		"name": "light",
+		"type": "Float",
+		"unit": "%",
 		"devid": 1
 		},
 		{
-		"type": "noise",
+		"name": "noise",
+		"type":  "Float",
+		"unit": "dB",
 		"devid": 2
 		}
 	]

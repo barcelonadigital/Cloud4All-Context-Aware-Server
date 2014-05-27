@@ -22,7 +22,7 @@ var app = require('../app'),
   cache = new CacheRedis(app.redisClient, app.logmessage),
   sensorClass = {'entityName': 'sensor'};
 
-describe('Sensor trigger system', function () {
+describe('User trigger system', function () {
   var that = this;
 
   before(function (done) {
@@ -34,16 +34,16 @@ describe('Sensor trigger system', function () {
       function (callback) {
         User.remove(callback);
       },
-      function (item, callback) {
+      function (err, item, callback) {
         Data.remove(callback);
       },
-      function (item, callback) {
+      function (err, item, callback) {
         Sensor.remove(callback);
       },
-      function (item, callback) {
+      function (err, item, callback) {
         Device.remove(callback);
       },
-      function (item, callback) {
+      function (err, item, callback) {
         that.user = new User(user_sample);
         that.user.save(function (err, item) {
           callback(null, item);

@@ -4,12 +4,16 @@
 	"location": "kitchen",
 	"sensors": [
 		{
-		"type": "light",
-		"devid": 1
+			"name": "Humidity",
+			"type": "Float",
+			"unit": "%",
+			"devid": 1
 		},
 		{
-		"type": "noise",
-		"devid": 2
+			"name": "Noise",
+			"type":  "Float",
+			"unit": "dB",
+			"devid": 2
 		}
 	]
 }

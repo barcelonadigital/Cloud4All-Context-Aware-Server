@@ -24,11 +24,11 @@ describe('Device Model', function () {
       function (cb) {
         Sensor.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Device.remove(cb);
       }],
       done
-      );
+    );
   };
 
   before(function (done) {
@@ -108,10 +108,10 @@ describe('Device API', function () {
       function (cb) {
         Sensor.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Device.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Device.fullSave(device_sample, cb);
       },
       function (item, cb) {

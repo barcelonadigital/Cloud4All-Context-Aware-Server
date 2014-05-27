@@ -27,10 +27,10 @@ describe('Sensor API', function () {
       function (callback) {
         Sensor.remove(callback);
       },
-      function (item, callback) {
+      function (err, item, callback) {
         Device.remove(callback);
       },
-      function (item, callback) {
+      function (err, item, callback) {
         Device.fullSave(device_sample, callback);
       },
       function (item, callback) {
@@ -77,7 +77,7 @@ describe('Sensor API', function () {
 
   it('gets noise sensors', function (done) {
     request(app)
-      .get('/sensors/?type=noise')
+      .get('/sensors/?name=Noise')
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
         res.body.should.be.an.instanceOf(Array);
@@ -87,7 +87,7 @@ describe('Sensor API', function () {
 
   it('gets 404 when search not found', function (done) {
     request(app)
-      .get('/sensors/?type=abracadabra')
+      .get('/sensors/?name=abracadabra')
       .expect(404, done);
   });
 

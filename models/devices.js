@@ -16,7 +16,7 @@ var mongoose = require('mongoose'),
 var DataSchema = new Schema({
   _sensor: {type: Schema.ObjectId, ref: 'Sensor'},
   at: {type: Date, "default": Date.now},
-  value: Number
+  value: String
 });
 
 DataSchema.statics.getLast = function (id, cb) {
@@ -55,15 +55,17 @@ DataSchema.pre('save', function (next) {
   Sensor.findByIdAndUpdate(this._sensor, {$set: {'_last': id}}, next);
 });
 
-var SensorSchema = new Schema({
-  devid: String,
-  type: String,
-  _last: {type: Schema.ObjectId, ref: 'Data'}
-});
-
 /**
  * Sensor Schema
  */
+
+var SensorSchema = new Schema({
+  devid: String,
+  type: String,
+  unit: String,
+  name: String,
+  _last: {type: Schema.ObjectId, ref: 'Data'}
+});
 
 SensorSchema.methods.getConfig = function (cb) {
   Config.findByRef(this.id, cb);
@@ -148,9 +150,12 @@ DeviceSchema.statics.fullSave = function (data, cb) {
         newDevice.sensors = results.map(function (el) {
           return el[0]._id;
         });
-        Device.findByIdAndUpdate(device.id, newDevice, function (err, item) {
-          cb(err, item);
-        });
+        Device
+          .findByIdAndUpdate(device.id, newDevice)
+          .populate('sensors')
+          .exec(function (err, item) {
+            cb(err, item);
+          });
       });
     }
   });

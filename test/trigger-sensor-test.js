@@ -39,22 +39,22 @@ describe('Sensor trigger system', function () {
       function (cb) {
         Data.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         User.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Sensor.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Trigger.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Device.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         TriggerHistory.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         var user = new User(user_sample);
         user.save(function (err, item) {
           cb(err, item);
@@ -218,22 +218,22 @@ describe('Sensor Trigger Api', function () {
       function (cb) {
         Data.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         User.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Sensor.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Trigger.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Device.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         TriggerHistory.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         var user = new User(user_sample);
         user.save(function (err, item) {
           cb(err, item);
@@ -342,22 +342,22 @@ describe('Sensor History Trigger Api', function () {
       function (cb) {
         Data.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         User.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Sensor.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Trigger.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         Device.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         TriggerHistory.remove(cb);
       },
-      function (item, cb) {
+      function (err, item, cb) {
         var user = new User(user_sample);
         user.save(function (err, item) {
           cb(err, item);
