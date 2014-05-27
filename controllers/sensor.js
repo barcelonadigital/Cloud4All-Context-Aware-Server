@@ -25,7 +25,6 @@ exports.get = function (req, res, next) {
     query.populate({path: '_last', select: 'at value -_id'});
   }
 
-  debugger;
   query.exec(function (err, item) {
     if (err) {
       next(err);
@@ -78,7 +77,6 @@ exports.postData = function (req, res, next) {
     e;
 
   Sensor.findById(id, function (err, sensor) {
-    debugger;
     if (err) {
       next(err);
     } else if (sensor) {
