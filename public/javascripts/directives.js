@@ -39,6 +39,15 @@ angular.module('casApp.directives', []).
           return d.at.format("dddd, MMMM Do YYYY, h:mm:ss a") + ', ' + d.value;
         };
 
+        var getYDomain = function (scope) {
+          var min = parseFloat(d3.min(scope.data, function (d) {return parseFloat(d.value); }));
+          var max = parseFloat(d3.max(scope.data, function (d) {return parseFloat(d.value); }));
+          var thres = Math.abs(max - min);
+
+          thres = thres > 0 ? thres : min * 20 / 100;
+          return [min - thres, max + thres];
+        };
+
         scope.updateTime();
 
         var x = d3.time.scale()
@@ -49,12 +58,8 @@ angular.module('casApp.directives', []).
           .domain(x.domain())
           .range([0, width]);
 
-        var min = d3.min(scope.data, function (d) {return d.value; });
-        var max = d3.max(scope.data, function (d) {return d.value; });
-        var thres = Math.abs(max - min);
-
         var y = d3.scale.linear()
-          .domain([min - thres, max + thres])
+          .domain(getYDomain(scope))
           .range([height, 0]);
 
         var y2 = d3.scale.linear()
@@ -213,13 +218,8 @@ angular.module('casApp.directives', []).
           context.selectAll('g.x.axis').call(xAxis2);
 
           // update y axis
-          min = d3.min(scope.data, function (d) {return d.value; });
-          max = d3.max(scope.data, function (d) {return d.value; });
-          thres = Math.abs(max - min);
-
-          y.domain([min - thres, max + thres]);
-          y2.domain([min - thres, max + thres]);
-
+          y.domain(getYDomain(scope));
+          y2.domain(y.domain());
           yAxis.scale(y);
 
           focus.selectAll('g.y.axis').call(yAxis);
@@ -254,6 +254,10 @@ angular.module('casApp.directives', []).
 
         }
 
+        scope.$watch('fired', function () {
+          updateGraph();
+        });
+
         scope.$watch('data', function () {
           var last = scope.data.length > 0 ? moment(_.last(scope.data).at) : null;
 
@@ -264,7 +268,10 @@ angular.module('casApp.directives', []).
             scope.data = [_.last(scope.data)];
             scope.fired = [];
           }
-          updateGraph();
+
+          if (!_.isEmpty(scope.data)) {
+            updateGraph();
+          }
         });
       }
     };

@@ -1,8 +1,11 @@
 p There are {{ sensors.length }} sensors
 div(ng-repeat='sensor in sensors')
   div Id: {{ sensor._id }}
+  div Name: {{ sensor.name }}
   div Type: {{ sensor.type }}
-  div Data: {{ sensor._last.value || "-" }}
+  div Unit: {{ sensor.unit }}
+  div Value: {{ sensor._last.value || "-" }}
+  div At: {{ sensor._last.at || "-" }}
   div Trigger: {{ fired[sensor._id] || "-" }}
 
   a(href='/stream/{{ sensor._id }}') stream {{ stream._id }}

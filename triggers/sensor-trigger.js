@@ -56,7 +56,7 @@ SensorTrigger.prototype.getSensorConfig = function (trigger) {
   Config.findByRef(that.sensor.id, function (err, item) {
     that.receiver = item.config.receiver;
     that.config = item.config.triggers[trigger];
-    that.on(that.config.onTriggered, that.publishTrigger);
+    that.on(that.config.onSavedFired, that.publishTrigger);
 
     that.emit(that.config.onConfig);
   });
@@ -137,7 +137,7 @@ SensorTrigger.prototype.getNearUsers = function () {
     } else if (!device) {
       that.emit('error', new Error('device not found'));
     } else if (!device.gps) {
-      that.emit('error', new Error('device gps not found'));
+      that.emit(that.config.onNotNear);
     } else {
       User.findNear({gps: device.gps, maxDistance: maxDistance}, function (err, users) {
         if (users) {

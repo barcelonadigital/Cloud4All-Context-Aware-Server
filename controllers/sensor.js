@@ -90,7 +90,12 @@ exports.postData = function (req, res, next) {
 
       e = new trigger.SensorTrigger(sensor);
       e.emit('onNewData', series);
+      e.on('error', function (err) {
+        console.log(err);
+      });
+
       res.send();
+
     } else {
       res.send(404);
     }
