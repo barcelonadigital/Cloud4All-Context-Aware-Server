@@ -12,6 +12,7 @@ var util = require('util'),
   var args = optimist.argv,
     id = args.id || null,
     num = args.num || 1,
+    type = args.type || 'int',
     sleep = args.sleep || 1000,
     host = args.host || 'localhost',
     port = args.port || '8888';
@@ -20,6 +21,16 @@ var util = require('util'),
     console.error('No id provided, please provide sensor id');
     return false;
   }
+
+  var getRandomData = function (type) {
+    switch (type) {
+    case 'int':
+      return Math.floor((Math.random() * 10) + 1);
+    case 'bool':
+      return Math.random() > 0.5 ? true : false;
+    }
+
+  };
 
   var path = '/sensors/' + id + '/data';
   var sendData = function () {
@@ -31,7 +42,7 @@ var util = require('util'),
     for (i = 0; i < num; i++) {
       data[i] = {
         at: now.add(sleep * i / (2 * num)).toISOString(),
-        value: Math.floor((Math.random() * 10) + 1)
+        value: getRandomData(type)
       };
     }
 
