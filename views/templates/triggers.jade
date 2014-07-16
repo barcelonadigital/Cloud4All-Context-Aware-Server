@@ -7,6 +7,6 @@ ul
     form(name = 'editTrigger' ng-show = 'trigger.edit' ng-submit = 'submit(trigger)')
       select(ng-model = 'trigger.type' ng-options = 'type.value as type.name for type in types')
       select(ng-model = 'trigger.operator' ng-options = 'op.value as op.name for op in operators')
-      input(type = 'number' ng-model = 'trigger.threshold' required)
+      input(type = 'number' step = 'any' ng-model = 'trigger.threshold' required)
       input(type = 'submit' value = 'Submit' ng-click = 'trigger.edit = !trigger.edit')
 button(ng-click = 'add()') Add
