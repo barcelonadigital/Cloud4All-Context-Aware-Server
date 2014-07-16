@@ -10,6 +10,17 @@ angular.module('casApp.directives', []).
     var margin = {top: 10, right: 10, bottom: 100, left: 40},
       margin2 = {top: 430, right: 10, bottom: 20, left: 40};
 
+    var toFloat = function (value) {
+      switch (value) {
+      case 'true':
+        return 1;
+      case 'false':
+        return 0;
+      default:
+        return parseFloat(value);
+      }
+    };
+
     return {
       restrict: 'E',
       replace: true,
@@ -40,8 +51,10 @@ angular.module('casApp.directives', []).
         };
 
         var getYDomain = function (scope) {
-          var min = parseFloat(d3.min(scope.data, function (d) {return parseFloat(d.value); }));
-          var max = parseFloat(d3.max(scope.data, function (d) {return parseFloat(d.value); }));
+          var formatValue = function (d) {return toFloat(d.value); };
+
+          var min = d3.min(scope.data, formatValue);
+          var max = d3.max(scope.data, formatValue);
           var thres = Math.abs(max - min);
 
           thres = thres > 0 ? thres : min * 20 / 100;
@@ -67,19 +80,21 @@ angular.module('casApp.directives', []).
           .range([height2, 0]);
 
         var line = d3.svg.line()
+          .interpolate('step-after')
           .x(function (d) {
             return x(moment(d.at));
           })
           .y(function (d) {
-            return y(d.value);
+            return y(toFloat(d.value));
           });
 
         var line2 = d3.svg.line()
+          .interpolate('step-after')
           .x(function (d) {
             return x2(moment(d.at));
           })
           .y(function (d) {
-            return y2(d.value);
+            return y2(toFloat(d.value));
           });
 
         var graph = d3.select(element[0])
@@ -185,14 +200,14 @@ angular.module('casApp.directives', []).
             d.at = moment(d.at);
 
             tip.select('circle.y')
-              .attr('transform', 'translate(' + x(d.at) + ',' + y(d.value) + ')');
+              .attr('transform', 'translate(' + x(d.at) + ',' + y(toFloat(d.value)) + ')');
             tip.select('text.y')
-              .attr('transform', 'translate(' + x(d.at) + ',' + y(d.value) + ')')
+              .attr('transform', 'translate(' + x(d.at) + ',' + y(toFloat(d.value)) + ')')
               .text(formatData(d));
             tip.select('.x')
               .attr('transform', 'translate(' + x(d.at) + ',0)');
             tip.select('.y')
-              .attr('transform', 'translate(' + width * -1 + ', ' + y(d.value) + ')')
+              .attr('transform', 'translate(' + width * -1 + ', ' + y(toFloat(d.value)) + ')')
               .attr('x', width + x(d.at));
           }
         }
@@ -203,7 +218,7 @@ angular.module('casApp.directives', []).
           focus.selectAll('circle')
             .attr('clip-path', 'url(#clip)')
             .attr("cx", function (d) { return x(moment(d.at)); })
-            .attr("cy", function (d) { return y(d.value); });
+            .attr("cy", function (d) { return y(toFloat(d.value)); });
           focus.select('.x.axis').call(xAxis);
         }
 
@@ -234,12 +249,12 @@ angular.module('casApp.directives', []).
 
           circles
             .attr("cx", function (d) { return x(moment(d.at)); })
-            .attr("cy", function (d) { return y(d.value); })
+            .attr("cy", function (d) { return y(toFloat(d.value)); })
             .enter()
               .append('circle')
               .attr('clip-path', 'url(#clip)')
               .attr('cx', function (d) { return x(moment(d.at)); })
-              .attr('cy', function (d) { return y(d.value); })
+              .attr('cy', function (d) { return y(toFloat(d.value)); })
               .attr('r', 5);
 
           circles.exit().remove();
@@ -290,4 +305,47 @@ angular.module('casApp.directives', []).
       restrict: 'E',
       templateUrl: '/templates/triggers'
     };
-  });
+  })
+
+  .directive('floorPlan', ['d3','_', function (d3, _) {
+    return {
+      restrict: 'E',
+      scope: {
+	  sensors: '='
+      },
+      link: function (scope, element) {
+	function updateHeatmap() {
+	    // console.log("updateHeatmap");
+      function is_on(d) {
+          if (d._last.value>=10) {
+              return true;
+          } else {
+              return false;
+          }
+      }
+	    var sensors = scope.sensors;
+	    var graph = d3.select(element[0]).selectAll('.room').data(scope.sensors);
+	    graph.enter().append("p").attr("class", "room").style("background-color", "white");
+      graph.text(function(d) {return "Sensor id: " + d._id + "\nValue: " + d._last.value;});
+      graph.transition()
+          .duration(function(d){
+              if(is_on(d)) {return 1000;}
+              else {return 3000;}
+          })
+          .style("background-color", function(d){
+              if(is_on(d)) {return "#E21403";}
+              else {return "white";}
+          });
+      graph.exit().remove();
+
+	};
+
+        scope.$watch('sensors', function () {
+          if (!_.isEmpty(scope.sensors)) {
+            updateHeatmap();
+          }
+        }, true);
+
+      }
+    };
+  }]);
