@@ -1,4 +1,4 @@
-/**
+   /**
  * Trigger API routes.
 **/
 
@@ -51,11 +51,11 @@ exports.post = function (req, res, next) {
   var item = req.body,
     trigger = new Trigger(item);
 
-  trigger.save(function (err) {
+  trigger.save(function (err, el) {
     if (err) {
       next(err);
     } else {
-      res.send(trigger);
+      res.send(el);
     }
   });
 };

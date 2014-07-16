@@ -15,6 +15,17 @@ exports.UUIDCheck = function (uuid) {
   return uuid.match(re);
 };
 
+var toFloat = function (value) {
+  switch (value) {
+  case 'true':
+    return 1;
+  case 'false':
+    return 0;
+  default:
+    return parseFloat(value);
+  }
+};
+
 exports.deepen = function (o) {
    /*
   ** Converts javascript dot notation object to nested object
@@ -23,13 +34,14 @@ exports.deepen = function (o) {
     t,
     parts,
     part,
+    key,
     k;
 
   for (k in o) {
     if (o.hasOwnProperty(k)) {
       t = oo;
       parts = k.split('.');
-      var key = parts.pop();
+      key = parts.pop();
       while (parts.length) {
         part = parts.shift();
         t = t[part] = t[part] || {};
@@ -41,20 +53,23 @@ exports.deepen = function (o) {
 };
 
 exports.compare = function (type, a, b) {
-  switch(type) {
-    case "gt":
-      return a > b;
-    case "gte":
-      return a >= b;
-    case "lte":
-      return a <= b;
-    case "lt":
-      return a < b;
-    case "eq":
-      return a === b;
-    case "neq":
-      return a !== b;
-    default:
-      return new Error("incorrect comparison type: " + type);
+  a = toFloat(a);
+  b = toFloat(b);
+
+  switch (type) {
+  case "gt":
+    return a > b;
+  case "gte":
+    return a >= b;
+  case "lte":
+    return a <= b;
+  case "lt":
+    return a < b;
+  case "eq":
+    return a === b;
+  case "neq":
+    return a !== b;
+  default:
+    return new Error("incorrect comparison type: " + type);
   }
 };
