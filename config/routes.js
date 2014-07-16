@@ -5,7 +5,9 @@ var sensor = require('../controllers/sensor'),
   site = require('../controllers/site'),
   trigger = require('../controllers/trigger'),
   triggerHistory = require('../controllers/trigger-history'),
-  device = require('../controllers/device');
+  device = require('../controllers/device'),
+  command = require('../controllers/command'),
+  home = require('../controllers/home');
 
 module.exports = function (app) {
   // General
@@ -59,7 +61,16 @@ module.exports = function (app) {
   app.post('/users', user.post);
   app.post('/users/:id', user.update);
   app.del('/users/:id', user.remove);
+  
+  //Api:commands
+  app.get('/commands/:name', command.get);
 
+  //Api:home
+  app.get('/homes/:id', home.get);
+  app.get('/homes', home.search);
+  app.post('/homes', home.post);
+  app.del('/homes/:id', home.remove);  
+  
   // Redirect all others to the index (HTML5 History)
   app.get('*', site.index);
 
