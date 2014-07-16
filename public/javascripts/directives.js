@@ -297,9 +297,9 @@ angular.module('casApp.directives', []).
       template: '<button class="forward" ng-disabled="stream" ng-click="forward()">Page up</button>' +
                 '<button class="back" ng-click="back()">Page down</button>'
     };
-  }).
+  })
 
-  directive('triggerList', function () {
+  .directive('triggerList', function () {
     return {
       controller: 'TriggerCtrl',
       restrict: 'E',
@@ -311,34 +311,75 @@ angular.module('casApp.directives', []).
     return {
       restrict: 'E',
       scope: {
-	  sensors: '='
+	      sensors: '=',
+        floorplan: '=',
+        width: '@',
+        height: '@'
       },
       link: function (scope, element) {
 	function updateHeatmap() {
 	    // console.log("updateHeatmap");
+
       function is_on(d) {
-          if (d._last.value>=10) {
-              return true;
-          } else {
-              return false;
-          }
+          var sensor_is_on = false;
+          d.devices.forEach(function(sensor_id) {
+              sensors.forEach(function(sensor) {
+                  if(sensor._id == sensor_id) {
+                      console.log(sensor);
+                      if (sensor._last.value>=10) {
+                          // Sensor in room and active
+                          console.log("ON");
+                          sensor_is_on = true;
+                      }
+                  }
+              })
+          });
+          console.log("OFF");
+          return sensor_is_on;
       }
+
+      var color_on = "#E21403";
+      var color_off = "#006666";
 	    var sensors = scope.sensors;
-	    var graph = d3.select(element[0]).selectAll('.room').data(scope.sensors);
-	    graph.enter().append("p").attr("class", "room").style("background-color", "white");
-      graph.text(function(d) {return "Sensor id: " + d._id + "\nValue: " + d._last.value;});
-      graph.transition()
+      console.log(scope.floorplan);
+	    var rooms = graph.selectAll('.room').data(scope.floorplan.rooms);
+
+      rooms.enter().append("rect")
+          .attr("class", "room")
+          .attr("x", function(d){return d.x})
+          .attr("y", function(d){return d.y})
+          .attr("width", function(d){return d.width})
+          .attr("height", function(d){return d.height})
+          .attr("fill", color_off);
+//	    rooms.enter()
+
+	    var labels = graph.selectAll('.labels').data(scope.floorplan.rooms);
+      labels.enter()
+          .append("text")
+          .attr("class","labels")
+          .attr("text-anchor", "middle")
+          .attr("x", function(d,i){return d.x+d.width/2;})
+          .attr("y", function(d,i){return d.y+d.height/2;})
+          .text(function(d) {return d.name;});
+ 
+      rooms.transition()
           .duration(function(d){
               if(is_on(d)) {return 1000;}
               else {return 3000;}
           })
-          .style("background-color", function(d){
-              if(is_on(d)) {return "#E21403";}
-              else {return "white";}
+          .style("fill", function(d){
+              if(is_on(d)) {return color_on;}
+              else {return color_off;}
           });
-      graph.exit().remove();
+      rooms.exit().remove();
 
 	};
+          
+        var graph = d3.select(element[0])
+          .append("svg")
+          .attr('width', scope.width)
+          .attr('height', scope.height);
+
 
         scope.$watch('sensors', function () {
           if (!_.isEmpty(scope.sensors)) {
