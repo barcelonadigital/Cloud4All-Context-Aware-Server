@@ -9,3 +9,6 @@ div(ng-repeat='sensor in sensors')
   div Trigger: {{ fired[sensor._id] || "-" }}
 
   a(href='/stream/{{ sensor._id }}') stream {{ stream._id }}
+
+div
+  floor-plan(sensors='sensors')

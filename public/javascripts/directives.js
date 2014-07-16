@@ -290,4 +290,47 @@ angular.module('casApp.directives', []).
       restrict: 'E',
       templateUrl: '/templates/triggers'
     };
-  });
+  })
+
+  .directive('floorPlan', ['d3','_', function (d3, _) {
+    return {
+      restrict: 'E',
+      scope: {
+	  sensors: '='
+      },
+      link: function (scope, element) {
+	function updateHeatmap() {
+	    // console.log("updateHeatmap");
+      function is_on(d) {
+          if (d._last.value>=10) {
+              return true;
+          } else {
+              return false;
+          }
+      }
+	    var sensors = scope.sensors;
+	    var graph = d3.select(element[0]).selectAll('.room').data(scope.sensors);
+	    graph.enter().append("p").attr("class", "room").style("background-color", "white");
+      graph.text(function(d) {return "Sensor id: " + d._id + "\nValue: " + d._last.value;});
+      graph.transition()
+          .duration(function(d){
+              if(is_on(d)) {return 1000;}
+              else {return 3000;}
+          })
+          .style("background-color", function(d){
+              if(is_on(d)) {return "#E21403";}
+              else {return "white";}
+          });
+      graph.exit().remove();
+
+	};
+
+        scope.$watch('sensors', function () {
+          if (!_.isEmpty(scope.sensors)) {
+            updateHeatmap();
+          }
+        }, true);
+
+      }
+    };
+  }]);
