@@ -20,7 +20,7 @@ exports.get = function (req, res, next) {
   query = Device.findById(id);
 
   if (populate) {
-    query.populate('sensors');
+    query.populate({path: 'sensors'});
   }
 
   query.exec(function (err, item) {
@@ -50,7 +50,7 @@ exports.search = function (req, res, next) {
   query = Device.find(q);
 
   if (populate) {
-    query.populate('sensors');
+    query.populate({path: 'sensors'});
   }
 
   query.exec(function (err, devices) {

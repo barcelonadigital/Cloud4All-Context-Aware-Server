@@ -160,6 +160,8 @@ angular.module('casApp.controllers', []).
     function (sc, params, sensor, device, home, socket, _) {
       sc.data = {};
       sc.fired = {};
+      sc.rooms = [];
+      sc.home = '';
       socket.connect('/dashboard');
 
       sc.sensors = sensor.query({'populate': true}, function () {
@@ -167,8 +169,14 @@ angular.module('casApp.controllers', []).
           return el._id;
         }));
       });
-	  
-    sc.devices = device.query();
+
+      device.query({'populate': true}, function (devices) {
+        sc.devices = _.filter(devices, function (device) {
+          return _.find(device.sensors, function (el) {
+            return el.name == 'General purpose';
+          });
+        });
+      });
 
       socket.on('data', function (el) {
         _.find(sc.sensors, function (sensor) {
@@ -179,38 +187,55 @@ angular.module('casApp.controllers', []).
       socket.on('fired', function (el) {
         sc.fired[el.id] = el.data;
       });
-	  
-	  	
-	sc.dropped = function(dragEl, dropEl) {
-		// this is your application logic, do whatever makes sense
-		var drag = angular.element(dragEl);
-		var drop = angular.element(dropEl);
 
-		console.log();
-		if (drag.attr("x-lvl-drop-target") == "true"){
-			console.log("Building room");
+      sc.submit = function () {
+        sc.rooms.forEach(function (room, i) {
+          room.actuator = "53c66e4ba4075b9d335d6c57";
+        });
 
-		//drag.addClass("grey");
-		} else {
-			if (drop.attr('room') == null) {
-				console.log("Not a room");
-			} else {
-				//drop.removeClass("slot");
-				//drop.text(drag.text());
-				drop.addClass("image");
-				drop.attr('title', drag.text());
-				drag.attr('draggable', false);
-				drag.text("");
-				drop.attr("x-lvl-drop-target", false)
-				console.log("The element " + drag.attr('id') + " has been dropped on room " + drop.attr("room") + "!");
-				
-				
-			
-			}
-		}
-	  
-	  
-    };
+        sc.home = home.save({
+          name: "home2",
+          rooms: sc.rooms
+        });
+      };
+
+      sc.dropped = function(dragEl, dropEl) {
+    	  // this is your application logic, do whatever makes sense
+    		var drag = angular.element(dragEl);
+    		var drop = angular.element(dropEl);
+
+    		if (drag.attr("x-lvl-drop-target") == "true"){
+    			console.log("Building room");
+          sc.rooms.push({
+            name: 'Room ' + drop.attr('room'),
+            roomId: drop.attr('room'),
+            x: Number(drag.attr('col')),
+            y: Number(drag.attr('row')),
+            height: Number(drop.attr('row')) - Number(drag.attr('row')),
+            width: Number(drop.attr('col')) - Number(drag.attr('col')),
+            devices: []
+          });
+
+    		//drag.addClass("grey");
+    		} else {
+    			if (drop.attr('room') == null) {
+    				console.log("Not a room");
+    			} else {
+    				//drop.removeClass("slot");
+    				//drop.text(drag.text());
+            _.find(sc.rooms, function (room) {
+              return room.roomId == drop.attr('room');
+            }).devices.push(drag.text());
+
+            drop.addClass("image");
+            drop.attr('title', drag.text());
+            drag.attr('draggable', false);
+            drag.text("");
+            drop.attr("x-lvl-drop-target", false)
+            console.log("The element " + drag.attr('id') + " has been dropped on room " + drop.attr("room") + "!");
+    			}
+    		}
+      };
     }]).
 
   controller('FloorPlanCtrl', ['$scope', '$routeParams', 'device', 'home', 'socket', '_',

@@ -1,49 +1,98 @@
 {
-	"name": "home1",
-	"rooms": [
-		{
-			"name": "Room 1",
+  "name": "home1",
+  "rooms": [
+    {
+      "name": "Room 1",
       "x": 0,
       "y": 0,
-			"height": 10,
-			"width": 10,
-			"devices":[
-				"53c7ccd468275cf55d9aa432",
-				"53c7ccd468275cf55d9aa434"
-			],
-			"actuator": "53c66e4ba4075b9d335d6c57"
-		},
-		{
-			"name": "Room 2",
+      "height": 10,
+      "width": 10,
+      "actuator": "53c66e4ba4075b9d335d6c57",
+      "devices": [
+        "53c7ccd468275cf55d9aa432"
+      ]
+    },
+    {
+      "name": "Room 2",
+      "x": 0,
+      "y": 10,
+      "height": 10,
+      "width": 15,
+      "actuator": "53c66e4ba4075b9d335d6c57",
+      "_id": "53c7cfa468275cf55d9aa610",
+      "devices": [
+        "53c7ccd468275cf55d9aa436"
+      ]
+    },
+    {
+      "name": "Room 3",
       "x": 10,
-      "y": 3,
-			"height": 30,
-			"width": 25,
-			"devices":[
-				"53c7ccd468275cf55d9aa436",
-				"53c7ccd468275cf55d9aa43b"
-			],
-			"actuator": "53c66e4ba4075b9d335d6c57"
-		},
-		{
-			"name": "Room 3",
+      "y": 0,
+      "height": 10,
+      "width": 25,
+      "actuator": "53c66e4ba4075b9d335d6c57",
+      "_id": "53c7cfa468275cf55d9aa60f",
+      "devices": [
+        "53c7e27768275cf55d9aa93b"
+      ]
+    },
+    {
+      "name": "Room 4",
+      "x": 15,
+      "y": 10,
+      "height": 10,
+      "width": 25,
+      "actuator": "53c66e4ba4075b9d335d6c57",
+      "_id": "53c7cfa468275cf55d9aa60e",
+      "devices": [
+        "53c7cd0468275cf55d9aa490"
+      ]
+    },
+    {
+      "name": "Room 5",
+      "x": 0,
+      "y": 20,
+      "height": 10,
+      "width": 10,
+      "actuator": "53c66e4ba4075b9d335d6c57",
+      "devices": [
+      	"53c7ccd468275cf55d9aa447"
+      ]
+    },
+    {
+      "name": "Room 6",
+      "x": 10,
+      "y": 20,
+      "height": 10,
+      "width": 10,
+      "actuator": "53c66e4ba4075b9d335d6c57",
+      "_id": "53c7cfa468275cf55d9aa610",
+      "devices": [
+      ]
+    },
+    {
+      "name": "Room 7",
       "x": 20,
-      "y": 3,
-			"height": 10,
-			"width": 25,
-			"devices":[
-			],
-			"actuator": "53c66e4ba4075b9d335d6c57"
-		},
-		{
-			"name": "Room 4",
-      "x": 10,
+      "y": 20,
+      "height": 10,
+      "width": 10,
+      "actuator": "53c66e4ba4075b9d335d6c57",
+      "_id": "53c7cfa468275cf55d9aa60f",
+      "devices": [
+        "53c7dd9968275cf55d9aa895"
+      ]
+    },
+    {
+      "name": "Room 8",
+      "x": 0,
       "y": 30,
-			"height": 10,
-			"width": 5,
-			"devices":[
-			],
-			"actuator": "53c66e4ba4075b9d335d6c57"
-		}
-	]
+      "height": 10,
+      "width": 20,
+      "actuator": "53c66e4ba4075b9d335d6c57",
+      "_id": "53c7cfa468275cf55d9aa60f",
+      "devices": [
+        "53c7d22068275cf55d9aa740"
+      ]
+    }
+  ]
 }

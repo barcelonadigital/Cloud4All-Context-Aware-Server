@@ -1,33 +1,19 @@
-<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+link(href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet")
+
+form(ng-submit="submit()")
+  input(type="submit" id="submit" value="Submit")
+
+a(href='/heatmap/{{ home._id }}') my home
 
 
-<div style="margin-top:50px;">
-<div class="row">
-div.col-md-1.col-md-offset-1(ng-repeat='device in devices')
-  div( x-lvl-draggable='true') {{ device._id }}
+div(style="margin-top:50px;")
+div.row
+  div.col-md-1.col-md-offset-1(ng-repeat='device in devices')
+    div( x-lvl-draggable='true') {{ device._id }}
+br
 
-<br>
-<div class="col-md-10 aa">
-<div ng-repeat="r in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]">
-<span class="slot" row="{{$parent.$index}}" col="{{$index}}" ng-repeat="c in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]" x-lvl-draggable='true' x-lvl-drop-target="true" x-on-drop="dropped(dragEl, dropEl)"></span>
-</div>
-</div>
-</div>
-</div>
-
-
-
-p There are {{ sensors.length }} sensors
-div(ng-repeat='sensor in sensors')
-  div Id: {{ sensor._id }}
-  div Name: {{ sensor.name }}
-  div Type: {{ sensor.type }}
-  div Unit: {{ sensor.unit }}
-  div Value: {{ sensor._last.value || "-" }}
-  div At: {{ sensor._last.at || "-" }}
-  div Trigger: {{ fired[sensor._id] || "-" }}
-
-  a(href='/stream/{{ sensor._id }}') stream {{ stream._id }}
-
-div
-  floor-plan(sensors='sensors')
+div(class="col-md-10 aa")
+  div(ng-repeat="r in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]")
+    span.slot(row="{{$parent.$index}}" col="{{$index}}"
+      ng-repeat="c in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"
+      x-lvl-draggable='true' x-lvl-drop-target="true" x-on-drop="dropped(dragEl, dropEl)")

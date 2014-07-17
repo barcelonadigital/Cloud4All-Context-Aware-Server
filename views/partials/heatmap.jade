@@ -2,3 +2,14 @@ p There are {{ sensors.length }} sensors
 p {{floorplan.name}}
 div
   floor-plan(sensors='sensors', floorplan='floorplan', width=800, height=600)
+
+div(ng-repeat='sensor in sensors')
+  div Id: {{ sensor._id }}
+  div Device: {{ sensor.device}}
+  div Name: {{ sensor.name }}
+  div Type: {{ sensor.type }}
+  div Unit: {{ sensor.unit }}
+  div Value: {{ sensor._last.value || "-" }}
+  div At: {{ sensor._last.at || "-" }}
+  div Trigger: {{ fired[sensor._id] || "-" }}
+
