@@ -20,7 +20,7 @@ angular.module('casApp', [
       }).
       when('/heatmap/:id', {
         templateUrl: '/partials/heatmap',
-        controller: 'DashBoardCtrl'
+        controller: 'FloorPlanCtrl'
       }).
       when('/stream/:id', {
         templateUrl: '/partials/stream',

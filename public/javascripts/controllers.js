@@ -158,13 +158,43 @@ angular.module('casApp.controllers', []).
 
   controller('DashBoardCtrl', ['$scope', '$routeParams', 'sensor', 'home', 'socket', '_',
     function (sc, params, sensor, home, socket, _) {
-
-      sc.home_id = params.id;
       sc.data = {};
       sc.fired = {};
       socket.connect('/dashboard');
 
       sc.sensors = sensor.query({'populate': true}, function () {
+        socket.emit('subscribe', sc.sensors.map(function (el) {
+          return el._id;
+        }));
+      });
+
+      socket.on('data', function (el) {
+        _.find(sc.sensors, function (sensor) {
+          return sensor._id === el.id;
+        })._last = el.data;
+      });
+
+      socket.on('fired', function (el) {
+        sc.fired[el.id] = el.data;
+      });
+    }]).
+
+  controller('FloorPlanCtrl', ['$scope', '$routeParams', 'device', 'home', 'socket', '_',
+    function (sc, params, device, home, socket, _) {
+      sc.home_id = params.id;
+      sc.data = {};
+      sc.fired = {};
+      sc.sensors = [];
+      socket.connect('/dashboard');
+
+      sc.devices = device.query({'populate': true}, function () {
+        sc.devices.forEach(function (device) {
+          device.sensors.forEach(function (sensor) {
+            sensor.device = device._id;
+            sc.sensors.push(sensor);
+          });
+        });
+
         socket.emit('subscribe', sc.sensors.map(function (el) {
           return el._id;
         }));
@@ -185,3 +215,4 @@ angular.module('casApp.controllers', []).
         sc.fired[el.id] = el.data;
       });
     }]);
+
