@@ -156,8 +156,8 @@ angular.module('casApp.controllers', []).
 
   }]).
 
-  controller('DashBoardCtrl', ['$scope', '$routeParams', 'sensor', 'home', 'socket', '_',
-    function (sc, params, sensor, home, socket, _) {
+  controller('DashBoardCtrl', ['$scope', '$routeParams', 'sensor', 'device', 'home', 'socket', '_',
+    function (sc, params, sensor, device, home, socket, _) {
       sc.data = {};
       sc.fired = {};
       socket.connect('/dashboard');
@@ -167,6 +167,8 @@ angular.module('casApp.controllers', []).
           return el._id;
         }));
       });
+	  
+    sc.devices = device.query();
 
       socket.on('data', function (el) {
         _.find(sc.sensors, function (sensor) {
