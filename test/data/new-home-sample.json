@@ -1,0 +1,23 @@
+{
+	"name": "home1",
+	"rooms": [
+		{
+			"name": "room1",
+			"height": 10,
+			"width": 10,
+			"devices":[
+				"53c66e4fa4075b9d335d6c62",
+				"53c66d59a4075b9d335d6bd0"
+			],
+			"actuator" : "53c66e4ba4075b9d335d6c57"
+		},
+		{
+			"name": "room2",
+			"height": 20,
+			"width": 20,
+			"devices":[
+			],
+			"actuator" : "53c66e4ba4075b9d335d6c57"
+		}
+	]
+}

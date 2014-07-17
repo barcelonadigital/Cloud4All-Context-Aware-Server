@@ -20,6 +20,7 @@
     "node-uuid": "*",
     "mongoose": "*",
     "less-middleware": "*",
+    "node-rest-client": "*",
     "socket.io": "*"
   }
 }

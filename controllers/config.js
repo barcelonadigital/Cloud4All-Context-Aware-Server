@@ -44,7 +44,7 @@ exports.post = function (req, res, next) {
 
 exports.search = function (req, res, next) {
   /**
-   * search devices from database
+   * search configs from database
   **/
 
   var q = req.query || {};
@@ -62,7 +62,7 @@ exports.search = function (req, res, next) {
 
 exports.searchBySensor = function (req, res, next) {
   /**
-   * Search triggers from database
+   * Search configs by sensor from database
   **/
 
   var id = req.params.id,
@@ -108,7 +108,7 @@ exports.update = function (req, res, next) {
 
 exports.remove = function (req, res, next) {
   /**
-   * Deletes an existing user
+   * Deletes an existing config
   **/
   var id = req.params.id;
 

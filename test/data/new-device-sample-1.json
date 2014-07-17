@@ -1,0 +1,19 @@
+{
+	"serial": "serial-1",
+	"gps": [2.194909, 41.402455],
+	"location": "kitchen",
+	"sensors": [
+		{
+		"name": "light",
+		"type": "Float",
+		"unit": "%",
+		"devid": 1
+		},
+		{
+		"name": "noise",
+		"type":  "Float",
+		"unit": "dB",
+		"devid": 2
+		}
+	]
+}
