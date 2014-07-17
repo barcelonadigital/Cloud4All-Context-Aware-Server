@@ -55,6 +55,11 @@ angular.module('casApp.services', ['ngResource']).
     });
   }]).
 
+  //home api
+  factory('home', ['$resource', function ($resource) {
+    return $resource('/homes/:id/');
+  }]).
+
   //data api
   factory('data', ['$resource', function ($resource) {
     return $resource('/sensors/:id/data/');
