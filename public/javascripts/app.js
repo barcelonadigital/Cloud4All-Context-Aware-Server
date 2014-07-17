@@ -18,6 +18,10 @@ angular.module('casApp', [
         templateUrl: '/partials/dashboard',
         controller: 'DashBoardCtrl'
       }).
+      when('/heatmap/', {
+        templateUrl: '/partials/heatmap',
+        controller: 'DashBoardCtrl'
+      }).
       when('/stream/:id', {
         templateUrl: '/partials/stream',
         controller: 'StreamCtrl'
