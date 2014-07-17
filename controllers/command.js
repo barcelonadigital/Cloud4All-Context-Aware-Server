@@ -16,7 +16,8 @@ var app = require('../app'),
 
 
 exports.get = function (req, res, next) {
-	var name = req.params.name;
+	var name = req.params.name || "light",
+		value = req.params.value || "on";
 	switch(name)
 	{
 		//Turn on lights of the current room
@@ -67,19 +68,15 @@ exports.get = function (req, res, next) {
 
 			    							// set content-type header and data as json in args parameter
 			    							var args = {
-			    							  data: {"command":"on" },
+			    							  data: {
+			    							  	"command": value
+			    							  },
 			    							  headers:{"Content-Type": "application/json"}
 			  							  };
 
 			    							var url = "http://localhost:8080/devices/" + detectedRoom.actuator + "/commands";
 			    							console.log("URL:", url);
-			    							client.post(url, args, function(data,response, error) {
-			        					      // parsed response body as js object
-			        					    console.log(data);
-			        					    // raw response
-			        					    console.log(response);
-			        					    next(error);
-			        					});
+			    							client.post(url, args, next);
 								  		}
 								  }
 								  next();

@@ -12,9 +12,18 @@ exports.get = function (req, res, next) {
   /**
    * Gets device from database
   **/
-  var id = req.params.id;
 
-  Device.findById(id, function (err, item) {
+  var id = req.params.id,
+    populate = req.query.populate || false,
+    query = null;
+
+  query = Device.findById(id);
+
+  if (populate) {
+    query.populate({path: 'sensors'});
+  }
+
+  query.exec(function (err, item) {
     if (err) {
       next(err);
     } else if (item) {
@@ -30,9 +39,21 @@ exports.search = function (req, res, next) {
    * search devices from database
   **/
 
-  var q = req.query || {};
+  var q = req.query || {},
+    populate = req.query.populate || false,
+    query = null;
 
-  Device.find(q, function (err, devices) {
+  if (populate) {
+    delete q.populate;
+  }
+
+  query = Device.find(q);
+
+  if (populate) {
+    query.populate({path: 'sensors'});
+  }
+
+  query.exec(function (err, devices) {
     if (err) {
       next(err);
     } else if (devices.length > 0) {

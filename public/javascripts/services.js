@@ -40,18 +40,23 @@ angular.module('casApp.services', ['ngResource']).
     return $resource('/sensors/:id/');
   }]).
 
+  //device api
+  factory('device', ['$resource', function ($resource) {
+    return $resource('/devices/:id/');
+  }]).
+
   //trigger api
   factory('trigger', ['$resource', function ($resource) {
     return $resource('/triggers/:id/', {id: '@_id'}, {
       'create': {method: 'POST', url: '/sensors/:sensorId/triggers/'},
-      'query': {method: 'GET', url: '/sensors/:sensorId/triggers/', isArray: true},
+      'query': {method: 'GET', url: '/sensors/:sensorId/triggers/', isArray: true}
     });
   }]).
 
   //trigger history api
   factory('fired', ['$resource', function ($resource) {
     return $resource('/fired-triggers/:id/', {id: '@_id'}, {
-      'lapse': {method: 'GET', url: '/sensors/:sensorId/fired-triggers/date/:start/:end', isArray: true},
+      'lapse': {method: 'GET', url: '/sensors/:sensorId/fired-triggers/date/:start/:end', isArray: true}
     });
   }]).
 

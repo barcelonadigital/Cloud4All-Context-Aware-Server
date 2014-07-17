@@ -61,16 +61,16 @@ module.exports = function (app) {
   app.post('/users', user.post);
   app.post('/users/:id', user.update);
   app.del('/users/:id', user.remove);
-  
+
   //Api:commands
-  app.get('/commands/:name', command.get);
+  app.get('/commands/:name/:value', command.get);
 
   //Api:home
   app.get('/homes/:id', home.get);
   app.get('/homes', home.search);
   app.post('/homes', home.post);
-  app.del('/homes/:id', home.remove);  
-  
+  app.del('/homes/:id', home.remove);
+
   // Redirect all others to the index (HTML5 History)
   app.get('*', site.index);
 

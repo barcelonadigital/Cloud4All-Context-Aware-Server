@@ -12,7 +12,7 @@ angular.module('casApp.controllers', []).
       {name: 'less than', value: 'lt'},
       {name: 'less than equal', value: 'lte'},
       {name: 'equal', value: 'eq'},
-      {name: 'non equal', value: 'neq'},
+      {name: 'non equal', value: 'neq'}
     ];
 
     sc.types = [
@@ -156,32 +156,32 @@ angular.module('casApp.controllers', []).
 
   }]).
 
-  controller('DashBoardCtrl', ['$scope', '$routeParams', 'sensor', 'home', 'socket', '_', function (sc, params, sensor, home, socket, _) {
+  controller('DashBoardCtrl', ['$scope', '$routeParams', 'sensor', 'home', 'socket', '_',
+    function (sc, params, sensor, home, socket, _) {
 
-    sc.home_id = params.id;
-    sc.data = {};
-    sc.fired = {};
-    socket.connect('/dashboard');
+      sc.home_id = params.id;
+      sc.data = {};
+      sc.fired = {};
+      socket.connect('/dashboard');
 
-    sc.sensors = sensor.query({'populate': true}, function () {
-      socket.emit('subscribe', sc.sensors.map(function (el) {
-        return el._id;
-      }));
-    });
+      sc.sensors = sensor.query({'populate': true}, function () {
+        socket.emit('subscribe', sc.sensors.map(function (el) {
+          return el._id;
+        }));
+      });
 
       sc.floorplan = null;
-      home.get({id:sc.home_id},
-               function(result) {
-                   sc.floorplan = result;
-               });
+      home.get({id: sc.home_id}, function (result) {
+        sc.floorplan = result;
+      });
 
-    socket.on('data', function (el) {
-      _.find(sc.sensors, function (sensor) {
-        return sensor._id === el.id;
-      })._last = el.data;
-    });
+      socket.on('data', function (el) {
+        _.find(sc.sensors, function (sensor) {
+          return sensor._id === el.id;
+        })._last = el.data;
+      });
 
-    socket.on('fired', function (el) {
-      sc.fired[el.id] = el.data;
-    });
-  }]);
+      socket.on('fired', function (el) {
+        sc.fired[el.id] = el.data;
+      });
+    }]);
