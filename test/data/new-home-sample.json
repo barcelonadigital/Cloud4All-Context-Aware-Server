@@ -1,0 +1,21 @@
+{
+	"name": "home1",
+	"rooms": [
+		{
+			"name": "room1",
+			"lenght": "10",
+			"weight": "10",
+			"devices":[
+				"53c61b8023c5d2c40584c504",
+				"53c65adade39940f1b03eb4d"
+			]
+		},
+		{
+			"name": "room2",
+			"lenght": "20",
+			"weight": "20",
+			"devices":[
+			]
+		}
+	]
+}

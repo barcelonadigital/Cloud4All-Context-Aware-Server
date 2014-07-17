@@ -19,6 +19,19 @@ var DataSchema = new Schema({
   value: String
 });
 
+
+DataSchema.statics.getLastActiveSensor = function (search, cb) {
+  this
+    .find(search)
+    .sort('-at')
+    .limit(1)
+    .select('_sensor at value -_id')
+    .exec(function (err, item) {
+      cb(err, item[0] || []);
+    });
+};
+
+
 DataSchema.statics.getLast = function (id, cb) {
   this
     .find({'_sensor': id})

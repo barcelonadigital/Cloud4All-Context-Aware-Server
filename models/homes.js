@@ -13,8 +13,11 @@ var mongoose = require('mongoose'),
  */
 var RoomSchema = new Schema({
   name: String,
-  lenght: String,
-  weight: String,
+  length: String,
+  weigth: String,
+  x: String,
+  y: String,
+  actuator: {type: Schema.ObjectId, ref: "Device"},
   devices: [{type: Schema.ObjectId, ref: "Device"}]
 });
 
