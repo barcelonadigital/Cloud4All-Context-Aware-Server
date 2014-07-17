@@ -403,4 +403,126 @@ angular.module('casApp.directives', []).
 
       }
     };
-  }]);
+  }]).
+  
+    directive('lvlDraggable', ['$rootScope', 'uuid', function($rootScope, uuid) {
+	    return {
+	        restrict: 'A',
+	        link: function(scope, el, attrs, controller) {
+	        	angular.element(el).attr("draggable", "true");
+	            
+	            var id = angular.element(el).attr("id");
+	            if (!id) {
+	                id = uuid.new()
+	                angular.element(el).attr("id", id);
+	            }
+	            
+	            el.bind("dragstart", function(e) {
+					angular.element(el).addClass('start');
+					e.dataTransfer.setData('text', id);
+					$rootScope.$emit("LVL-DRAG-START");
+					if (el.attr("x-lvl-drop-target") == "true"){
+						var hab;
+						for (hab = 0; hab<=3;hab++) {
+							if (d3.select('.slot[room="'+hab+'"]')[0][0] == null) {
+								break;
+							}
+						}
+						console.log("Start!! Room: " + hab);
+						angular.element(el).attr('room', hab);
+					}
+	            });
+	            
+	            el.bind("dragend", function(e) {
+	                $rootScope.$emit("LVL-DRAG-END");
+	            });
+	        }
+    	}
+	}]).directive('lvlDropTarget', ['$rootScope', 'uuid', 'd3', function($rootScope, uuid, d3) {
+	    return {
+	        restrict: 'A',
+	        scope: {
+	            onDrop: '&'
+	        },
+	        link: function(scope, el, attrs, controller) {
+	            var id = angular.element(el).attr("id");
+	            if (!id) {
+	                id = uuid.new()
+	                angular.element(el).attr("id", id);
+	            }
+	                       
+	            el.bind("dragover", function(e) {
+	              if (e.preventDefault) {
+	                e.preventDefault(); // Necessary. Allows us to drop.
+	              }
+	              
+	              e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+	              return false;
+	            });
+	            
+	            el.bind("dragenter", function(e) {
+					var start = angular.element(d3.select('.start')[0]);
+					// this / e.target is the current hover target.
+					if (start.attr("x-lvl-drop-target") == "true"){
+						//angular.element(e.target).addClass('red');
+						//console.log(angular.element(e.target).attr("col")+ " "+angular.element(e.target).attr("row"));
+						//var x = el.parent().parent().find( "span" ).find("[col='" + angular.element(e.target).attr("col") + "']");
+						//x.css( "background-color", "red" );
+
+							//angular.element($('.slot[col="'+i+'"].slot[row="3"]')).addClass('green');
+							
+						var i, j;
+						var row = parseInt(angular.element(el).attr("row"));
+						var col = parseInt(angular.element(el).attr("col"));
+						for (i = parseInt(start.attr("col")); i<=col;i++) {
+							angular.element(d3.select('.slot[col="'+i+'"].slot[row="'+row+'"]')[0]).attr('room', start.attr("room"));
+						}
+						for (j = parseInt(start.attr("row")); j<=row;j++) {
+							//console.log("target: " + i + " " + y); 
+							angular.element(d3.select('.slot[col="'+col+'"].slot[row="'+j+'"]')[0]).attr('room', start.attr("room"));
+							
+						}				
+
+						//$('.slot[col="0"]').addClass('green');
+						//el.parent().parent()('[col="1"]');.css( "background-color", "green" );
+						//var y = el.children();
+						//$( "aa" ).find( "span" ).css( "background-color", "green" );
+					}else{
+						angular.element(e.target).addClass('lvl-over');
+					}
+	            });
+	            
+	            el.bind("dragleave", function(e) {
+	              angular.element(e.target).removeClass('lvl-over');  // this / e.target is previous target element.
+	            });
+	            
+	            el.bind("drop", function(e) {
+	              if (e.preventDefault) {
+	                e.preventDefault(); // Necessary. Allows us to drop.
+	              }
+
+	              if (e.stopPropagation) {
+	                e.stopPropagation(); // Necessary. Allows us to drop.
+	              }
+	            	var data = e.dataTransfer.getData("text");
+	                var dest = document.getElementById(id);
+	                var src = document.getElementById(data);
+	                angular.element(d3.select('.start')[0]).removeClass('start');
+	                scope.onDrop({dragEl: src, dropEl: dest});
+	            });
+
+	            $rootScope.$on("LVL-DRAG-START", function() {
+	                var el = document.getElementById(id);
+	                angular.element(el).addClass("lvl-target");
+	            });
+	            
+	            $rootScope.$on("LVL-DRAG-END", function() {
+	                var el = document.getElementById(id);
+	                angular.element(el).removeClass("lvl-target");
+	                angular.element(el).removeClass("lvl-over");
+	            });
+	        }
+    	}
+	}])
+  
+  ;

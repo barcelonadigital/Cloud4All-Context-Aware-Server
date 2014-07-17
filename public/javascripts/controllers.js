@@ -177,6 +177,38 @@ angular.module('casApp.controllers', []).
       socket.on('fired', function (el) {
         sc.fired[el.id] = el.data;
       });
+	  
+	  	
+	sc.dropped = function(dragEl, dropEl) {
+		// this is your application logic, do whatever makes sense
+		var drag = angular.element(dragEl);
+		var drop = angular.element(dropEl);
+
+		console.log();
+		if (drag.attr("x-lvl-drop-target") == "true"){
+			console.log("Building room");
+
+		//drag.addClass("grey");
+		} else {
+			if (drop.attr('room') == null) {
+				console.log("Not a room");
+			} else {
+				//drop.removeClass("slot");
+				//drop.text(drag.text());
+				drop.addClass("image");
+				drop.attr('title', drag.text());
+				drag.attr('draggable', false);
+				drag.text("");
+				drop.attr("x-lvl-drop-target", false)
+				console.log("The element " + drag.attr('id') + " has been dropped on room " + drop.attr("room") + "!");
+				
+				
+			
+			}
+		}
+	  
+	  
+    };
     }]).
 
   controller('FloorPlanCtrl', ['$scope', '$routeParams', 'device', 'home', 'socket', '_',
