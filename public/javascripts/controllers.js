@@ -156,8 +156,9 @@ angular.module('casApp.controllers', []).
 
   }]).
 
-  controller('DashBoardCtrl', ['$scope', 'sensor', 'home', 'socket', '_', function (sc, sensor, home, socket, _) {
+  controller('DashBoardCtrl', ['$scope', '$routeParams', 'sensor', 'home', 'socket', '_', function (sc, params, sensor, home, socket, _) {
 
+    sc.home_id = params.id;
     sc.data = {};
     sc.fired = {};
     socket.connect('/dashboard');
@@ -169,7 +170,7 @@ angular.module('casApp.controllers', []).
     });
 
       sc.floorplan = null;
-      home.get({id:'53c7a3966dbff563196dabe9'},
+      home.get({id:sc.home_id},
                function(result) {
                    sc.floorplan = result;
                });

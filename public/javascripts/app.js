@@ -18,7 +18,7 @@ angular.module('casApp', [
         templateUrl: '/partials/dashboard',
         controller: 'DashBoardCtrl'
       }).
-      when('/heatmap/', {
+      when('/heatmap/:id', {
         templateUrl: '/partials/heatmap',
         controller: 'DashBoardCtrl'
       }).
