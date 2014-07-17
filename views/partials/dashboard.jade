@@ -1,14 +1,20 @@
 link(href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet")
 
-form(ng-submit="submit()")
-  input(type="submit" id="submit" value="Submit")
+h1 Dashboard
+h2 My Homes
 
-a(href='/heatmap/{{ home._id }}') my home
+div(ng-repeat='home in homes')
+  a(href='/heatmap/{{ home._id }}') my {{ home.name }}
+  button.btn-default(ng-click="remove(home)")
+    span.glyphicon.glyphicon-remove remove
+
+form(ng-submit="submit()")
+  input.btn.btn-primary(type="submit" id="add" value="Save the new floor plan")
 
 
 div(style="margin-top:50px;")
 div.row
-  div.col-md-1.col-md-offset-1(ng-repeat='device in devices')
+  div.col-md-2(ng-repeat='device in devices')
     div( x-lvl-draggable='true') {{ device._id }}
 br
 

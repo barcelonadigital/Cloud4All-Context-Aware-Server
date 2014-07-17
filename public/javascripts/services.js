@@ -77,12 +77,12 @@ angular.module('casApp.services', ['ngResource']).
             }
             return _p8() + _p8(true) + _p8(true) + _p8();
         },
-         
+
         empty: function() {
           return '00000000-0000-0000-0000-000000000000';
         }
     };
-     
+
     return svc;
 });
 

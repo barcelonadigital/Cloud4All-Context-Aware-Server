@@ -161,7 +161,6 @@ angular.module('casApp.controllers', []).
       sc.data = {};
       sc.fired = {};
       sc.rooms = [];
-      sc.home = '';
       socket.connect('/dashboard');
 
       sc.sensors = sensor.query({'populate': true}, function () {
@@ -169,6 +168,8 @@ angular.module('casApp.controllers', []).
           return el._id;
         }));
       });
+
+      sc.homes = home.query();
 
       device.query({'populate': true}, function (devices) {
         sc.devices = _.filter(devices, function (device) {
@@ -193,11 +194,21 @@ angular.module('casApp.controllers', []).
           room.actuator = "53c66e4ba4075b9d335d6c57";
         });
 
+        if (!sc.rooms.length > 0) { return false; }
+
         sc.home = home.save({
-          name: "home2",
+          name: "home " + Number(sc.homes.length + 1),
           rooms: sc.rooms
+        }, function () {
+          sc.homes.push(sc.home);
         });
       };
+
+      sc.remove = function (home) {
+        home.$remove({id: home._id}, function () {
+          sc.homes = _.without(sc.homes, home);
+        });
+      }
 
       sc.dropped = function(dragEl, dropEl) {
     	  // this is your application logic, do whatever makes sense
