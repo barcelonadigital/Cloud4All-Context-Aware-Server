@@ -319,12 +319,12 @@ angular.module('casApp.directives', []).
       link: function (scope, element) {
 	function updateHeatmap() {
 	    console.log("updateHeatmap");
-      
+
       function is_on(d) {
           var sensor_is_on = false;
-          d.devices.forEach(function(sensor_id) {
+          d.devices.forEach(function(device_id) {
               sensors.forEach(function(sensor) {
-                  if(sensor._id == sensor_id) {
+                  if(sensor.device == device_id) {
                       if (sensor._last.value>=10) {
                           // Sensor in room and active
                           sensor_is_on = true;
@@ -358,8 +358,8 @@ angular.module('casApp.directives', []).
           .attr("x", function(d,i){return room_size*(d.x+d.width/2);})
           .attr("y", function(d,i){return room_size*(d.y+d.height/2);})
           .text(function(d) {return d.name;});
- 
-      var rooms_changed = rooms.select(function(d, i) { 
+
+      var rooms_changed = rooms.select(function(d, i) {
           var activate = is_on(d);
           if(this.getAttribute("sensor_active") == "true"  && !activate) return this;
           if(this.getAttribute("sensor_active") == "false" &&  activate) return this;
@@ -380,7 +380,7 @@ angular.module('casApp.directives', []).
       rooms.exit().remove();
 
 	};
-          
+
         var graph = d3.select(element[0])
           .append("svg")
           .attr('width', scope.width)
@@ -388,14 +388,14 @@ angular.module('casApp.directives', []).
 
 
         scope.$watch('sensors', function () {
-          if (!_.isEmpty(scope.sensors) 
+          if (!_.isEmpty(scope.sensors)
               && !_.isEmpty(scope.floorplan) ) {
             updateHeatmap();
           }
         }, true);
 
         scope.$watch('floorplan', function () {
-          if (!_.isEmpty(scope.sensors) 
+          if (!_.isEmpty(scope.sensors)
               && !_.isEmpty(scope.floorplan) ) {
             updateHeatmap();
           }
