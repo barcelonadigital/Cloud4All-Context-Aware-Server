@@ -3,9 +3,12 @@
 	"rooms": [
 		{
 			"name": "room1",
+                        "x": 0,
+                        "y": 0,
 			"height": 10,
 			"width": 10,
 			"devices":[
+                                "53c3bd91c24e87151ca17216",
 				"53c66e4fa4075b9d335d6c62",
 				"53c66d59a4075b9d335d6bce",
 				"53c66d59a4075b9d335d6bc9",
@@ -19,9 +22,12 @@
 		},
 		{
 			"name": "room2",
-			"height": 20,
-			"width": 20,
+                        "x": 10,
+                        "y": 3,
+			"height": 30,
+			"width": 25,
 			"devices":[
+                                "53c3bd91c24e87151ca17217"
 			],
 			"actuator" : "53c66e4ba4075b9d335d6c57"
 		}

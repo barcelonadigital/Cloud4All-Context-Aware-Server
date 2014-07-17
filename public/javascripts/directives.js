@@ -318,59 +318,65 @@ angular.module('casApp.directives', []).
       },
       link: function (scope, element) {
 	function updateHeatmap() {
-	    // console.log("updateHeatmap");
-
+	    console.log("updateHeatmap");
+      
       function is_on(d) {
           var sensor_is_on = false;
           d.devices.forEach(function(sensor_id) {
               sensors.forEach(function(sensor) {
                   if(sensor._id == sensor_id) {
-                      console.log(sensor);
                       if (sensor._last.value>=10) {
                           // Sensor in room and active
-                          console.log("ON");
                           sensor_is_on = true;
                       }
                   }
               })
           });
-          console.log("OFF");
           return sensor_is_on;
       }
 
       var color_on = "#E21403";
       var color_off = "#006666";
+      var room_size = 10;
 	    var sensors = scope.sensors;
-      console.log(scope.floorplan);
 	    var rooms = graph.selectAll('.room').data(scope.floorplan.rooms);
 
       rooms.enter().append("rect")
           .attr("class", "room")
-          .attr("x", function(d){return d.x})
-          .attr("y", function(d){return d.y})
-          .attr("width", function(d){return d.width})
-          .attr("height", function(d){return d.height})
-          .attr("fill", color_off);
-//	    rooms.enter()
+          .attr("x", function(d){return room_size*d.x-1})
+          .attr("y", function(d){return room_size*d.y-1})
+          .attr("width", function(d){return room_size*d.width-1})
+          .attr("height", function(d){return room_size*d.height-1})
+          .attr("fill", color_off)
+          .attr("sensor_active", "false");
 
 	    var labels = graph.selectAll('.labels').data(scope.floorplan.rooms);
       labels.enter()
           .append("text")
           .attr("class","labels")
           .attr("text-anchor", "middle")
-          .attr("x", function(d,i){return d.x+d.width/2;})
-          .attr("y", function(d,i){return d.y+d.height/2;})
+          .attr("x", function(d,i){return room_size*(d.x+d.width/2);})
+          .attr("y", function(d,i){return room_size*(d.y+d.height/2);})
           .text(function(d) {return d.name;});
  
-      rooms.transition()
+      var rooms_changed = rooms.select(function(d, i) { 
+          var activate = is_on(d);
+          if(this.getAttribute("sensor_active") == "true"  && !activate) return this;
+          if(this.getAttribute("sensor_active") == "false" &&  activate) return this;
+          return null;
+      });
+
+      rooms_changed.attr("sensor_active", function(d) {return is_on(d);})
+          .transition()
           .duration(function(d){
               if(is_on(d)) {return 1000;}
-              else {return 3000;}
+              else {return 5000;}
           })
           .style("fill", function(d){
               if(is_on(d)) {return color_on;}
               else {return color_off;}
           });
+
       rooms.exit().remove();
 
 	};
@@ -382,7 +388,15 @@ angular.module('casApp.directives', []).
 
 
         scope.$watch('sensors', function () {
-          if (!_.isEmpty(scope.sensors)) {
+          if (!_.isEmpty(scope.sensors) 
+              && !_.isEmpty(scope.floorplan) ) {
+            updateHeatmap();
+          }
+        }, true);
+
+        scope.$watch('floorplan', function () {
+          if (!_.isEmpty(scope.sensors) 
+              && !_.isEmpty(scope.floorplan) ) {
             updateHeatmap();
           }
         }, true);

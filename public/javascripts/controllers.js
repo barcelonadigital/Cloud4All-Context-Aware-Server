@@ -156,7 +156,7 @@ angular.module('casApp.controllers', []).
 
   }]).
 
-  controller('DashBoardCtrl', ['$scope', 'sensor', 'socket', '_', function (sc, sensor, socket, _) {
+  controller('DashBoardCtrl', ['$scope', 'sensor', 'home', 'socket', '_', function (sc, sensor, home, socket, _) {
 
     sc.data = {};
     sc.fired = {};
@@ -168,32 +168,11 @@ angular.module('casApp.controllers', []).
       }));
     });
 
-      // HACK-hardcoded for testing
-      sc.floorplan = {
-	            "name": "home1",
-	            "rooms": [
-		              {
-			                "name": "room1",
-                      "x":0,
-                      "y":0,
-			                "width": "100",
-			                "height": "100",
-			                "devices":[
-				                  "53c3bd91c24e87151ca17216"
-			                ]
-		              },
-		              {
-			                "name": "room2",
-                      "x":30,
-                      "y":105,
-			                "width": "70",
-			                "height": "70",
-			                "devices":[
-                          "53c3bd91c24e87151ca17217"
-			                ]
-		              }
-	            ]
-          };
+      sc.floorplan = null;
+      home.get({id:'53c7a3966dbff563196dabe9'},
+               function(result) {
+                   sc.floorplan = result;
+               });
 
     socket.on('data', function (el) {
       _.find(sc.sensors, function (sensor) {
