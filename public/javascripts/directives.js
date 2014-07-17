@@ -325,23 +325,19 @@ angular.module('casApp.directives', []).
           d.devices.forEach(function(sensor_id) {
               sensors.forEach(function(sensor) {
                   if(sensor._id == sensor_id) {
-                      console.log(sensor);
                       if (sensor._last.value>=10) {
                           // Sensor in room and active
-                          console.log("ON");
                           sensor_is_on = true;
                       }
                   }
               })
           });
-          console.log("OFF");
           return sensor_is_on;
       }
 
       var color_on = "#E21403";
       var color_off = "#006666";
 	    var sensors = scope.sensors;
-      console.log(scope.floorplan);
 	    var rooms = graph.selectAll('.room').data(scope.floorplan.rooms);
 
       rooms.enter().append("rect")
@@ -350,8 +346,8 @@ angular.module('casApp.directives', []).
           .attr("y", function(d){return d.y})
           .attr("width", function(d){return d.width})
           .attr("height", function(d){return d.height})
-          .attr("fill", color_off);
-//	    rooms.enter()
+          .attr("fill", color_off)
+          .attr("sensor_active", "false");
 
 	    var labels = graph.selectAll('.labels').data(scope.floorplan.rooms);
       labels.enter()
@@ -362,15 +358,24 @@ angular.module('casApp.directives', []).
           .attr("y", function(d,i){return d.y+d.height/2;})
           .text(function(d) {return d.name;});
  
-      rooms.transition()
+      var rooms_changed = rooms.select(function(d, i) { 
+          var activate = is_on(d);
+          if(this.getAttribute("sensor_active") == "true"  && !activate) return this;
+          if(this.getAttribute("sensor_active") == "false" &&  activate) return this;
+          return null;
+      });
+
+      rooms_changed.attr("sensor_active", function(d) {return is_on(d);})
+          .transition()
           .duration(function(d){
               if(is_on(d)) {return 1000;}
-              else {return 3000;}
+              else {return 5000;}
           })
           .style("fill", function(d){
               if(is_on(d)) {return color_on;}
               else {return color_off;}
           });
+
       rooms.exit().remove();
 
 	};
