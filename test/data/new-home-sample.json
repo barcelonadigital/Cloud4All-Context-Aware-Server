@@ -2,31 +2,46 @@
 	"name": "home1",
 	"rooms": [
 		{
-			"name": "room1",
+			"name": "Room 1",
       "x": 0,
       "y": 0,
 			"height": 10,
 			"width": 10,
 			"devices":[
-				"53c66e4fa4075b9d335d6c62",
-				"53c66d59a4075b9d335d6bce",
-				"53c66d59a4075b9d335d6bc9",
-				"53c66d59a4075b9d335d6bd0"
+				"53c7ccd468275cf55d9aa432",
+				"53c7ccd468275cf55d9aa434"
 			],
 			"actuator": "53c66e4ba4075b9d335d6c57"
 		},
 		{
-			"name": "room2",
+			"name": "Room 2",
       "x": 10,
       "y": 3,
 			"height": 30,
 			"width": 25,
 			"devices":[
-				"53c79f476c4f5a5848dab2ba",
-				"53c77b516c4f5a5848daa0b9",
-				"53c77aba6c4f5a5848daa05b",
-				"53c66e4ba4075b9d335d6c57",
-				"53c7c79fd47bbfda5b0f8dbe"
+				"53c7ccd468275cf55d9aa436",
+				"53c7ccd468275cf55d9aa43b"
+			],
+			"actuator": "53c66e4ba4075b9d335d6c57"
+		},
+		{
+			"name": "Room 3",
+      "x": 20,
+      "y": 3,
+			"height": 10,
+			"width": 25,
+			"devices":[
+			],
+			"actuator": "53c66e4ba4075b9d335d6c57"
+		},
+		{
+			"name": "Room 4",
+      "x": 10,
+      "y": 30,
+			"height": 10,
+			"width": 5,
+			"devices":[
 			],
 			"actuator": "53c66e4ba4075b9d335d6c57"
 		}
