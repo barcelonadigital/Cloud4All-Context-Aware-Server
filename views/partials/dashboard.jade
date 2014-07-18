@@ -1,25 +1,24 @@
 link(href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet")
 
-h1 Dashboard
-h2 My Homes
+div.container
+  div.row(ng-repeat='home in homes')
+    a.btn.btn-default(href='/heatmap/{{ home._id }}') my {{ home.name }}
+    span.btn.btn-danger(ng-click="remove(home)") Remove
 
-div(ng-repeat='home in homes')
-  a(href='/heatmap/{{ home._id }}') my {{ home.name }}
-  button.btn-default(ng-click="remove(home)")
-    span.glyphicon.glyphicon-remove remove
+  br
 
-form(ng-submit="submit()")
-  input.btn.btn-primary(type="submit" id="add" value="Save the new floor plan")
+  form(ng-submit="submit()")
+    input.btn.btn-primary(type="submit" id="add" value="Save the new floor plan")
 
+  div.row Motion Sensors
+  div.row
+    div.col-md-3(ng-repeat='device in devices')
+      div.btn.btn-default(x-lvl-draggable='true') {{ device._id }}
 
-div(style="margin-top:50px;")
-div.row
-  div.col-md-2(ng-repeat='device in devices')
-    div( x-lvl-draggable='true') {{ device._id }}
-br
+  br
 
-div(class="col-md-10 aa")
-  div(ng-repeat="r in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]")
-    span.slot(row="{{$parent.$index}}" col="{{$index}}"
-      ng-repeat="c in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"
-      x-lvl-draggable='true' x-lvl-drop-target="true" x-on-drop="dropped(dragEl, dropEl)")
+  div(class="col-md-10 aa")
+    div(ng-repeat="r in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]")
+      span.slot(row="{{$parent.$index}}" col="{{$index}}"
+        ng-repeat="c in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"
+        x-lvl-draggable='true' x-lvl-drop-target="true" x-on-drop="dropped(dragEl, dropEl)")

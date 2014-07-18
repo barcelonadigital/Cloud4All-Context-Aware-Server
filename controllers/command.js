@@ -77,6 +77,8 @@ exports.get = function (req, res, next) {
 			    							var url = "http://localhost:8080/devices/" + detectedRoom.actuator + "/commands";
 			    							console.log("URL:", url);
 			    							client.post(url, args, next);
+			    							res.send(detectedRoom);
+			    							break;
 								  		}
 								  }
 								  next();
@@ -89,7 +91,7 @@ exports.get = function (req, res, next) {
 			break;
 		default:
 			console.log("ERROR. Command invalid")
+			res.send(404);
 			break
 	}
-	res.send(200);
 }

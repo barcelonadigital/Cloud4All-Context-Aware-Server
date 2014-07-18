@@ -191,7 +191,7 @@ angular.module('casApp.controllers', []).
 
       sc.submit = function () {
         sc.rooms.forEach(function (room, i) {
-          room.actuator = "53c66e4ba4075b9d335d6c57";
+          room.actuator = "53c7d3d168275cf55d9aa780";
         });
 
         if (!sc.rooms.length > 0) { return false; }
@@ -222,8 +222,8 @@ angular.module('casApp.controllers', []).
             roomId: drop.attr('room'),
             x: Number(drag.attr('col')),
             y: Number(drag.attr('row')),
-            height: Number(drop.attr('row')) - Number(drag.attr('row')),
-            width: Number(drop.attr('col')) - Number(drag.attr('col')),
+            height: Number(drop.attr('row')) - Number(drag.attr('row')) + 1,
+            width: Number(drop.attr('col')) - Number(drag.attr('col')) + 1,
             devices: []
           });
 
@@ -237,6 +237,9 @@ angular.module('casApp.controllers', []).
             _.find(sc.rooms, function (room) {
               return room.roomId == drop.attr('room');
             }).devices.push(drag.text());
+
+            var device = _.find(sc.devices, function (el) {return el._id == drag.text()});
+            sc.devices = _.without(sc.devices, device);
 
             drop.addClass("image");
             drop.attr('title', drag.text());
