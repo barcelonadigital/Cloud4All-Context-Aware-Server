@@ -12,7 +12,7 @@ var app = require('../app'),
   Room = require('../models/homes').Room,
   Home = require('../models/homes').Home,
   Sensor = require('../models/devices').Sensor,
-  Client = require('node-rest-client').Client;;
+  Client = require('node-rest-client').Client;
 
 
 exports.get = function (req, res, next) {
@@ -48,8 +48,14 @@ exports.get = function (req, res, next) {
 							//Get device from sensor
 							Device.findOne({"sensors": activeSensor._sensor}, function(err, device){
 								console.log("device id: " + device.id);
+								var client = new Client();
+								var args = {
+  							  data: {
+  							  	"command": value
+  							  },
+  							  headers:{"Content-Type": "application/json"}
+							  };
 
-								//Get room of the device
 								Home.find(function (err, homes) {
 								  if (err) return console.error(err);
 
@@ -78,7 +84,6 @@ exports.get = function (req, res, next) {
 			    							console.log("URL:", url);
 			    							client.post(url, args, next);
 			    							res.send(detectedRoom);
-			    							break;
 								  		}
 								  }
 								  next();
@@ -86,12 +91,9 @@ exports.get = function (req, res, next) {
 							});
 					  });
 					});
-
-
 			break;
 		default:
 			console.log("ERROR. Command invalid")
-			res.send(404);
 			break
 	}
 }

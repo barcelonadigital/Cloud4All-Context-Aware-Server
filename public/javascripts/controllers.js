@@ -191,7 +191,7 @@ angular.module('casApp.controllers', []).
 
       sc.submit = function () {
         sc.rooms.forEach(function (room, i) {
-          room.actuator = "53c7d3d168275cf55d9aa780";
+          room.actuator = "53c8d9cb2f05da796c3b5abd";
         });
 
         if (!sc.rooms.length > 0) { return false; }
@@ -236,15 +236,14 @@ angular.module('casApp.controllers', []).
     				//drop.text(drag.text());
             _.find(sc.rooms, function (room) {
               return room.roomId == drop.attr('room');
-            }).devices.push(drag.text());
+            }).devices.push(drag.attr('device'));
 
-            var device = _.find(sc.devices, function (el) {return el._id == drag.text()});
+            var device = _.find(sc.devices, function (el) {return el._id == drag.attr('device')});
             sc.devices = _.without(sc.devices, device);
+            sc.$apply();
 
             drop.addClass("image");
-            drop.attr('title', drag.text());
             drag.attr('draggable', false);
-            drag.text("");
             drop.attr("x-lvl-drop-target", false)
             console.log("The element " + drag.attr('id') + " has been dropped on room " + drop.attr("room") + "!");
     			}

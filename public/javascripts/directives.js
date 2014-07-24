@@ -336,7 +336,7 @@ angular.module('casApp.directives', []).
 
           var color_on = "#E21403"
            , color_off = "#006666"
-           , room_size = 10
+           , room_size = 20
            , sensors = scope.sensors
            , rooms = graph.selectAll('.room').data(scope.floorplan.rooms);
 
@@ -369,7 +369,7 @@ angular.module('casApp.directives', []).
             .transition()
             .duration(function(d){
               if(is_on(d)) {return 1000;}
-              else {return 5000;}
+              else {return 2000;}
             })
             .style("fill", function(d){
               if(is_on(d)) {return color_on;}
@@ -418,7 +418,7 @@ angular.module('casApp.directives', []).
 			    $rootScope.$emit("LVL-DRAG-START");
           if (el.attr("x-lvl-drop-target") == "true") {
 				    var hab;
-				    for (hab = 0; hab<=3;hab++) {
+				    for (hab = 0; hab<=8;hab++) {
               if (d3.select('.slot[room="'+hab+'"]')[0][0] == null) {
 						    break;
               }

@@ -1,5 +1,7 @@
-p There are {{ sensors.length }} sensors
-p {{floorplan.name}}
+
+div.alert.alert-info There are {{ sensors.length }} sensors
+h2 {{floorplan.name}}
+
 div
   floor-plan(sensors='sensors', floorplan='floorplan', width=800, height=600)
 
