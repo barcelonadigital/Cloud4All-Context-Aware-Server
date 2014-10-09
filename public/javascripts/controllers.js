@@ -191,7 +191,7 @@ angular.module('casApp.controllers', []).
 
       sc.submit = function () {
         sc.rooms.forEach(function (room, i) {
-          room.actuator = "53c8d9cb2f05da796c3b5abd";
+          room.actuator = "53d7b69c90879d9af82c4e06";
         });
 
         if (!sc.rooms.length > 0) { return false; }
