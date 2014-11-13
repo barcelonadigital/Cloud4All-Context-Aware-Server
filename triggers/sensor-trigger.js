@@ -67,10 +67,12 @@ SensorTrigger.prototype.getSensorTriggers = function () {
   var that = this;
 
   this.triggers = [];
-
-  Trigger.findByRef(that.sensor.id, function (err, items) {
-    that.triggers = items;
-    that.emit(that.config.onTriggers);
+  Trigger
+    .find({'_sensor': that.sensor.id})
+    .populate('_sensor')
+    .exec(function (err, items) {
+      that.triggers = items;
+      that.emit(that.config.onTriggers);
   });
 };
 
