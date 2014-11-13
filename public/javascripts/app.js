@@ -22,6 +22,10 @@ angular.module('casApp', [
         templateUrl: '/partials/stream',
         controller: 'StreamCtrl'
       }).
+      when('/context/location/', {
+        templateUrl: '/partials/context',
+        controller: 'ContextCtrl'
+      }).
       otherwise({
         redirectTo: '/'
       });

@@ -156,6 +156,28 @@ angular.module('casApp.controllers', []).
 
   }]).
 
+
+  controller('ContextCtrl', ['$scope', '$routeParams', 'socket', function (sc, params, socket) {
+    /*
+     * Example: http://localhost:8888/context/location/?gps=%5B0,0%5D
+     * it gets the gps from location and creates a room with a new user
+    */
+    sc.location = params.gps.split(',').map(Number);
+    sc.fired = {};
+    sc.user = null;
+
+    socket.connect('/context-stream');
+    socket.emit('location', sc.location);
+
+    socket.on('new-user', function (id) {
+      sc.user = id;
+      socket.emit('subscribe', sc.user);
+      socket.on('fired', function (el) {
+        sc.fired[el.id] = el.data;
+      });
+    });
+  }]).
+
   controller('DashBoardCtrl', ['$scope', 'sensor', 'socket', '_', function (sc, sensor, socket, _) {
 
     sc.data = {};

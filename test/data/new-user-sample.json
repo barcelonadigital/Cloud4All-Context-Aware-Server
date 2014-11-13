@@ -12,13 +12,12 @@
               "id": "org.gnome.desktop.a11y.magnifier",
               "priority": 100,
               "parameters": {
-                "show-cross-hairs": false 
+                "show-cross-hairs": false
              	}
             }
           ]
         }
       }
     }
-  },
-  "uuid": "0a57f00b-df52-41d2-9cbf-5b59bd4609d6"
+  }
 }

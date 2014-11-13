@@ -117,7 +117,6 @@ describe('User trigger system', function () {
     e.once('ack', function (chunk) {
       var profile = JSON.parse(chunk);
       profile.context[0].data.should.eql(_.clone(that.data).reverse());
-      profile.uuid.should.eql(that.user.uuid);
       profile.profile.should.eql(that.user.profile);
       done();
     });

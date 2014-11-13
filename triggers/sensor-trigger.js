@@ -23,6 +23,7 @@ function SensorTrigger(sensor) {
   this.data = [];
   this.triggers = [];
   this.fired = [];
+  this.users = [];
   this.sensor = sensor;
 
   this.on('onNewData', function (data) {
@@ -201,7 +202,12 @@ SensorTrigger.prototype.publishData = function () {
 };
 
 SensorTrigger.prototype.publishTrigger = function () {
-  app.pub.publish("fired." + this.sensor.id, JSON.stringify(this.fired));
+  var that = this;
+
+  app.pub.publish("fired." + that.sensor.id, JSON.stringify(that.fired));
+  that.users.forEach(function (user) {
+    app.pub.publish("near." + user.id, JSON.stringify(that.fired));
+  });
 };
 
 SensorTrigger.prototype.saveFired = function () {

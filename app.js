@@ -8,6 +8,7 @@ var express = require('express'),
   path = require('path'),
   redis = require('redis'),
   mongoose = require('mongoose');
+  domain = require('domain').create();
 
 var common = require('./config/common'),
   envConfig = common.config(),

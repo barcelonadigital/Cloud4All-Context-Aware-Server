@@ -40,21 +40,11 @@ describe('user API', function () {
       .send(new_user_sample)
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.uuid.should.equal(new_user_sample.uuid);
         res.body.profile.preferences.display.screenEnhancement.magnification.should.equal(
           new_user_sample.profile.preferences.display.screenEnhancement.magnification
         );
         done();
       });
-  });
-
-  it('Throws exception when saving new user with same uuid', function (done) {
-    request(app)
-      .post('/users')
-      .set('Accept', 'application/json')
-      .send(user_sample)
-      .expect('Content-type', /json/)
-      .expect(500, done);
   });
 
   it('updates a user', function (done) {
@@ -64,17 +54,6 @@ describe('user API', function () {
       .send(user_sample)
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.uuid.should.equal(that.user.uuid);
-        done();
-      });
-  });
-
-  it('finds a user by his uuid', function (done) {
-    request(app)
-      .get('/users/' + '?uuid=' + that.user.uuid)
-      .expect('Content-type', /json/)
-      .expect(200, function (err, res) {
-        res.body[0].uuid.should.equal(that.user.uuid);
         done();
       });
   });
@@ -84,7 +63,6 @@ describe('user API', function () {
       .del('/users/' + that.user.id)
       .expect('Content-type', /json/)
       .expect(200, function (err, res) {
-        res.body.uuid.should.equal(that.user.uuid);
         User.find({_id: that.user.id}, function (err, user) {
           user.should.be.empty;
           done();

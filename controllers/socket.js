@@ -5,9 +5,10 @@
 'use strict';
 
 var pubsub = require('../managers/pubsub-redis'),
+  User = require('../models/users').User,
   _ = require('underscore');
 
-module.exports = function (app, io) {
+module.exports = function (app, io, next) {
 
   var psManager = new pubsub.PubSub({pub: app.pub, sub: app.sub});
 
@@ -26,6 +27,10 @@ module.exports = function (app, io) {
     case 'fired':
       io.of('/stream')['in'](id).emit('fired', {'id': id, 'data': el});
       io.of('/dashboard').emit('fired', {'id': id, 'data': el});
+      break;
+
+    case 'near':
+      io.of('/context-stream')['in'](id).emit('fired', {'id': id, 'data': el});
       break;
     }
   });
@@ -49,6 +54,42 @@ module.exports = function (app, io) {
       currentRooms.forEach(function (room) {
         psManager.unsubscribe('data.' + room, 'fired.' + room, socket);
       });
+    });
+  });
+
+  io.of('/context-stream').on('connection', function (socket) {
+    /*
+     * client connects to the context and receive information
+     * if there is relevant context near their location. Steps:
+     *  1. we create a user into database with the gps location from parameters
+     *  2. the user.uuid is passed to the client
+     *  3. the client connects to his specific room.uuid
+     *  4. when new trigger is fired with users in nearby. data is pushed to room.uuid
+    */
+
+    var currentRoom = null;
+    var user = null;
+
+    socket.on('location', function (location) {
+      user = new User({'gps': location});
+      user.save(function (err, user) {
+        if (err) {
+          next(err);
+        } else if (user)  {
+          socket.emit('new-user', user.id);
+        }
+      });
+    });
+
+    socket.on('subscribe', function (room) {
+      psManager.subscribe('near.' + room, socket);
+      socket.join(room);
+      currentRoom = room;
+    });
+
+    socket.on('disconnect', function () {
+      psManager.unsubscribe('near.' + currentRoom, socket);
+      if (user) { user.remove(); }
     });
   });
 
