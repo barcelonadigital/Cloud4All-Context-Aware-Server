@@ -159,7 +159,7 @@ angular.module('casApp.controllers', []).
 
   controller('ContextCtrl', ['$scope', '$routeParams', 'socket', function (sc, params, socket) {
     /*
-     * Example: http://localhost:8888/context/location/?gps=%5B0,0%5D
+     * Example: http://localhost:8888/context/location/?gps=0,0
      * it gets the gps from location and creates a room with a new user
     */
     sc.location = params.gps.split(',').map(Number);
