@@ -149,6 +149,43 @@ Test are implemented using mocha. To run the test suite first invoke the followi
 	make test
 
 
+An Introduction Example
+------------------------
+First of all, you have to start from scratch. Remove from mongodb the devdb (and also testdb). Then:
+
+1. Run the mongo server (if it is not running already):
+
+```bash
+mongod
+```
+
+2. Run the node app. We have to be in root directory (where app.js is):
+
+```bash
+node app.js
+```
+
+3. Create a new device using the sample data in test
+
+```bash
+application/json" -X POST --data @test/data/new-device-sample.json http://127.0.0.1:8888/devices
+```
+
+4. Add real time samples to sensor: The terminal outputs the _id of the sensors. Use one of them in the following command
+
+```bash
+node tools/sensor-mockup.js --id={{_id selected}}
+```
+
+5. Create a trigger: Go to the web and search for the sensor that is receiving data (in http://localhost:8888/). Select the sensor that is receiving data (you can see it because its Value is changing), in the next page create a trigger clicking on [Add]. For example, add a "threshold greater than 5", and Submit.
+
+6. Connect the socket.io to stream new triggered data from specific location. Check for the gps location of the device created before (in our example is "gps": 2.194909, 41.402455. In the browser, go to the following url:
+
+    http://localhost:8888/context/location/?gps=2.194909,41.402455
+
+7. If all is going smothly, you will see that fired triggers with data are sent to this specific client using web sockets.
+
+
 Contributors
 ------------
 
