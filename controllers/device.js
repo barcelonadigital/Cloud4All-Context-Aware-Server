@@ -14,11 +14,13 @@ exports.get = function (req, res, next) {
   **/
   var id = req.params.id;
 
-  Device.findById(id, function (err, item) {
+  Device.findById(id, function (err, device) {
     if (err) {
       next(err);
-    } else if (item) {
-      res.send(item);
+    } else if (device) {
+      device.populate('sensors', function (err, device) {
+        res.send(device);
+      });
     } else {
       res.send(404);
     }
@@ -73,7 +75,9 @@ exports.update = function (req, res, next) {
     if (err) {
       next(err);
     } else if (device) {
-      res.send(device);
+      device.populate('sensors', function (err, device) {
+        res.send(device);
+      });
     } else {
       res.send(404);
     }

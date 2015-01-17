@@ -185,7 +185,7 @@ DeviceSchema.statics.updateById = function (id, item, cb) {
               sensor.devid = el.devid;
               sensor.save(cb);
             } else {
-              new Sensor(item.sensors[sensor]).save(function (err, sensor) {
+              new Sensor(el).save(function (err, sensor) {
                 device.sensors.push(sensor.id);
                 cb();
               });
