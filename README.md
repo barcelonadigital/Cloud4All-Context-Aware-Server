@@ -168,7 +168,7 @@ node app.js
 * Create a new device using the sample data in test
 
 ```bash
-application/json" -X POST --data @test/data/new-device-sample.json http://127.0.0.1:8888/devices
+curl -H "Content-Type: application/json" -X POST --data @test/data/new-device-sample.json http://127.0.0.1:8888/devices
 ```
 
 * Add real time samples to sensor: The terminal outputs the _id of the sensors. Use one of them in the following command
