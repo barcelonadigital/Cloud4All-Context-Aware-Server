@@ -94,7 +94,7 @@ angular.module('casApp.controllers', []).
       {name: '3 months', sample: 'averaged', unit: 'months', period: '3'}
     ];
 
-    sc.scale = sc.scales[0];
+    sc.scale = sc.scales[2];
 
     sc.updateTime = function (start, end) {
       sc.start = start || sc.start || moment();
