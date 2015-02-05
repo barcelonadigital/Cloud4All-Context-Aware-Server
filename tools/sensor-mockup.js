@@ -31,7 +31,7 @@ var util = require('util'),
     for (i = 0; i < num; i++) {
       data[i] = {
         at: now.add(sleep * i / (2 * num)).toISOString(),
-        value: Math.floor((Math.random() * 10) + 1)
+        value: Math.floor((Math.random() * 200))
       };
     }
 

@@ -102,7 +102,7 @@ SensorTrigger.prototype.trigger = function () {
           last = actual;
         }
 
-        if (triggered && !trigger.triggered) {
+        if (triggered) {
           that.fired.push({
             at: el.at,
             value: el.value,
